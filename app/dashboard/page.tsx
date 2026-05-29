@@ -503,18 +503,12 @@ function DashboardInner() {
 
       <div className="max-w-5xl mx-auto px-6 py-10">
 
-        {/* Usage banner */}
+        {/* Pricing reminder — shown once, dismissible */}
         {usage?.plan === 'free' && (
-          <div className={`mb-8 rounded-xl px-5 py-4 flex items-center justify-between ${isAtLimit ? 'bg-red-500/10 border border-red-500/20' : 'bg-indigo-500/10 border border-indigo-500/20'}`}>
-            <div>
-              <p className="text-sm font-medium text-white">
-                {isAtLimit ? 'הגעת למגבלת הדוחות החינמיים' : `נותרו ${(usage?.limit ?? 3) - (usage?.used ?? 0)} דוחות חינמיים החודש`}
-              </p>
-              <p className="text-xs text-gray-400 mt-0.5">שדרג ל-Pro לדוחות ללא הגבלה — $19/חודש</p>
-            </div>
-            <button onClick={handleUpgrade} className="text-sm bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg transition-colors shrink-0">
-              שדרג ל-Pro
-            </button>
+          <div className="mb-8 rounded-xl px-5 py-3 bg-white/3 border border-white/8 flex items-center justify-between">
+            <p className="text-xs text-gray-500">
+              ⚡ מהיר = חינמי תמיד &nbsp;·&nbsp; 📊 מלא = $1.99/דוח &nbsp;·&nbsp; 🔬 עמוק = $3.99/דוח
+            </p>
           </div>
         )}
 

@@ -69,40 +69,61 @@ export default function LandingPage() {
 
       {/* Pricing */}
       <section className="max-w-6xl mx-auto px-6 py-20">
-        <h2 className="text-3xl font-bold text-white text-center mb-4">תמחור פשוט</h2>
-        <p className="text-gray-400 text-center mb-16">התחל חינם, שדרג כשאתה צריך יותר</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-3xl mx-auto">
-          {/* Free */}
+        <h2 className="text-3xl font-bold text-white text-center mb-4">תמחור שקוף</h2>
+        <p className="text-gray-400 text-center mb-16">מחקר מהיר חינמי תמיד — משלמים רק על ניתוח מעמיק</p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
+          {/* Quick - Free */}
           <div className="bg-white/5 border border-white/10 rounded-2xl p-8">
-            <div className="text-gray-400 text-sm mb-2">חינמי</div>
-            <div className="text-4xl font-bold text-white mb-1">$0</div>
-            <div className="text-gray-500 text-sm mb-8">לתמיד</div>
-            <ul className="space-y-3 mb-8 text-sm text-gray-300">
-              {['3 דוחות לחודש', 'ניתוח standard', 'כל 6 שלבי הניתוח', 'היסטוריית דוחות'].map((f) => (
+            <div className="text-2xl mb-3">⚡</div>
+            <div className="text-green-300 text-sm font-medium mb-2">מהיר</div>
+            <div className="text-4xl font-bold text-white mb-1">חינמי</div>
+            <div className="text-gray-500 text-sm mb-6">תמיד, ללא הגבלה</div>
+            <ul className="space-y-2.5 mb-8 text-sm text-gray-300">
+              {['פרופיל חברה', 'ניתוח פיננסי', 'סינתזה וסיכום', 'היסטוריית דוחות'].map((f) => (
                 <li key={f} className="flex items-center gap-2">
-                  <span className="text-indigo-400">✓</span> {f}
+                  <span className="text-green-400">✓</span> {f}
                 </li>
               ))}
             </ul>
-            <Link href="/signup" className="block text-center border border-white/10 hover:border-indigo-500/50 text-gray-300 hover:text-white py-3 rounded-xl transition-colors text-sm font-medium">
+            <Link href="/signup" className="block text-center border border-white/10 hover:border-green-500/50 text-gray-300 hover:text-white py-3 rounded-xl transition-colors text-sm font-medium">
               התחל חינם
             </Link>
           </div>
-          {/* Pro */}
-          <div className="bg-indigo-600/10 border border-indigo-500/30 rounded-2xl p-8 relative">
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-indigo-600 text-white text-xs px-3 py-1 rounded-full">פופולרי</div>
-            <div className="text-indigo-300 text-sm mb-2">Pro</div>
-            <div className="text-4xl font-bold text-white mb-1">$19</div>
-            <div className="text-gray-500 text-sm mb-8">לחודש</div>
-            <ul className="space-y-3 mb-8 text-sm text-gray-300">
-              {['דוחות ללא הגבלה', 'ניתוח deep', 'כל 6 שלבי הניתוח', 'קדימות בתור', 'תמיכה מהירה'].map((f) => (
+
+          {/* Standard */}
+          <div className="bg-amber-500/8 border border-amber-500/30 rounded-2xl p-8 relative">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-500 text-black text-xs font-bold px-3 py-1 rounded-full">פופולרי</div>
+            <div className="text-2xl mb-3">📊</div>
+            <div className="text-amber-300 text-sm font-medium mb-2">מלא</div>
+            <div className="text-4xl font-bold text-white mb-1">$1.99</div>
+            <div className="text-gray-500 text-sm mb-6">לדוח</div>
+            <ul className="space-y-2.5 mb-8 text-sm text-gray-300">
+              {['כל 6 שלבי הניתוח', 'אירועים ורגולציה', 'ניתוח תחרותי', 'הערכת סיכונים'].map((f) => (
                 <li key={f} className="flex items-center gap-2">
-                  <span className="text-indigo-400">✓</span> {f}
+                  <span className="text-amber-400">✓</span> {f}
                 </li>
               ))}
             </ul>
-            <Link href="/signup" className="block text-center bg-indigo-600 hover:bg-indigo-500 text-white py-3 rounded-xl transition-colors text-sm font-medium">
-              שדרג ל-Pro
+            <Link href="/signup" className="block text-center bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 py-3 rounded-xl transition-colors text-sm font-medium">
+              הרשם ונסה
+            </Link>
+          </div>
+
+          {/* Deep */}
+          <div className="bg-purple-500/8 border border-purple-500/20 rounded-2xl p-8">
+            <div className="text-2xl mb-3">🔬</div>
+            <div className="text-purple-300 text-sm font-medium mb-2">עמוק</div>
+            <div className="text-4xl font-bold text-white mb-1">$3.99</div>
+            <div className="text-gray-500 text-sm mb-6">לדוח</div>
+            <ul className="space-y-2.5 mb-8 text-sm text-gray-300">
+              {['כל מה שב"מלא"', 'חיפוש אינטרנט חי', 'Claude Sonnet', 'ניתוח מעמיק ביותר'].map((f) => (
+                <li key={f} className="flex items-center gap-2">
+                  <span className="text-purple-400">✓</span> {f}
+                </li>
+              ))}
+            </ul>
+            <Link href="/signup" className="block text-center bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 py-3 rounded-xl transition-colors text-sm font-medium">
+              הרשם ונסה
             </Link>
           </div>
         </div>

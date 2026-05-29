@@ -636,26 +636,36 @@ function UserSettings({ user, data, getIdToken, logout }: {
       </nav>
       <div className="max-w-2xl mx-auto px-6 py-12 space-y-6">
         <h1 className="text-2xl font-bold text-white">הגדרות חשבון</h1>
+
         <div className="bg-white/5 border border-white/8 rounded-2xl p-6 space-y-4">
           <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">פרטי חשבון</h2>
           <div className="flex items-center justify-between"><span className="text-gray-400 text-sm">אימייל</span><span className="text-white text-sm">{user.email}</span></div>
           {data.profile.createdAt && <div className="flex items-center justify-between"><span className="text-gray-400 text-sm">חשבון נוצר</span><span className="text-white text-sm">{new Date(data.profile.createdAt).toLocaleDateString('he-IL')}</span></div>}
         </div>
+
+        {/* Pricing model info */}
         <div className="bg-white/5 border border-white/8 rounded-2xl p-6 space-y-4">
-          <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">פלאן ומנוי</h2>
-          <div className="flex items-center justify-between">
-            <span className="text-gray-400 text-sm">פלאן נוכחי</span>
-            <span className={`text-sm font-semibold px-2.5 py-1 rounded-full ${plan === 'pro' ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30' : 'bg-white/8 text-gray-300'}`}>{plan === 'pro' ? 'Pro ✦' : 'Free'}</span>
+          <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">תמחור</h2>
+          <div className="space-y-3">
+            {[
+              { icon: '⚡', label: 'מהיר', price: 'חינמי תמיד', color: 'text-green-300', sub: '3 שלבי ניתוח' },
+              { icon: '📊', label: 'מלא',  price: '$1.99 לדוח',  color: 'text-amber-300', sub: '6 שלבי ניתוח' },
+              { icon: '🔬', label: 'עמוק', price: '$3.99 לדוח',  color: 'text-purple-300', sub: '6 שלבים + חיפוש רשת' },
+            ].map((t) => (
+              <div key={t.label} className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span>{t.icon}</span>
+                  <span className="text-white text-sm">{t.label}</span>
+                  <span className="text-gray-600 text-xs">· {t.sub}</span>
+                </div>
+                <span className={`text-sm font-semibold ${t.color}`}>{t.price}</span>
+              </div>
+            ))}
           </div>
-          {plan === 'free' && usage && <div className="flex items-center justify-between"><span className="text-gray-400 text-sm">שימוש החודש</span><span className="text-white text-sm">{usage.used} / {usage.limit} דוחות</span></div>}
           <div className="pt-3 border-t border-white/8">
-            {plan === 'free' ? (
-              <><p className="text-sm text-gray-400 mb-3">שדרג ל-Pro לדוחות ללא הגבלה — $19/חודש</p>
-              <button onClick={handleUpgrade} className="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-2.5 rounded-xl text-sm font-medium transition-colors">שדרג ל-Pro</button></>
-            ) : (
-              <><p className="text-sm text-gray-400">לביטול: <a href="mailto:support@stocksage.io" className="text-indigo-400 hover:underline">support@stocksage.io</a></p>
-              <p className="text-xs text-gray-600 mt-1">ביטול ייכנס לתוקף בסוף תקופת החיוב הנוכחית.</p></>
-            )}
+            <p className="text-xs text-gray-500">
+              לשאלות על חיוב: <a href="mailto:support@stocksage.io" className="text-indigo-400 hover:underline">support@stocksage.io</a>
+            </p>
           </div>
         </div>
         <div className="bg-red-500/5 border border-red-500/20 rounded-2xl p-6 space-y-4">
