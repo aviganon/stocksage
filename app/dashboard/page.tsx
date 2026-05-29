@@ -163,6 +163,10 @@ export default function DashboardPage() {
               </div>
             )}
             <span className="text-sm text-gray-500 hidden sm:block">{user.email}</span>
+            <Link href="/settings" className="text-sm text-gray-500 hover:text-gray-300 transition-colors">הגדרות</Link>
+            {user.email === 'galfainbur@gmail.com' && (
+              <Link href="/admin" className="text-sm text-red-400/70 hover:text-red-300 transition-colors">Admin</Link>
+            )}
             <button onClick={logout} className="text-sm text-gray-500 hover:text-gray-300 transition-colors">יציאה</button>
           </div>
         </div>

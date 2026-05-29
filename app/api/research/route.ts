@@ -45,6 +45,14 @@ export async function POST(req: NextRequest) {
     return fail('usage_limit', `You've used ${usage.used}/${usage.limit} free reports this month. Upgrade to Pro for unlimited reports.`, 402);
   }
 
+  // Prevent concurrent reports — one running at a time per user
+  const repo0 = new ResearchReportsRepository();
+  const existing = await repo0.listForUser(uid, { limit: 5 });
+  const hasRunning = existing.some((r) => r.status === 'running' || r.status === 'pending');
+  if (hasRunning) {
+    return fail('concurrent_limit', 'יש לך דוח שכבר בריצה. המתן לסיומו לפני שמתחיל דוח חדש.', 429);
+  }
+
   const reportId = randomUUID();
   const STEPS_BY_DEPTH: Record<string, string[]> = {
     quick:    ['data_collection', 'profile', 'financials', 'synthesis'],

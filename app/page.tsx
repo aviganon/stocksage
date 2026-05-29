@@ -110,9 +110,13 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="border-t border-white/5 px-6 py-8 mt-12">
-        <div className="max-w-6xl mx-auto flex items-center justify-between text-sm text-gray-600">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-gray-600">
           <span>© 2026 StockSage. All rights reserved.</span>
-          <span className="text-xs">לצרכי מידע בלבד — אינו ייעוץ השקעות</span>
+          <div className="flex items-center gap-4 text-xs">
+            <Link href="/terms" className="hover:text-gray-400 transition-colors">תנאי שימוש</Link>
+            <Link href="/privacy" className="hover:text-gray-400 transition-colors">מדיניות פרטיות</Link>
+            <span>לצרכי מידע בלבד — אינו ייעוץ השקעות</span>
+          </div>
         </div>
       </footer>
     </div>
