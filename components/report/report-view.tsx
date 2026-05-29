@@ -99,27 +99,32 @@ export default function ReportView({ reportId }: { reportId: string }) {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
-            <Link href="/dashboard" className="text-gray-500 hover:text-gray-300 text-sm transition-colors">← חזרה</Link>
-          </div>
-          <h1 className="text-3xl font-bold text-white">{report.assetName}</h1>
-          <div className="flex items-center gap-3 mt-2 flex-wrap">
-            <span className="text-gray-400 text-sm">{report.assetId}</span>
-            <Badge color="gray">{report.depth}</Badge>
-            <Badge color="gray">{report.language === 'he' ? 'עברית' : 'English'}</Badge>
-            {report.status === 'completed' && <Badge color="green">הושלם</Badge>}
-            {report.status === 'partial' && <Badge color="yellow">חלקי</Badge>}
-            {report.status === 'failed' && <Badge color="red">נכשל</Badge>}
-            {isRunning && <Badge color="indigo">בריצה...</Badge>}
-          </div>
-          {report.completedAt && (
-            <p className="text-gray-600 text-xs mt-2">
-              {new Date(report.startedAt).toLocaleString('he-IL')} · {report.durationMs ? `${(report.durationMs / 1000).toFixed(0)}ש׳` : ''} · ${report.costUSD.toFixed(3)}
-            </p>
-          )}
+      <div className="mb-2">
+        <h1 className="text-3xl font-bold text-white mb-3">{report.assetName}</h1>
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Back button — big, prominent, inline with status */}
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-1.5 bg-white/8 hover:bg-white/15 text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors border border-white/10"
+          >
+            ← לוח בקרה
+          </Link>
+
+          <span className="text-white/20 text-sm">|</span>
+
+          <span className="text-gray-400 text-sm">{report.assetId}</span>
+          <Badge color="gray">{report.depth === 'quick' ? 'מהיר' : report.depth === 'standard' ? 'מלא' : 'עמוק'}</Badge>
+          <Badge color="gray">{report.language === 'he' ? 'עברית' : 'English'}</Badge>
+          {report.status === 'completed' && <Badge color="green">הושלם</Badge>}
+          {report.status === 'partial' && <Badge color="yellow">חלקי</Badge>}
+          {report.status === 'failed' && <Badge color="red">נכשל</Badge>}
+          {isRunning && <Badge color="indigo">בריצה...</Badge>}
         </div>
+        {report.completedAt && (
+          <p className="text-gray-600 text-xs mt-2">
+            {new Date(report.startedAt).toLocaleString('he-IL')} · {report.durationMs ? `${(report.durationMs / 1000).toFixed(0)}ש׳` : ''} · ${report.costUSD.toFixed(3)}
+          </p>
+        )}
       </div>
 
       {/* Progress steps */}
