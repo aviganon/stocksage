@@ -1,6 +1,11 @@
 import { AssetId, Exchange } from './types';
 
-const VALID_EXCHANGES: Exchange[] = ['NASDAQ', 'NYSE', 'TASE', 'AMEX', 'CRYPTO', 'GOV'];
+const VALID_EXCHANGES: Exchange[] = [
+  'NASDAQ', 'NYSE', 'AMEX',
+  'TASE',
+  'LSE', 'XETRA', 'EPA', 'TSX', 'ASX',
+  'CRYPTO', 'GOV',
+];
 
 export interface ParsedAssetId {
   exchange: Exchange;
@@ -53,13 +58,22 @@ export function inferAssetType(
   return 'stock';
 }
 
+/** Yahoo Finance symbol suffix per exchange */
+const YAHOO_SUFFIX: Partial<Record<Exchange, string>> = {
+  TASE:  '.TA',
+  LSE:   '.L',
+  XETRA: '.DE',
+  EPA:   '.PA',
+  TSX:   '.TO',
+  ASX:   '.AX',
+};
+
 /**
  * Convert internal symbol form to Yahoo's format.
- * TASE stocks need .TA suffix.
  */
 export function toYahooSymbol(exchange: Exchange, symbol: string): string {
-  if (exchange === 'TASE') return `${symbol}.TA`;
-  return symbol;
+  const suffix = YAHOO_SUFFIX[exchange];
+  return suffix ? `${symbol}${suffix}` : symbol;
 }
 
 /**
@@ -69,9 +83,12 @@ export function fromYahooSymbol(yahooSymbol: string): {
   exchange: Exchange;
   symbol: string;
 } {
-  if (yahooSymbol.endsWith('.TA')) {
-    return { exchange: 'TASE', symbol: yahooSymbol.slice(0, -3) };
-  }
-  // Default to NASDAQ; the source layer can refine based on exchangeName field
+  if (yahooSymbol.endsWith('.TA'))  return { exchange: 'TASE',  symbol: yahooSymbol.slice(0, -3) };
+  if (yahooSymbol.endsWith('.L'))   return { exchange: 'LSE',   symbol: yahooSymbol.slice(0, -2) };
+  if (yahooSymbol.endsWith('.DE'))  return { exchange: 'XETRA', symbol: yahooSymbol.slice(0, -3) };
+  if (yahooSymbol.endsWith('.PA'))  return { exchange: 'EPA',   symbol: yahooSymbol.slice(0, -3) };
+  if (yahooSymbol.endsWith('.TO'))  return { exchange: 'TSX',   symbol: yahooSymbol.slice(0, -3) };
+  if (yahooSymbol.endsWith('.AX'))  return { exchange: 'ASX',   symbol: yahooSymbol.slice(0, -3) };
+  // Default to NASDAQ; source layer refines based on exchangeName
   return { exchange: 'NASDAQ', symbol: yahooSymbol };
 }

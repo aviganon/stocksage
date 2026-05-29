@@ -307,15 +307,78 @@ const DEPTH_OPTIONS: { value: Depth; label: string; icon: string; desc: string; 
   { value: 'deep',     label: 'עמוק',  icon: '🔬', desc: 'כל 6 שלבים + חיפוש רשת', time: '~2 דקות', steps: '6 + Web',  price: '$3.99',  badge: '$3.99'  },
 ];
 
-const POPULAR_TASE: SearchResult[] = [
-  { id: 'TASE:TEVA',  symbol: 'TEVA',  name: 'טבע תעשיות',       exchange: 'TASE' },
-  { id: 'TASE:ICL',   symbol: 'ICL',   name: 'כימיקלים לישראל',  exchange: 'TASE' },
-  { id: 'TASE:ESLT',  symbol: 'ESLT',  name: 'אלביט מערכות',     exchange: 'TASE' },
-  { id: 'TASE:POLI',  symbol: 'POLI',  name: 'בנק הפועלים',      exchange: 'TASE' },
-  { id: 'TASE:LUMI',  symbol: 'LUMI',  name: 'בנק לאומי',        exchange: 'TASE' },
-  { id: 'TASE:NICE',  symbol: 'NICE',  name: 'NICE מערכות',      exchange: 'TASE' },
-  { id: 'TASE:AZRG',  symbol: 'AZRG',  name: 'עזריאלי',          exchange: 'TASE' },
-  { id: 'TASE:BEZQ',  symbol: 'BEZQ',  name: 'בזק',              exchange: 'TASE' },
+const POPULAR_STOCKS: { label: string; stocks: SearchResult[] }[] = [
+  {
+    label: '🇮🇱 ת"א',
+    stocks: [
+      { id: 'TASE:TEVA',  symbol: 'TEVA',  name: 'טבע',         exchange: 'TASE' },
+      { id: 'TASE:ICL',   symbol: 'ICL',   name: 'כימיקלים',    exchange: 'TASE' },
+      { id: 'TASE:ESLT',  symbol: 'ESLT',  name: 'אלביט',       exchange: 'TASE' },
+      { id: 'TASE:POLI',  symbol: 'POLI',  name: 'הפועלים',     exchange: 'TASE' },
+      { id: 'TASE:LUMI',  symbol: 'LUMI',  name: 'לאומי',       exchange: 'TASE' },
+      { id: 'TASE:NICE',  symbol: 'NICE',  name: 'NICE',        exchange: 'TASE' },
+    ],
+  },
+  {
+    label: '🇺🇸 US',
+    stocks: [
+      { id: 'NASDAQ:AAPL',  symbol: 'AAPL',  name: 'Apple',   exchange: 'NASDAQ' },
+      { id: 'NASDAQ:MSFT',  symbol: 'MSFT',  name: 'Microsoft', exchange: 'NASDAQ' },
+      { id: 'NASDAQ:NVDA',  symbol: 'NVDA',  name: 'Nvidia',  exchange: 'NASDAQ' },
+      { id: 'NASDAQ:GOOGL', symbol: 'GOOGL', name: 'Google',  exchange: 'NASDAQ' },
+      { id: 'NYSE:JPM',     symbol: 'JPM',   name: 'JPMorgan', exchange: 'NYSE' },
+      { id: 'NYSE:TSLA',    symbol: 'TSLA',  name: 'Tesla',   exchange: 'NYSE' },
+    ],
+  },
+  {
+    label: '🇬🇧 UK',
+    stocks: [
+      { id: 'LSE:HSBA', symbol: 'HSBA', name: 'HSBC',       exchange: 'LSE' },
+      { id: 'LSE:BP',   symbol: 'BP',   name: 'BP',         exchange: 'LSE' },
+      { id: 'LSE:AZN',  symbol: 'AZN',  name: 'AstraZeneca', exchange: 'LSE' },
+      { id: 'LSE:SHEL', symbol: 'SHEL', name: 'Shell',      exchange: 'LSE' },
+      { id: 'LSE:RIO',  symbol: 'RIO',  name: 'Rio Tinto',  exchange: 'LSE' },
+    ],
+  },
+  {
+    label: '🇩🇪 Germany',
+    stocks: [
+      { id: 'XETRA:SAP',  symbol: 'SAP',  name: 'SAP',      exchange: 'XETRA' },
+      { id: 'XETRA:SIE',  symbol: 'SIE',  name: 'Siemens',  exchange: 'XETRA' },
+      { id: 'XETRA:BMW',  symbol: 'BMW',  name: 'BMW',      exchange: 'XETRA' },
+      { id: 'XETRA:BAYN', symbol: 'BAYN', name: 'Bayer',    exchange: 'XETRA' },
+      { id: 'XETRA:ADS',  symbol: 'ADS',  name: 'Adidas',   exchange: 'XETRA' },
+    ],
+  },
+  {
+    label: '🇫🇷 France',
+    stocks: [
+      { id: 'EPA:MC',  symbol: 'MC',  name: 'LVMH',     exchange: 'EPA' },
+      { id: 'EPA:OR',  symbol: 'OR',  name: "L'Oréal",  exchange: 'EPA' },
+      { id: 'EPA:SAN', symbol: 'SAN', name: 'Sanofi',   exchange: 'EPA' },
+      { id: 'EPA:AIR', symbol: 'AIR', name: 'Airbus',   exchange: 'EPA' },
+      { id: 'EPA:TTE', symbol: 'TTE', name: 'TotalEnergies', exchange: 'EPA' },
+    ],
+  },
+  {
+    label: '🇨🇦 Canada',
+    stocks: [
+      { id: 'TSX:RY',   symbol: 'RY',   name: 'Royal Bank', exchange: 'TSX' },
+      { id: 'TSX:TD',   symbol: 'TD',   name: 'TD Bank',    exchange: 'TSX' },
+      { id: 'TSX:SHOP', symbol: 'SHOP', name: 'Shopify',    exchange: 'TSX' },
+      { id: 'TSX:CNR',  symbol: 'CNR',  name: 'CN Rail',    exchange: 'TSX' },
+      { id: 'TSX:SU',   symbol: 'SU',   name: 'Suncor',     exchange: 'TSX' },
+    ],
+  },
+  {
+    label: '🇦🇺 Australia',
+    stocks: [
+      { id: 'ASX:BHP', symbol: 'BHP', name: 'BHP',    exchange: 'ASX' },
+      { id: 'ASX:CBA', symbol: 'CBA', name: 'CommBank', exchange: 'ASX' },
+      { id: 'ASX:CSL', symbol: 'CSL', name: 'CSL',    exchange: 'ASX' },
+      { id: 'ASX:NAB', symbol: 'NAB', name: 'NAB',    exchange: 'ASX' },
+    ],
+  },
 ];
 
 const EXCHANGE_COLORS: Record<string, string> = {
@@ -581,22 +644,26 @@ function DashboardInner() {
             )}
           </div>
 
-          {/* Popular TASE stocks (shown when no query and no selection) */}
-          {!query && !selected && !isAtLimit && (
-            <div className="mb-6">
-              <p className="text-xs text-gray-600 mb-2.5">מניות ת״א פופולריות</p>
-              <div className="flex flex-wrap gap-2">
-                {POPULAR_TASE.map((s) => (
-                  <button
-                    key={s.id}
-                    onClick={() => handleSelect(s)}
-                    className="text-xs bg-white/5 hover:bg-indigo-500/10 border border-white/8 hover:border-indigo-500/30 text-gray-300 px-3 py-1.5 rounded-lg transition-colors"
-                  >
-                    <span className="font-semibold text-white">{s.symbol}</span>
-                    <span className="text-gray-500 mr-1"> · {s.name}</span>
-                  </button>
-                ))}
-              </div>
+          {/* Popular stocks by market (shown when no query and no selection) */}
+          {!query && !selected && (
+            <div className="mb-6 space-y-3">
+              {POPULAR_STOCKS.map((group) => (
+                <div key={group.label}>
+                  <p className="text-xs text-gray-600 mb-2">{group.label}</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {group.stocks.map((s) => (
+                      <button
+                        key={s.id}
+                        onClick={() => handleSelect(s)}
+                        className="text-xs bg-white/5 hover:bg-indigo-500/10 border border-white/8 hover:border-indigo-500/30 text-gray-300 px-2.5 py-1.5 rounded-lg transition-colors"
+                      >
+                        <span className="font-semibold text-white">{s.symbol}</span>
+                        <span className="text-gray-600 mr-1"> · {s.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
           )}
 

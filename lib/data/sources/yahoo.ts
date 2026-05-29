@@ -89,9 +89,19 @@ function dateStr(v: unknown): string {
 function mapExchange(exch: string | undefined, isTaseSymbol: boolean): Exchange {
   if (isTaseSymbol) return 'TASE';
   const e = (exch ?? '').toUpperCase();
-  if (e.includes('NAS')) return 'NASDAQ';
-  if (e.includes('NYS')) return 'NYSE';
+  if (e.includes('NAS') || e === 'NMS' || e === 'NGM' || e === 'NCM') return 'NASDAQ';
+  if (e.includes('NYS') || e === 'NYQ') return 'NYSE';
   if (e.includes('AME') || e === 'PCX') return 'AMEX';
+  // UK
+  if (e === 'LSE' || e === 'LON' || e.includes('LONDON') || e === 'IOB') return 'LSE';
+  // Germany
+  if (e === 'GER' || e === 'XETRA' || e === 'ETR' || e === 'EXS' || e.includes('FRANKFURT')) return 'XETRA';
+  // France
+  if (e === 'PAR' || e === 'EURONEXT' || e === 'ENX' || e.includes('PARIS')) return 'EPA';
+  // Canada
+  if (e === 'TOR' || e === 'TSX' || e === 'CNQ' || e.includes('TORONTO')) return 'TSX';
+  // Australia
+  if (e === 'ASX' || e === 'AUS' || e.includes('AUSTRALIA') || e.includes('SYDNEY')) return 'ASX';
   return 'NASDAQ';
 }
 

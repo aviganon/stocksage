@@ -6,8 +6,16 @@
  */
 
 export type AssetType = 'stock' | 'etf' | 'crypto' | 'bond';
-export type Exchange = 'NASDAQ' | 'NYSE' | 'TASE' | 'AMEX' | 'CRYPTO' | 'GOV';
-export type Currency = 'USD' | 'ILS' | 'EUR' | 'GBP';
+export type Exchange =
+  | 'NASDAQ' | 'NYSE' | 'AMEX'   // USA
+  | 'TASE'                        // Israel
+  | 'LSE'                         // UK — London Stock Exchange
+  | 'XETRA'                       // Germany — Deutsche Börse / Xetra
+  | 'EPA'                         // France — Euronext Paris
+  | 'TSX'                         // Canada — Toronto Stock Exchange
+  | 'ASX'                         // Australia — Australian Securities Exchange
+  | 'CRYPTO' | 'GOV';
+export type Currency = 'USD' | 'ILS' | 'EUR' | 'GBP' | 'CAD' | 'AUD';
 export type MarketState = 'pre' | 'open' | 'closed' | 'after';
 
 /**

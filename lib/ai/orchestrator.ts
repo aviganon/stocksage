@@ -149,7 +149,7 @@ async function collectData(assetId: AssetId, depth: ReportDepth, language: 'he' 
     financials: financials.status === 'fulfilled' ? financials.value : null,
     news: mergedNews,
     historical: historical.status === 'fulfilled' ? historical.value : [],
-    macro: macro.status === 'fulfilled' ? macro.value : { treasury10y: null, fedFundsRate: null, cpi: null, unemployment: null, ilsToUsd: null, israeliKeyRate: null, israeliCpi: null, asOf: new Date().toISOString() },
+    macro: macro.status === 'fulfilled' ? macro.value : { treasury10y: null, fedFundsRate: null, cpi: null, unemployment: null, ilsToUsd: null, israeliKeyRate: null, israeliCpi: null, gbpToUsd: null, boeRate: null, ukCpi: null, eurToUsd: null, ecbRate: null, cadToUsd: null, bocRate: null, audToUsd: null, rbaRate: null, asOf: new Date().toISOString() },
     filings: filings.status === 'fulfilled' ? (filings.value as unknown[]) : [],
     quote,
     language,
