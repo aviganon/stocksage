@@ -643,31 +643,37 @@ function UserSettings({ user, data, getIdToken, logout }: {
           {data.profile.createdAt && <div className="flex items-center justify-between"><span className="text-gray-400 text-sm">חשבון נוצר</span><span className="text-white text-sm">{new Date(data.profile.createdAt).toLocaleDateString('he-IL')}</span></div>}
         </div>
 
-        {/* Pricing model info */}
-        <div className="bg-white/5 border border-white/8 rounded-2xl p-6 space-y-4">
-          <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">תמחור</h2>
-          <div className="space-y-3">
-            {[
-              { icon: '⚡', label: 'מהיר', price: 'חינמי תמיד', color: 'text-green-300', sub: '3 שלבי ניתוח' },
-              { icon: '📊', label: 'מלא',  price: '$1.99 לדוח',  color: 'text-amber-300', sub: '6 שלבי ניתוח' },
-              { icon: '🔬', label: 'עמוק', price: '$3.99 לדוח',  color: 'text-purple-300', sub: '6 שלבים + חיפוש רשת' },
-            ].map((t) => (
-              <div key={t.label} className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span>{t.icon}</span>
-                  <span className="text-white text-sm">{t.label}</span>
-                  <span className="text-gray-600 text-xs">· {t.sub}</span>
-                </div>
-                <span className={`text-sm font-semibold ${t.color}`}>{t.price}</span>
-              </div>
-            ))}
-          </div>
-          <div className="pt-3 border-t border-white/8">
-            <p className="text-xs text-gray-500">
-              לשאלות על חיוב: <a href="mailto:support@stocksage.io" className="text-indigo-400 hover:underline">support@stocksage.io</a>
+        {/* Plan section */}
+        {plan === 'pro' ? (
+          <div className="bg-indigo-500/8 border border-indigo-500/20 rounded-2xl p-6 space-y-3">
+            <div className="flex items-center gap-3">
+              <span className="text-lg font-bold text-indigo-300">Pro ✦</span>
+              <span className="text-sm text-gray-400">מנוי פעיל</span>
+            </div>
+            <p className="text-sm text-gray-400">ניתוח מלא ועמוק ללא הגבלה</p>
+            <p className="text-xs text-gray-600">
+              לביטול: <a href="mailto:support@stocksage.io" className="text-indigo-400 hover:underline">support@stocksage.io</a>
             </p>
           </div>
-        </div>
+        ) : (
+          <div className="bg-white/5 border border-white/8 rounded-2xl p-6 space-y-4">
+            <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">שדרג ל-Pro</h2>
+            <div className="space-y-2 text-sm text-gray-300">
+              <p className="flex items-center gap-2"><span className="text-indigo-400">✓</span> ניתוח מלא (6 שלבים) ללא הגבלה</p>
+              <p className="flex items-center gap-2"><span className="text-indigo-400">✓</span> ניתוח עמוק עם חיפוש רשת</p>
+              <p className="flex items-center gap-2"><span className="text-indigo-400">✓</span> כל הבורסות — ת"א, US, UK, EU ועוד</p>
+            </div>
+            <button
+              onClick={handleUpgrade}
+              className="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-3 rounded-xl text-sm font-semibold transition-colors"
+            >
+              שדרג ל-Pro →
+            </button>
+            <p className="text-xs text-gray-600 text-center">
+              לשאלות: <a href="mailto:support@stocksage.io" className="text-indigo-400 hover:underline">support@stocksage.io</a>
+            </p>
+          </div>
+        )}
         <div className="bg-red-500/5 border border-red-500/20 rounded-2xl p-6 space-y-4">
           <h2 className="text-sm font-semibold text-red-400 uppercase tracking-wider">אזור מסוכן</h2>
           <p className="text-sm text-gray-400">מחיקת החשבון תמחק לצמיתות את כל הדוחות שלך.</p>

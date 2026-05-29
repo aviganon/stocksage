@@ -646,12 +646,8 @@ function DashboardInner() {
             Stock<span className="text-indigo-400">Sage</span>
           </Link>
           <div className="flex items-center gap-4">
-            {usage && (
-              <span className="text-sm text-gray-400">
-                {usage.plan === 'pro'
-                  ? <span className="text-indigo-300 font-medium">Pro ✦</span>
-                  : <span>{usage.used}/{usage.limit} דוחות</span>}
-              </span>
+            {usage?.plan === 'pro' && (
+              <span className="text-sm text-indigo-300 font-medium">Pro ✦</span>
             )}
             <span className="text-sm text-gray-500 hidden sm:block">{user.email}</span>
             <LanguageSwitcher />
@@ -666,8 +662,8 @@ function DashboardInner() {
 
       <div className="max-w-5xl mx-auto px-6 py-10">
 
-        {/* Pricing reminder */}
-        {usage?.plan === 'free' && (
+        {/* Pricing reminder — shown only to non-Pro users */}
+        {usage?.plan !== 'pro' && (
           <div className="mb-6 rounded-xl px-5 py-3 bg-white/3 border border-white/8">
             <p className="text-xs text-gray-500">
               ⚡ מהיר = חינמי תמיד &nbsp;·&nbsp; 📊 מלא = $1.99/דוח &nbsp;·&nbsp; 🔬 עמוק = $3.99/דוח
