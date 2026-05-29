@@ -85,12 +85,17 @@ export class ResearchReportsRepository {
 
   async updateStep(reportId: string, stepId: string, updates: Partial<ReportStep>): Promise<void> {
     const db = getDb();
-    const snap = await db.collection(COLLECTION).doc(reportId).get();
-    if (!snap.exists) return;
-    const steps = ((snap.data()!['steps'] ?? []) as ReportStep[]).map((s) =>
-      s.stepId === stepId ? { ...s, ...updates } : s,
-    );
-    await db.collection(COLLECTION).doc(reportId).update({ steps });
+    const ref = db.collection(COLLECTION).doc(reportId);
+    // Use a transaction to prevent the race condition when parallel steps
+    // all call updateStep simultaneously (read-modify-write conflict).
+    await db.runTransaction(async (tx) => {
+      const snap = await tx.get(ref);
+      if (!snap.exists) return;
+      const steps = ((snap.data()!['steps'] ?? []) as ReportStep[]).map((s) =>
+        s.stepId === stepId ? { ...s, ...updates } : s,
+      );
+      tx.update(ref, { steps });
+    });
   }
 
   async addCost(reportId: string, additionalCostUSD: number): Promise<void> {

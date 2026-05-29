@@ -129,13 +129,14 @@ export async function callClaude<T>(options: CallClaudeOptions<T>): Promise<Call
       let inputTokens: number;
       let outputTokens: number;
 
+      const TIMEOUT_MS = 120_000; // 2 minutes max per Claude call
       if (webSearch) {
-        const result = await runWithToolLoop(client, requestParams);
+        const result = await runWithToolLoop(client, requestParams, 5);
         response = result.response;
         inputTokens = result.totalInput;
         outputTokens = result.totalOutput;
       } else {
-        response = await client.messages.create(requestParams);
+        response = await client.messages.create(requestParams, { timeout: TIMEOUT_MS });
         inputTokens = response.usage.input_tokens;
         outputTokens = response.usage.output_tokens;
       }
