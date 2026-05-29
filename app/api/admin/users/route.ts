@@ -1,6 +1,7 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdmin, AuthError } from '@/lib/admin';
-import { getAdminDb } from '@/lib/firebase/admin';
+import { getAdminDb, getAdminAuth } from '@/lib/firebase/admin';
+import { z } from 'zod';
 
 export async function GET() {
   try {
@@ -53,4 +54,54 @@ export async function GET() {
     .sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''));
 
   return NextResponse.json({ users, total: users.length });
+}
+
+// ─── POST /api/admin/users — create new user ─────────────────────────────────
+
+const CreateSchema = z.object({
+  email:    z.string().email(),
+  password: z.string().min(8),
+  plan:     z.enum(['free', 'pro']).default('free'),
+  notes:    z.string().max(1000).optional(),
+});
+
+export async function POST(req: NextRequest) {
+  try { await verifyAdmin(); }
+  catch (e) {
+    if (e instanceof AuthError) return NextResponse.json({ error: e.message }, { status: e.code === 'forbidden' ? 403 : 401 });
+    return NextResponse.json({ error: 'Auth error' }, { status: 500 });
+  }
+
+  const body = await req.json().catch(() => ({}));
+  const parsed = CreateSchema.safeParse(body);
+  if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0]?.message ?? 'Invalid input' }, { status: 400 });
+
+  const { email, password, plan, notes } = parsed.data;
+
+  // Create Firebase Auth user
+  let uid: string;
+  try {
+    const auth = getAdminAuth();
+    const userRecord = await auth.createUser({ email, password, emailVerified: false });
+    uid = userRecord.uid;
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
+    if (msg.includes('EMAIL_EXISTS') || msg.includes('email-already-exists')) {
+      return NextResponse.json({ error: 'כתובת האימייל כבר קיימת במערכת' }, { status: 409 });
+    }
+    return NextResponse.json({ error: `שגיאה ביצירת משתמש: ${msg}` }, { status: 500 });
+  }
+
+  // Create Firestore profile
+  const profile = {
+    uid, email, plan,
+    notes: notes ?? '',
+    suspended: false,
+    reportLimitOverride: null,
+    createdAt: new Date().toISOString(),
+    createdByAdmin: true,
+  };
+  await getAdminDb().collection('users').doc(uid).set(profile);
+
+  return NextResponse.json({ ok: true, uid, email, plan }, { status: 201 });
 }
