@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdmin, AuthError } from '@/lib/admin';
 import { getAdminDb, getAdminAuth } from '@/lib/firebase/admin';
+import { setCredits } from '@/lib/usage/tracker';
 import { z } from 'zod';
 
 type RouteContext = { params: Promise<{ uid: string }> };
@@ -50,6 +51,10 @@ const UpdateSchema = z.object({
   suspended:           z.boolean().optional(),
   reportLimitOverride: z.number().int().min(0).nullable().optional(),
   notes:               z.string().max(1000).optional(),
+  credits:             z.object({
+    standard: z.number().int().min(0).optional(),
+    deep:     z.number().int().min(0).optional(),
+  }).optional(),
 });
 
 export async function PATCH(req: NextRequest, { params }: RouteContext) {
@@ -72,6 +77,10 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
   if (d.notes               !== undefined) updates['notes']               = d.notes;
 
   await getAdminDb().collection('users').doc(uid).update(updates);
+
+  // Update credits separately (uses dot-notation fields)
+  if (d.credits) await setCredits(uid, d.credits);
+
   return NextResponse.json({ ok: true });
 }
 

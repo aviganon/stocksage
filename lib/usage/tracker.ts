@@ -4,12 +4,16 @@ import { FieldValue } from 'firebase-admin/firestore';
 const FREE_REPORTS_PER_MONTH = 3;
 const COLLECTION = 'users';
 
+export interface Credits { standard: number; deep: number }
+
 export interface UserProfile {
   uid: string;
   email: string | null;
   firstName?: string;
   lastName?: string;
   plan: 'free' | 'pro';
+  credits?: Credits;
+  creditsUsed?: Credits;
   createdAt: string;
   lastSeenAt?: string;
 }
@@ -74,6 +78,42 @@ export async function updateUserProfile(
     ...data,
     updatedAt: FieldValue.serverTimestamp(),
   });
+}
+
+/** Check if user has a free credit for this depth. Returns remaining count. */
+export async function getCreditsRemaining(uid: string, depth: 'standard' | 'deep'): Promise<number> {
+  const profile = await getUserProfile(uid);
+  return profile?.credits?.[depth] ?? 0;
+}
+
+/** Consume one credit. Returns true if credit was available and consumed. */
+export async function consumeCredit(uid: string, depth: 'standard' | 'deep'): Promise<boolean> {
+  const db = getAdminDb();
+  const ref = db.collection(COLLECTION).doc(uid);
+  let consumed = false;
+  await db.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    if (!snap.exists) return;
+    const current = (snap.data()?.credits?.[depth] ?? 0) as number;
+    if (current <= 0) return;
+    tx.update(ref, {
+      [`credits.${depth}`]:     FieldValue.increment(-1),
+      [`creditsUsed.${depth}`]: FieldValue.increment(1),
+    });
+    consumed = true;
+  });
+  return consumed;
+}
+
+/** Admin: set credits for a user (absolute value, not increment). */
+export async function setCredits(uid: string, credits: Partial<Credits>): Promise<void> {
+  const db = getAdminDb();
+  const update: Record<string, unknown> = {};
+  if (credits.standard !== undefined) update['credits.standard'] = credits.standard;
+  if (credits.deep     !== undefined) update['credits.deep']     = credits.deep;
+  if (Object.keys(update).length) {
+    await db.collection(COLLECTION).doc(uid).update(update);
+  }
 }
 
 export async function touchLastSeen(uid: string): Promise<void> {

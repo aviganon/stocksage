@@ -8,7 +8,15 @@ import { useAuth } from '@/components/auth/auth-provider';
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface UserData {
-  profile: { plan: 'free' | 'pro'; email: string | null; createdAt: string };
+  profile: {
+    plan: 'free' | 'pro';
+    email: string | null;
+    firstName?: string;
+    lastName?: string;
+    createdAt: string;
+    credits?: { standard: number; deep: number };
+    creditsUsed?: { standard: number; deep: number };
+  };
   usage: { used: number; limit: number; plan: 'free' | 'pro'; allowed: boolean };
   isOwner: boolean;
 }
@@ -32,6 +40,7 @@ interface AdminUser {
   reportsThisMonth: number;
   costThisMonth: number;
   lastReport: string | null;
+  credits?: { standard: number; deep: number };
 }
 
 interface UserDetail {
@@ -39,6 +48,8 @@ interface UserDetail {
     uid: string; email: string | null; plan: 'free' | 'pro';
     suspended?: boolean; reportLimitOverride?: number | null;
     notes?: string; createdAt?: string;
+    credits?: { standard: number; deep: number };
+    creditsUsed?: { standard: number; deep: number };
   };
   stats: {
     reportsTotal: number; reportsThisMonth: number;
@@ -69,6 +80,8 @@ function EditUserDrawer({ uid, getIdToken, onClose, onSaved, onDeleted }: {
   const [suspended, setSuspended] = useState(false);
   const [limitOverride, setLimitOverride] = useState<string>('');
   const [notes, setNotes]         = useState('');
+  const [credStandard, setCredStandard] = useState('0');
+  const [credDeep,     setCredDeep]     = useState('0');
 
   useEffect(() => {
     (async () => {
@@ -81,6 +94,8 @@ function EditUserDrawer({ uid, getIdToken, onClose, onSaved, onDeleted }: {
         setSuspended(d.profile.suspended ?? false);
         setLimitOverride(d.profile.reportLimitOverride != null ? String(d.profile.reportLimitOverride) : '');
         setNotes(d.profile.notes ?? '');
+        setCredStandard(String((d.profile as Record<string,unknown>)['credits.standard'] ?? d.profile.credits?.standard ?? 0));
+        setCredDeep(String((d.profile as Record<string,unknown>)['credits.deep'] ?? d.profile.credits?.deep ?? 0));
       }
       setLoading(false);
     })();
@@ -97,6 +112,7 @@ function EditUserDrawer({ uid, getIdToken, onClose, onSaved, onDeleted }: {
         suspended,
         reportLimitOverride: limitOverride !== '' ? Number(limitOverride) : null,
         notes,
+        credits: { standard: Number(credStandard) || 0, deep: Number(credDeep) || 0 },
       }),
     });
     setSaving(false);
@@ -182,17 +198,26 @@ function EditUserDrawer({ uid, getIdToken, onClose, onSaved, onDeleted }: {
               </div>
             </div>
 
-            {/* Report limit override */}
+            {/* Free credits */}
             <div className="space-y-2">
-              <label className="text-sm text-gray-400">מגבלת דוחות מותאמת / חודש</label>
-              <input
-                type="number"
-                min="0"
-                value={limitOverride}
-                onChange={(e) => setLimitOverride(e.target.value)}
-                placeholder="ריק = ברירת מחדל (3 / ∞)"
-                className="w-full bg-white/5 border border-white/10 focus:border-indigo-500 text-white rounded-lg px-4 py-2.5 text-sm outline-none transition-colors"
-              />
+              <label className="text-sm text-gray-400 flex items-center gap-1.5">
+                <span className="text-green-400">🎁</span> סריקות חינמיות
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs text-gray-600 mb-1 block">📊 מלא</label>
+                  <input type="number" min="0" max="999" value={credStandard}
+                    onChange={(e) => setCredStandard(e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 focus:border-green-500 text-white rounded-lg px-3 py-2 text-sm outline-none transition-colors" />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-600 mb-1 block">🔬 עמוק</label>
+                  <input type="number" min="0" max="999" value={credDeep}
+                    onChange={(e) => setCredDeep(e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 focus:border-green-500 text-white rounded-lg px-3 py-2 text-sm outline-none transition-colors" />
+                </div>
+              </div>
+              <p className="text-xs text-gray-600">הכמות שמוגדרת כאן היא הנותרת. 0 = אין קרדיטים.</p>
             </div>
 
             {/* Suspended toggle */}
@@ -674,9 +699,36 @@ function UserSettings({ user, data, getIdToken, logout }: {
 
         <div className="bg-white/5 border border-white/8 rounded-2xl p-6 space-y-4">
           <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">פרטי חשבון</h2>
+          <div className="flex items-center justify-between"><span className="text-gray-400 text-sm">שם</span><span className="text-white text-sm">{[data.profile.firstName, data.profile.lastName].filter(Boolean).join(' ') || '—'}</span></div>
           <div className="flex items-center justify-between"><span className="text-gray-400 text-sm">אימייל</span><span className="text-white text-sm">{user.email}</span></div>
           {data.profile.createdAt && <div className="flex items-center justify-between"><span className="text-gray-400 text-sm">חשבון נוצר</span><span className="text-white text-sm">{new Date(data.profile.createdAt).toLocaleDateString('he-IL')}</span></div>}
         </div>
+
+        {/* Credits section — shown when user has free credits */}
+        {((data.profile.credits?.standard ?? 0) > 0 || (data.profile.credits?.deep ?? 0) > 0) && (
+          <div className="bg-green-500/8 border border-green-500/20 rounded-2xl p-6 space-y-3">
+            <h2 className="text-sm font-semibold text-green-400 uppercase tracking-wider">🎁 סריקות חינמיות</h2>
+            <div className="grid grid-cols-2 gap-3">
+              {(data.profile.credits?.standard ?? 0) > 0 && (
+                <div className="bg-white/5 rounded-xl p-4 text-center">
+                  <p className="text-2xl font-bold text-white">{data.profile.credits!.standard}</p>
+                  <p className="text-xs text-gray-500 mt-1">📊 מלא נותרו</p>
+                </div>
+              )}
+              {(data.profile.credits?.deep ?? 0) > 0 && (
+                <div className="bg-white/5 rounded-xl p-4 text-center">
+                  <p className="text-2xl font-bold text-white">{data.profile.credits!.deep}</p>
+                  <p className="text-xs text-gray-500 mt-1">🔬 עמוק נותרו</p>
+                </div>
+              )}
+            </div>
+            {((data.profile.creditsUsed?.standard ?? 0) + (data.profile.creditsUsed?.deep ?? 0)) > 0 && (
+              <p className="text-xs text-gray-600">
+                השתמשת: {data.profile.creditsUsed?.standard ?? 0} מלא · {data.profile.creditsUsed?.deep ?? 0} עמוק
+              </p>
+            )}
+          </div>
+        )}
 
         {/* Plan section */}
         {plan === 'pro' ? (

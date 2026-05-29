@@ -9,7 +9,7 @@ import { z } from 'zod';
 import { verifyAuth, AuthError } from '@/lib/auth/server';
 import { ResearchReportsRepository } from '@/lib/storage/research-reports';
 import { runResearchPipeline } from '@/lib/ai/orchestrator';
-import { canRunReport } from '@/lib/usage/tracker';
+import { canRunReport, consumeCredit, getCreditsRemaining } from '@/lib/usage/tracker';
 
 function ok(data: unknown, status = 200) {
   return NextResponse.json({ ok: true, ...((data && typeof data === 'object') ? data : { data }) }, { status });
@@ -42,9 +42,25 @@ export async function POST(req: NextRequest) {
   // Check depth permissions
   const usage = await canRunReport(uid, depth);
   if (!usage.allowed) {
-    return fail('usage_limit', 'מגבלת שימוש הגיעה. שדרג לPro.', 402);
+    return fail('usage_limit', 'מגבלת שימוש הגיעה.', 402);
   }
-  // requiresPayment — when Paddle is ready, redirect to checkout here
+
+  // Standard/Deep: check credits first, then paid flag
+  if (depth === 'standard' || depth === 'deep') {
+    const credits = await getCreditsRemaining(uid, depth);
+    if (credits > 0) {
+      // Use a free credit
+      await consumeCredit(uid, depth);
+    } else {
+      // Check if this request comes after a successful Paddle payment
+      // The 'paid' header is set by the dashboard after Paddle redirect
+      const paidHeader = req.headers.get('x-paid-research');
+      if (paidHeader !== 'true') {
+        return fail('payment_required', 'תשלום נדרש לסריקה זו.', 402);
+      }
+      // Payment confirmed — proceed (webhook will log it)
+    }
+  }
 
   const reportId = randomUUID();
   const STEPS_BY_DEPTH: Record<string, string[]> = {

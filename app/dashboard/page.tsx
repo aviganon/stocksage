@@ -490,6 +490,7 @@ function DashboardInner() {
   const [reports, setReports]           = useState<Report[]>([]);
   const [usage, setUsage]               = useState<Usage | null>(null);
   const [firstName, setFirstName]       = useState<string>('');
+  const [credits, setCredits]           = useState<{ standard: number; deep: number }>({ standard: 0, deep: 0 });
   const [query, setQuery]               = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searching, setSearching]       = useState(false);
@@ -529,6 +530,10 @@ function DashboardInner() {
       const userData = await userRes.json();
       setUsage(userData.usage);
       setFirstName(userData.profile?.firstName ?? '');
+      setCredits({
+        standard: userData.profile?.credits?.standard ?? 0,
+        deep:     userData.profile?.credits?.deep     ?? 0,
+      });
     }
     setLoadingData(false);
   }, [getIdToken]);
@@ -591,19 +596,24 @@ function DashboardInner() {
     try {
       const token = await getIdToken();
 
-      // Standard/Deep require payment — redirect to Paddle checkout
+      // Standard/Deep: check credits first, otherwise go to Paddle
       if (depth === 'standard' || depth === 'deep') {
-        const res = await fetch('/api/billing/checkout', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token ?? ''}` },
-          body: JSON.stringify({ depth, assetId: selected.id }),
-        });
-        const data = await res.json();
-        if (!res.ok) { setError(data.error ?? 'שגיאה'); return; }
-        if (data.url) { window.location.href = data.url; return; }
+        const hasCredit = credits[depth] > 0;
+        if (!hasCredit) {
+          // No credits → Paddle checkout
+          const res = await fetch('/api/billing/checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token ?? ''}` },
+            body: JSON.stringify({ depth, assetId: selected.id }),
+          });
+          const data = await res.json();
+          if (!res.ok) { setError(data.error ?? 'שגיאה'); return; }
+          if (data.url) { window.location.href = data.url; return; }
+        }
+        // Has credits → run free (server will consume the credit)
       }
 
-      // Quick is free — start immediately
+      // Start research
       const res = await fetch('/api/research', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token ?? ''}` },
@@ -633,7 +643,11 @@ function DashboardInner() {
       const token = await getIdToken();
       const res = await fetch('/api/research', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token ?? ''}` },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token ?? ''}`,
+          'x-paid-research': 'true',
+        },
         body: JSON.stringify({ assetId: paidAsset, depth: paidDepth, language: 'he' }),
       });
       const data = await res.json();
@@ -821,13 +835,20 @@ function DashboardInner() {
                     </div>
                     <div className="text-xs text-gray-500 mb-1">{opt.steps}</div>
                     <div className="text-xs text-gray-600 mb-2">{opt.time}</div>
-                    <div className={`text-xs font-semibold px-2 py-0.5 rounded-full w-fit ${
-                      opt.value === 'quick'
-                        ? 'bg-green-500/20 text-green-300'
-                        : 'bg-amber-500/20 text-amber-300'
-                    }`}>
-                      {opt.price}
-                    </div>
+                    {/* Price or free credits badge */}
+                    {(opt.value === 'standard' || opt.value === 'deep') && credits[opt.value] > 0 ? (
+                      <div className="text-xs font-semibold px-2 py-0.5 rounded-full w-fit bg-green-500/20 text-green-300">
+                        {credits[opt.value]} חינמיות
+                      </div>
+                    ) : (
+                      <div className={`text-xs font-semibold px-2 py-0.5 rounded-full w-fit ${
+                        opt.value === 'quick'
+                          ? 'bg-green-500/20 text-green-300'
+                          : 'bg-amber-500/20 text-amber-300'
+                      }`}>
+                        {opt.price}
+                      </div>
+                    )}
                   </button>
                 ))}
               </div>
