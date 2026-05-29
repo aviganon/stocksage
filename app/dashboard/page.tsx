@@ -78,7 +78,7 @@ function DoneReportRow({ report, onDelete, getIdToken }: {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://stocksage.io';
     const successUrl = `${appUrl}/dashboard?paid=1&assetId=${encodeURIComponent(report.assetId)}&depth=${next.depth}`;
     if (data.transactionId) {
-      await openCheckout(data.transactionId, successUrl);
+      await openCheckout(data.transactionId, successUrl, locale);
     } else if (data.url) {
       window.location.href = data.url;
     }
@@ -631,8 +631,7 @@ function DashboardInner() {
 
           if (data.transactionId) {
             setStarting(false);
-            // Open Paddle overlay — stays on stocksage.io
-            await openCheckout(data.transactionId, successUrl);
+            await openCheckout(data.transactionId, successUrl, locale);
             return;
           }
           if (data.url) { window.location.href = data.url; return; }

@@ -14,6 +14,7 @@ declare global {
             displayMode?: 'overlay' | 'inline';
             locale?: string;
             successUrl?: string;
+            theme?: 'light' | 'dark';
             frameTarget?: string;
             frameInitialHeight?: number;
           };
@@ -44,6 +45,15 @@ function initPaddle() {
   window.Paddle.Initialize({ token });
 }
 
+// Map app locales to Paddle locale codes
+const PADDLE_LOCALE: Record<string, string> = {
+  he: 'he',
+  en: 'en',
+  ru: 'ru',
+  fr: 'fr',
+  ar: 'ar',
+};
+
 export function usePaddleCheckout() {
   useEffect(() => {
     loadPaddleScript().then(initPaddle);
@@ -52,6 +62,7 @@ export function usePaddleCheckout() {
   const openCheckout = useCallback(async (
     transactionId: string,
     successUrl: string,
+    locale?: string,
   ) => {
     await loadPaddleScript();
     initPaddle();
@@ -64,6 +75,8 @@ export function usePaddleCheckout() {
       settings: {
         displayMode: 'overlay',
         successUrl,
+        locale: PADDLE_LOCALE[locale ?? 'he'] ?? 'en',
+        theme: 'dark',
       },
     });
   }, []);
