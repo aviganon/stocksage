@@ -13,10 +13,12 @@ export interface UserProfile {
   email: string | null;
   firstName?: string;
   lastName?: string;
+  phone?: string;
+  city?: string;
   plan: 'free' | 'pro';
   credits?: Credits;
   creditsUsed?: Credits;
-  proResetDate?: string;   // ISO — when credits were last reset
+  proResetDate?: string;
   paddleSubscriptionId?: string;
   createdAt: string;
   lastSeenAt?: string;
@@ -75,7 +77,7 @@ export async function updateUserPlan(uid: string, plan: 'free' | 'pro'): Promise
 
 export async function updateUserProfile(
   uid: string,
-  data: { firstName?: string; lastName?: string },
+  data: { firstName?: string; lastName?: string; phone?: string; city?: string },
 ): Promise<void> {
   const db = getAdminDb();
   await db.collection(COLLECTION).doc(uid).update({

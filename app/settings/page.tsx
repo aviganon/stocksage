@@ -13,6 +13,8 @@ interface UserData {
     email: string | null;
     firstName?: string;
     lastName?: string;
+    phone?: string;
+    city?: string;
     createdAt: string;
     credits?: { standard: number; deep: number };
     creditsUsed?: { standard: number; deep: number };
@@ -20,6 +22,17 @@ interface UserData {
   };
   usage: { used: number; limit: number; plan: 'free' | 'pro'; allowed: boolean };
   isOwner: boolean;
+  stats?: {
+    totalReports: number;
+    totalCost: number;
+    thisMonthReports: number;
+    thisMonthCost: number;
+    byDepth: {
+      quick:    { count: number; cost: number };
+      standard: { count: number; cost: number };
+      deep:     { count: number; cost: number };
+    };
+  };
 }
 
 interface AdminStats {
@@ -81,6 +94,8 @@ function EditUserDrawer({ uid, getIdToken, onClose, onSaved, onDeleted }: {
   const [suspended, setSuspended] = useState(false);
   const [limitOverride, setLimitOverride] = useState<string>('');
   const [notes, setNotes]         = useState('');
+  const [phone, setPhone]         = useState('');
+  const [city,  setCity]          = useState('');
   const [credStandard, setCredStandard] = useState('0');
   const [credDeep,     setCredDeep]     = useState('0');
 
@@ -95,6 +110,8 @@ function EditUserDrawer({ uid, getIdToken, onClose, onSaved, onDeleted }: {
         setSuspended(d.profile.suspended ?? false);
         setLimitOverride(d.profile.reportLimitOverride != null ? String(d.profile.reportLimitOverride) : '');
         setNotes(d.profile.notes ?? '');
+        setPhone((d.profile as Record<string,unknown>)['phone'] as string ?? '');
+        setCity((d.profile  as Record<string,unknown>)['city']  as string ?? '');
         setCredStandard(String((d.profile as Record<string,unknown>)['credits.standard'] ?? d.profile.credits?.standard ?? 0));
         setCredDeep(String((d.profile as Record<string,unknown>)['credits.deep'] ?? d.profile.credits?.deep ?? 0));
       }
@@ -112,7 +129,7 @@ function EditUserDrawer({ uid, getIdToken, onClose, onSaved, onDeleted }: {
         plan,
         suspended,
         reportLimitOverride: limitOverride !== '' ? Number(limitOverride) : null,
-        notes,
+        notes, phone, city,
         credits: { standard: Number(credStandard) || 0, deep: Number(credDeep) || 0 },
       }),
     });
@@ -196,6 +213,22 @@ function EditUserDrawer({ uid, getIdToken, onClose, onSaved, onDeleted }: {
                     {p === 'pro' ? 'Pro ✦' : 'Free'}
                   </button>
                 ))}
+              </div>
+            </div>
+
+            {/* Phone + City */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <label className="text-sm text-gray-400">טלפון</label>
+                <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)}
+                  placeholder="050-0000000" dir="ltr"
+                  className="w-full bg-white/5 border border-white/10 focus:border-indigo-500 text-white rounded-lg px-3 py-2 text-sm outline-none transition-colors" />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm text-gray-400">עיר</label>
+                <input type="text" value={city} onChange={(e) => setCity(e.target.value)}
+                  placeholder="תל אביב"
+                  className="w-full bg-white/5 border border-white/10 focus:border-indigo-500 text-white rounded-lg px-3 py-2 text-sm outline-none transition-colors" />
               </div>
             </div>
 
@@ -297,6 +330,8 @@ function CreateUserModal({ getIdToken, onClose, onCreated }: {
   const [lastName,  setLastName]  = useState('');
   const [email, setEmail]         = useState('');
   const [password, setPassword]   = useState('');
+  const [phone, setPhone]         = useState('');
+  const [city,  setCity]          = useState('');
   const [plan, setPlan]           = useState<'free' | 'pro'>('free');
   const [notes, setNotes]         = useState('');
   const [creating, setCreating]   = useState(false);
@@ -317,7 +352,7 @@ function CreateUserModal({ getIdToken, onClose, onCreated }: {
     const res = await fetch('/api/admin/users', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token ?? ''}` },
-      body: JSON.stringify({ email, password, firstName: firstName.trim(), lastName: lastName.trim() || undefined, plan, notes }),
+      body: JSON.stringify({ email, password, firstName: firstName.trim(), lastName: lastName.trim() || undefined, phone: phone.trim() || undefined, city: city.trim() || undefined, plan, notes }),
     });
     const d = await res.json();
     setCreating(false);
@@ -352,6 +387,22 @@ function CreateUserModal({ getIdToken, onClose, onCreated }: {
                   className="w-full bg-white/5 border border-white/10 focus:border-indigo-500 text-white rounded-lg px-4 py-2.5 text-sm outline-none transition-colors" />
               </div>
             </div>
+            {/* Phone + City */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <label className="text-sm text-gray-400">טלפון</label>
+                <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)}
+                  placeholder="050-0000000" dir="ltr"
+                  className="w-full bg-white/5 border border-white/10 focus:border-indigo-500 text-white rounded-lg px-4 py-2.5 text-sm outline-none transition-colors" />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm text-gray-400">עיר</label>
+                <input type="text" value={city} onChange={(e) => setCity(e.target.value)}
+                  placeholder="תל אביב"
+                  className="w-full bg-white/5 border border-white/10 focus:border-indigo-500 text-white rounded-lg px-4 py-2.5 text-sm outline-none transition-colors" />
+              </div>
+            </div>
+
             {/* Email */}
             <div className="space-y-1.5">
               <label className="text-sm text-gray-400">אימייל *</label>
@@ -658,6 +709,37 @@ function OwnerSettings({ user, data, getIdToken, logout }: {
 
 // ─── Regular User Settings ────────────────────────────────────────────────────
 
+function Field({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between py-1">
+      <span className="text-gray-500 text-sm w-28 shrink-0">{label}</span>
+      <span className="text-white text-sm text-left">{value || '—'}</span>
+    </div>
+  );
+}
+
+function EditableField({ label, value, onChange, placeholder, type = 'text', readonly = false }: {
+  label: string; value: string; onChange: (v: string) => void;
+  placeholder?: string; type?: string; readonly?: boolean;
+}) {
+  return (
+    <div className="space-y-1">
+      <label className="text-xs text-gray-500">{label}</label>
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        readOnly={readonly}
+        dir={type === 'email' || type === 'tel' ? 'ltr' : undefined}
+        className={`w-full bg-white/5 border rounded-lg px-3 py-2 text-sm text-white outline-none transition-colors ${
+          readonly ? 'border-white/5 text-gray-500 cursor-default' : 'border-white/10 focus:border-indigo-500'
+        }`}
+      />
+    </div>
+  );
+}
+
 function UserSettings({ user, data, getIdToken, logout }: {
   user: { email: string | null };
   data: UserData;
@@ -665,11 +747,42 @@ function UserSettings({ user, data, getIdToken, logout }: {
   logout: () => Promise<void>;
 }) {
   const router = useRouter();
-  const [deleting, setDeleting] = useState(false);
+
+  // Profile edit state
+  const [editing, setEditing]         = useState(false);
+  const [saving, setSaving]           = useState(false);
+  const [firstName, setFirstName]     = useState(data.profile.firstName ?? '');
+  const [lastName,  setLastName]      = useState(data.profile.lastName  ?? '');
+  const [phone,     setPhone]         = useState(data.profile.phone     ?? '');
+  const [city,      setCity]          = useState(data.profile.city      ?? '');
+
+  // Delete state
+  const [deleting, setDeleting]             = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [deleteInput, setDeleteInput] = useState('');
+  const [deleteInput, setDeleteInput]       = useState('');
+
   const plan  = data.profile.plan ?? 'free';
-  const usage = data.usage;
+  const stats = data.stats;
+
+  async function handleSaveProfile() {
+    setSaving(true);
+    const token = await getIdToken();
+    await fetch('/api/profile', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token ?? ''}` },
+      body: JSON.stringify({ firstName: firstName.trim() || undefined, lastName: lastName.trim() || undefined, phone: phone.trim() || undefined, city: city.trim() || undefined }),
+    });
+    setSaving(false);
+    setEditing(false);
+  }
+
+  function handleCancelEdit() {
+    setFirstName(data.profile.firstName ?? '');
+    setLastName(data.profile.lastName   ?? '');
+    setPhone(data.profile.phone         ?? '');
+    setCity(data.profile.city           ?? '');
+    setEditing(false);
+  }
 
   async function handleUpgrade() {
     const token = await getIdToken();
@@ -698,12 +811,87 @@ function UserSettings({ user, data, getIdToken, logout }: {
       <div className="max-w-2xl mx-auto px-6 py-12 space-y-6">
         <h1 className="text-2xl font-bold text-white">הגדרות חשבון</h1>
 
+        {/* ── Personal details ── */}
         <div className="bg-white/5 border border-white/8 rounded-2xl p-6 space-y-4">
-          <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">פרטי חשבון</h2>
-          <div className="flex items-center justify-between"><span className="text-gray-400 text-sm">שם</span><span className="text-white text-sm">{[data.profile.firstName, data.profile.lastName].filter(Boolean).join(' ') || '—'}</span></div>
-          <div className="flex items-center justify-between"><span className="text-gray-400 text-sm">אימייל</span><span className="text-white text-sm">{user.email}</span></div>
-          {data.profile.createdAt && <div className="flex items-center justify-between"><span className="text-gray-400 text-sm">חשבון נוצר</span><span className="text-white text-sm">{new Date(data.profile.createdAt).toLocaleDateString('he-IL')}</span></div>}
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">פרטים אישיים</h2>
+            {!editing && (
+              <button onClick={() => setEditing(true)}
+                className="text-xs text-indigo-400 hover:text-indigo-300 border border-indigo-500/30 px-3 py-1 rounded-lg transition-colors">
+                ✏️ ערוך
+              </button>
+            )}
+          </div>
+
+          {editing ? (
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <EditableField label="שם פרטי *" value={firstName} onChange={setFirstName} placeholder="ישראל" />
+                <EditableField label="שם משפחה" value={lastName}  onChange={setLastName}  placeholder="ישראלי" />
+              </div>
+              <EditableField label="אימייל" value={user.email ?? ''} onChange={() => {}} readonly type="email" />
+              <div className="grid grid-cols-2 gap-3">
+                <EditableField label="טלפון" value={phone} onChange={setPhone} placeholder="050-0000000" type="tel" />
+                <EditableField label="עיר"   value={city}  onChange={setCity}  placeholder="תל אביב" />
+              </div>
+              <div className="flex gap-2 pt-1">
+                <button onClick={handleSaveProfile} disabled={saving || !firstName.trim()}
+                  className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white text-sm px-4 py-2 rounded-lg transition-colors">
+                  {saving ? 'שומר...' : 'שמור'}
+                </button>
+                <button onClick={handleCancelEdit}
+                  className="text-gray-400 hover:text-white text-sm px-4 py-2 rounded-lg transition-colors">
+                  ביטול
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="divide-y divide-white/5">
+              <Field label="שם מלא"  value={[data.profile.firstName, data.profile.lastName].filter(Boolean).join(' ')} />
+              <Field label="אימייל"  value={user.email ?? ''} />
+              <Field label="טלפון"   value={data.profile.phone ?? ''} />
+              <Field label="עיר"     value={data.profile.city  ?? ''} />
+              {data.profile.createdAt && <Field label="חשבון נוצר" value={new Date(data.profile.createdAt).toLocaleDateString('he-IL')} />}
+            </div>
+          )}
         </div>
+
+        {/* ── Costs ── */}
+        {stats && stats.totalReports > 0 && (
+          <div className="bg-white/5 border border-white/8 rounded-2xl p-6 space-y-4">
+            <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">📊 פעילות ועלויות</h2>
+
+            {/* This month */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-white/5 rounded-xl p-4">
+                <p className="text-xs text-gray-500 mb-1">דוחות החודש</p>
+                <p className="text-2xl font-bold text-white">{stats.thisMonthReports}</p>
+                <p className="text-xs text-gray-600 mt-1">עלות: ${stats.thisMonthCost.toFixed(3)}</p>
+              </div>
+              <div className="bg-white/5 rounded-xl p-4">
+                <p className="text-xs text-gray-500 mb-1">סה״כ דוחות</p>
+                <p className="text-2xl font-bold text-white">{stats.totalReports}</p>
+                <p className="text-xs text-gray-600 mt-1">עלות: ${stats.totalCost.toFixed(3)}</p>
+              </div>
+            </div>
+
+            {/* Breakdown by depth */}
+            <div className="space-y-2">
+              <p className="text-xs text-gray-500">פירוט לפי סוג</p>
+              {[
+                { icon: '⚡', label: 'מהיר',  data: stats.byDepth.quick,    color: 'text-green-400' },
+                { icon: '📊', label: 'מלא',   data: stats.byDepth.standard, color: 'text-amber-400' },
+                { icon: '🔬', label: 'עמוק',  data: stats.byDepth.deep,     color: 'text-purple-400' },
+              ].filter(t => t.data.count > 0).map((t) => (
+                <div key={t.label} className="flex items-center justify-between text-sm">
+                  <span className={`${t.color}`}>{t.icon} {t.label}</span>
+                  <span className="text-gray-400">{t.data.count} דוחות</span>
+                  <span className="text-gray-600 text-xs">${t.data.cost.toFixed(3)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Credits section — shown when user has free credits */}
         {((data.profile.credits?.standard ?? 0) > 0 || (data.profile.credits?.deep ?? 0) > 0) && (

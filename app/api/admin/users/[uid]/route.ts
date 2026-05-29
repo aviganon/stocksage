@@ -51,6 +51,8 @@ const UpdateSchema = z.object({
   suspended:           z.boolean().optional(),
   reportLimitOverride: z.number().int().min(0).nullable().optional(),
   notes:               z.string().max(1000).optional(),
+  phone:               z.string().max(20).optional(),
+  city:                z.string().max(50).optional(),
   credits:             z.object({
     standard: z.number().int().min(0).optional(),
     deep:     z.number().int().min(0).optional(),
@@ -75,6 +77,8 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
   if (d.suspended           !== undefined) updates['suspended']           = d.suspended;
   if (d.reportLimitOverride !== undefined) updates['reportLimitOverride'] = d.reportLimitOverride;
   if (d.notes               !== undefined) updates['notes']               = d.notes;
+  if (d.phone               !== undefined) updates['phone']               = d.phone;
+  if (d.city                !== undefined) updates['city']                = d.city;
 
   await getAdminDb().collection('users').doc(uid).update(updates);
 
