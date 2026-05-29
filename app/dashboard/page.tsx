@@ -33,6 +33,96 @@ const STEP_LABELS: Record<string, string> = {
   synthesis:       'סינתזה',
 };
 
+function useElapsed(startedAt: string) {
+  const [elapsed, setElapsed] = useState('');
+  useEffect(() => {
+    function update() {
+      const secs = Math.floor((Date.now() - new Date(startedAt).getTime()) / 1000);
+      const m = Math.floor(secs / 60);
+      const s = secs % 60;
+      setElapsed(m > 0 ? `${m}:${String(s).padStart(2, '0')} דק׳` : `${s} שנ׳`);
+    }
+    update();
+    const id = setInterval(update, 1000);
+    return () => clearInterval(id);
+  }, [startedAt]);
+  return elapsed;
+}
+
+function ActiveResearchCard({ report }: { report: Report }) {
+  const elapsed = useElapsed(report.startedAt);
+  const steps = (report.steps ?? []).filter((s) => s.stepId !== 'data_collection');
+  const completed = steps.filter((s) => s.status === 'completed' || s.status === 'failed').length;
+  const pct = steps.length > 0 ? Math.round((completed / steps.length) * 100) : 0;
+  const depthLabel = report.depth === 'quick' ? 'מהיר' : report.depth === 'standard' ? 'מלא' : 'עמוק';
+
+  const stepIcon = (status: string) => {
+    if (status === 'completed') return <span className="text-green-400">✓</span>;
+    if (status === 'running')   return <span className="text-blue-400 animate-pulse">⬤</span>;
+    if (status === 'failed')    return <span className="text-red-400">✗</span>;
+    return <span className="text-white/20">○</span>;
+  };
+
+  return (
+    <Link
+      href={`/report/${report.id}`}
+      className="block bg-blue-500/8 border border-blue-500/25 rounded-2xl p-5 hover:bg-blue-500/12 transition-colors group"
+    >
+      {/* Header */}
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center text-sm font-bold text-blue-300">
+              {report.assetId.split(':')[1]?.slice(0, 2) ?? '??'}
+            </div>
+            <span className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full animate-pulse" />
+          </div>
+          <div>
+            <p className="text-white font-semibold">{report.assetName}</p>
+            <p className="text-gray-500 text-xs">{report.assetId} · {depthLabel} · {elapsed}</p>
+          </div>
+        </div>
+        <span className="flex items-center gap-1.5 text-xs text-blue-400 bg-blue-500/10 px-3 py-1.5 rounded-lg group-hover:bg-blue-500/20 transition-colors">
+          פתח מחקר →
+        </span>
+      </div>
+
+      {/* Step list */}
+      {steps.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-1.5 mb-4">
+          {steps.map((s) => (
+            <div key={s.stepId} className="flex items-center gap-2 text-xs">
+              {stepIcon(s.status)}
+              <span className={
+                s.status === 'running'   ? 'text-blue-300 font-medium' :
+                s.status === 'completed' ? 'text-gray-400' :
+                s.status === 'failed'    ? 'text-red-400' :
+                'text-white/30'
+              }>
+                {STEP_LABELS[s.stepId] ?? s.stepId}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Progress bar */}
+      <div>
+        <div className="flex justify-between text-xs text-gray-600 mb-1">
+          <span>{completed}/{steps.length} שלבים</span>
+          <span>{pct}%</span>
+        </div>
+        <div className="h-1.5 bg-white/8 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-blue-500 rounded-full transition-all duration-700"
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+      </div>
+    </Link>
+  );
+}
+
 function ReportProgress({ steps }: { steps: ReportStep[] }) {
   const analysis = steps.filter((s) => s.stepId !== 'data_collection');
   const completed = analysis.filter((s) => s.status === 'completed' || s.status === 'failed').length;
@@ -211,7 +301,9 @@ export default function DashboardPage() {
     if (data.url) window.location.href = data.url;
   }
 
-  const isAtLimit = usage?.plan === 'free' && (usage?.used ?? 0) >= (usage?.limit ?? 3);
+  const isAtLimit    = usage?.plan === 'free' && (usage?.used ?? 0) >= (usage?.limit ?? 3);
+  const activeReports = reports.filter((r) => r.status === 'running' || r.status === 'pending');
+  const doneReports   = reports.filter((r) => r.status !== 'running' && r.status !== 'pending');
 
   if (authLoading || !user) return (
     <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
@@ -259,6 +351,21 @@ export default function DashboardPage() {
             <button onClick={handleUpgrade} className="text-sm bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg transition-colors shrink-0">
               שדרג ל-Pro
             </button>
+          </div>
+        )}
+
+        {/* Active research section */}
+        {activeReports.length > 0 && (
+          <div className="mb-8">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
+              <h2 className="text-sm font-semibold text-blue-300 uppercase tracking-wider">מחקר פעיל</h2>
+            </div>
+            <div className="space-y-3">
+              {activeReports.map((r) => (
+                <ActiveResearchCard key={r.id} report={r} />
+              ))}
+            </div>
           </div>
         )}
 
@@ -403,59 +510,45 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* Reports list */}
+        {/* Completed reports list */}
         <div>
           <h2 className="text-lg font-semibold text-white mb-4">הדוחות שלי</h2>
           {loadingData ? (
             <div className="space-y-3">
               {[1, 2, 3].map((i) => <div key={i} className="h-20 bg-white/5 rounded-xl animate-pulse" />)}
             </div>
-          ) : reports.length === 0 ? (
+          ) : doneReports.length === 0 ? (
             <div className="text-center py-16 text-gray-500">
               <p className="text-4xl mb-4">📊</p>
-              <p>אין דוחות עדיין — חפש מניה למעלה כדי להתחיל</p>
+              <p>{activeReports.length > 0 ? 'המחקר הראשון שלך עדיין רץ — הוא יופיע כאן כשיסיים' : 'אין דוחות עדיין — חפש מניה למעלה כדי להתחיל'}</p>
             </div>
           ) : (
             <div className="space-y-3">
-              {reports.map((r) => {
-                const isActive = r.status === 'running' || r.status === 'pending';
-                return (
-                  <Link
-                    key={r.id}
-                    href={`/report/${r.id}`}
-                    className={`block rounded-xl px-5 py-4 transition-colors group border ${
-                      isActive
-                        ? 'bg-blue-500/5 border-blue-500/20 hover:bg-blue-500/10'
-                        : 'bg-white/5 border-white/8 hover:bg-white/8'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold shrink-0 ${
-                          isActive ? 'bg-blue-500/20 text-blue-300' : 'bg-indigo-500/20 text-indigo-300'
-                        }`}>
-                          {r.assetId.split(':')[1]?.slice(0, 2) ?? '??'}
-                        </div>
-                        <div>
-                          <p className="text-white font-medium">{r.assetName}</p>
-                          <p className="text-gray-500 text-xs mt-0.5">
-                            {r.assetId} · {r.depth === 'quick' ? 'מהיר' : r.depth === 'standard' ? 'מלא' : 'עמוק'} · {new Date(r.startedAt).toLocaleDateString('he-IL')}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 shrink-0">
-                        <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${STATUS_COLORS[r.status] ?? 'text-gray-400 bg-gray-400/10'}`}>
-                          {STATUS_LABELS[r.status] ?? r.status}
-                        </span>
-                        <span className="text-gray-600 group-hover:text-gray-400 transition-colors">→</span>
-                      </div>
+              {doneReports.map((r) => (
+                <Link
+                  key={r.id}
+                  href={`/report/${r.id}`}
+                  className="flex items-center justify-between bg-white/5 border border-white/8 hover:bg-white/8 rounded-xl px-5 py-4 transition-colors group"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-lg bg-indigo-500/20 flex items-center justify-center text-sm font-bold text-indigo-300 shrink-0">
+                      {r.assetId.split(':')[1]?.slice(0, 2) ?? '??'}
                     </div>
-                    {isActive && r.steps && r.steps.length > 0 && (
-                      <ReportProgress steps={r.steps} />
-                    )}
-                  </Link>
-                );
-              })}
+                    <div>
+                      <p className="text-white font-medium">{r.assetName}</p>
+                      <p className="text-gray-500 text-xs mt-0.5">
+                        {r.assetId} · {r.depth === 'quick' ? 'מהיר' : r.depth === 'standard' ? 'מלא' : 'עמוק'} · {new Date(r.startedAt).toLocaleDateString('he-IL')}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${STATUS_COLORS[r.status] ?? 'text-gray-400 bg-gray-400/10'}`}>
+                      {STATUS_LABELS[r.status] ?? r.status}
+                    </span>
+                    <span className="text-gray-600 group-hover:text-gray-400 transition-colors">→</span>
+                  </div>
+                </Link>
+              ))}
             </div>
           )}
         </div>
