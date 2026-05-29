@@ -27,6 +27,34 @@ export async function GET(_req: NextRequest, { params }: RouteContext) {
   return ok(report);
 }
 
+// PATCH — cancel a running report
+export async function PATCH(_req: NextRequest, { params }: RouteContext) {
+  let uid: string;
+  try {
+    ({ uid } = await verifyAuth());
+  } catch (e) {
+    if (e instanceof AuthError) return fail(e.code, e.message, 401);
+    return fail('internal', 'Auth error', 500);
+  }
+
+  const { reportId } = await params;
+  const repo = new ResearchReportsRepository();
+  const report = await repo.get(reportId);
+  if (!report || report.deletedAt) return fail('not_found', 'Report not found', 404);
+  if (report.uid !== uid) return fail('forbidden', 'Access denied', 403);
+  if (report.status !== 'running' && report.status !== 'pending') {
+    return fail('invalid_state', 'Report is not running', 400);
+  }
+
+  await repo.update(reportId, {
+    status: 'failed',
+    errors: ['הופסק על ידי המשתמש'],
+    completedAt: new Date().toISOString(),
+  });
+
+  return ok({ cancelled: true });
+}
+
 export async function DELETE(_req: NextRequest, { params }: RouteContext) {
   let uid: string;
   try {

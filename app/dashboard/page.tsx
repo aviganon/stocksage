@@ -33,6 +33,70 @@ const STEP_LABELS: Record<string, string> = {
   synthesis:       'סינתזה',
 };
 
+function DoneReportRow({ report, onDelete }: { report: Report; onDelete: (id: string) => void }) {
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting]           = useState(false);
+
+  async function handleConfirmDelete(e: React.MouseEvent) {
+    e.preventDefault();
+    setDeleting(true);
+    onDelete(report.id);
+  }
+
+  const depthLabel = report.depth === 'quick' ? 'מהיר' : report.depth === 'standard' ? 'מלא' : 'עמוק';
+
+  return (
+    <div className="flex items-center justify-between bg-white/5 border border-white/8 hover:bg-white/8 rounded-xl px-5 py-4 transition-colors group">
+      <Link href={`/report/${report.id}`} className="flex items-center gap-4 flex-1 min-w-0">
+        <div className="w-10 h-10 rounded-lg bg-indigo-500/20 flex items-center justify-center text-sm font-bold text-indigo-300 shrink-0">
+          {report.assetId.split(':')[1]?.slice(0, 2) ?? '??'}
+        </div>
+        <div className="min-w-0">
+          <p className="text-white font-medium">{report.assetName}</p>
+          <p className="text-gray-500 text-xs mt-0.5 truncate">
+            {report.assetId} · {depthLabel} · {new Date(report.startedAt).toLocaleDateString('he-IL')}
+          </p>
+        </div>
+      </Link>
+
+      <div className="flex items-center gap-2 shrink-0 mr-2">
+        <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${STATUS_COLORS[report.status] ?? 'text-gray-400 bg-gray-400/10'}`}>
+          {STATUS_LABELS[report.status] ?? report.status}
+        </span>
+
+        {confirmDelete ? (
+          <>
+            <span className="text-xs text-red-300">למחוק?</span>
+            <button
+              onClick={handleConfirmDelete}
+              disabled={deleting}
+              className="text-xs bg-red-600/80 hover:bg-red-600 text-white px-2.5 py-1 rounded-lg transition-colors"
+            >
+              {deleting ? '...' : 'כן'}
+            </button>
+            <button
+              onClick={() => setConfirmDelete(false)}
+              className="text-xs bg-white/8 hover:bg-white/15 text-gray-300 px-2.5 py-1 rounded-lg transition-colors"
+            >
+              לא
+            </button>
+          </>
+        ) : (
+          <button
+            onClick={() => setConfirmDelete(true)}
+            className="opacity-0 group-hover:opacity-100 text-xs text-gray-600 hover:text-red-400 hover:bg-red-500/10 p-1.5 rounded-lg transition-all"
+            title="מחק דוח"
+          >
+            ✕
+          </button>
+        )}
+
+        <Link href={`/report/${report.id}`} className="text-gray-600 group-hover:text-gray-400 transition-colors text-sm">→</Link>
+      </div>
+    </div>
+  );
+}
+
 function useElapsed(startedAt: string) {
   const [elapsed, setElapsed] = useState('');
   useEffect(() => {
@@ -49,8 +113,16 @@ function useElapsed(startedAt: string) {
   return elapsed;
 }
 
-function ActiveResearchCard({ report }: { report: Report }) {
+function ActiveResearchCard({ report, getIdToken, onStop }: {
+  report: Report;
+  getIdToken: () => Promise<string | null>;
+  onStop: (id: string) => void;
+}) {
+  const router = useRouter();
   const elapsed = useElapsed(report.startedAt);
+  const [confirming, setConfirming] = useState(false);
+  const [stopping, setStopping]     = useState(false);
+
   const steps = (report.steps ?? []).filter((s) => s.stepId !== 'data_collection');
   const completed = steps.filter((s) => s.status === 'completed' || s.status === 'failed').length;
   const pct = steps.length > 0 ? Math.round((completed / steps.length) * 100) : 0;
@@ -63,14 +135,26 @@ function ActiveResearchCard({ report }: { report: Report }) {
     return <span className="text-white/20">○</span>;
   };
 
+  async function handleStop(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (!confirming) { setConfirming(true); return; }
+    setStopping(true);
+    const token = await getIdToken();
+    await fetch(`/api/research/${report.id}`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token ?? ''}` },
+    });
+    onStop(report.id);
+  }
+
   return (
-    <Link
-      href={`/report/${report.id}`}
-      className="block bg-blue-500/8 border border-blue-500/25 rounded-2xl p-5 hover:bg-blue-500/12 transition-colors group"
-    >
+    <div className="bg-blue-500/8 border border-blue-500/25 rounded-2xl p-5">
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center gap-3">
+        <button
+          onClick={() => router.push(`/report/${report.id}`)}
+          className="flex items-center gap-3 text-right hover:opacity-80 transition-opacity"
+        >
           <div className="relative">
             <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center text-sm font-bold text-blue-300">
               {report.assetId.split(':')[1]?.slice(0, 2) ?? '??'}
@@ -81,10 +165,44 @@ function ActiveResearchCard({ report }: { report: Report }) {
             <p className="text-white font-semibold">{report.assetName}</p>
             <p className="text-gray-500 text-xs">{report.assetId} · {depthLabel} · {elapsed}</p>
           </div>
+        </button>
+
+        {/* Action buttons */}
+        <div className="flex items-center gap-2 shrink-0">
+          {confirming ? (
+            <>
+              <span className="text-xs text-red-300">לעצור?</span>
+              <button
+                onClick={handleStop}
+                disabled={stopping}
+                className="text-xs bg-red-600/80 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg transition-colors"
+              >
+                {stopping ? '...' : 'כן'}
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); setConfirming(false); }}
+                className="text-xs bg-white/8 hover:bg-white/15 text-gray-300 px-3 py-1.5 rounded-lg transition-colors"
+              >
+                ביטול
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={handleStop}
+                className="text-xs bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 px-3 py-1.5 rounded-lg transition-colors"
+              >
+                ⏹ עצור
+              </button>
+              <button
+                onClick={() => router.push(`/report/${report.id}`)}
+                className="text-xs text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 px-3 py-1.5 rounded-lg transition-colors"
+              >
+                פתח →
+              </button>
+            </>
+          )}
         </div>
-        <span className="flex items-center gap-1.5 text-xs text-blue-400 bg-blue-500/10 px-3 py-1.5 rounded-lg group-hover:bg-blue-500/20 transition-colors">
-          פתח מחקר →
-        </span>
       </div>
 
       {/* Step list */}
@@ -96,8 +214,7 @@ function ActiveResearchCard({ report }: { report: Report }) {
               <span className={
                 s.status === 'running'   ? 'text-blue-300 font-medium' :
                 s.status === 'completed' ? 'text-gray-400' :
-                s.status === 'failed'    ? 'text-red-400' :
-                'text-white/30'
+                s.status === 'failed'    ? 'text-red-400' : 'text-white/30'
               }>
                 {STEP_LABELS[s.stepId] ?? s.stepId}
               </span>
@@ -113,13 +230,10 @@ function ActiveResearchCard({ report }: { report: Report }) {
           <span>{pct}%</span>
         </div>
         <div className="h-1.5 bg-white/8 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-blue-500 rounded-full transition-all duration-700"
-            style={{ width: `${pct}%` }}
-          />
+          <div className="h-full bg-blue-500 rounded-full transition-all duration-700" style={{ width: `${pct}%` }} />
         </div>
       </div>
-    </Link>
+    </div>
   );
 }
 
@@ -317,6 +431,19 @@ export default function DashboardPage() {
   const activeReports = reports.filter((r) => r.status === 'running' || r.status === 'pending');
   const doneReports   = reports.filter((r) => r.status !== 'running' && r.status !== 'pending');
 
+  async function handleDelete(reportId: string) {
+    const token = await getIdToken();
+    const res = await fetch(`/api/research/${reportId}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token ?? ''}` },
+    });
+    if (res.ok) setReports((prev) => prev.filter((r) => r.id !== reportId));
+  }
+
+  function handleStop(reportId: string) {
+    setReports((prev) => prev.filter((r) => r.id !== reportId));
+  }
+
   if (authLoading || !user) return (
     <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
       <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
@@ -375,7 +502,7 @@ export default function DashboardPage() {
             </div>
             <div className="space-y-3">
               {activeReports.map((r) => (
-                <ActiveResearchCard key={r.id} report={r} />
+                <ActiveResearchCard key={r.id} report={r} getIdToken={getIdToken} onStop={handleStop} />
               ))}
             </div>
           </div>
@@ -537,29 +664,7 @@ export default function DashboardPage() {
           ) : (
             <div className="space-y-3">
               {doneReports.map((r) => (
-                <Link
-                  key={r.id}
-                  href={`/report/${r.id}`}
-                  className="flex items-center justify-between bg-white/5 border border-white/8 hover:bg-white/8 rounded-xl px-5 py-4 transition-colors group"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-lg bg-indigo-500/20 flex items-center justify-center text-sm font-bold text-indigo-300 shrink-0">
-                      {r.assetId.split(':')[1]?.slice(0, 2) ?? '??'}
-                    </div>
-                    <div>
-                      <p className="text-white font-medium">{r.assetName}</p>
-                      <p className="text-gray-500 text-xs mt-0.5">
-                        {r.assetId} · {r.depth === 'quick' ? 'מהיר' : r.depth === 'standard' ? 'מלא' : 'עמוק'} · {new Date(r.startedAt).toLocaleDateString('he-IL')}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 shrink-0">
-                    <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${STATUS_COLORS[r.status] ?? 'text-gray-400 bg-gray-400/10'}`}>
-                      {STATUS_LABELS[r.status] ?? r.status}
-                    </span>
-                    <span className="text-gray-600 group-hover:text-gray-400 transition-colors">→</span>
-                  </div>
-                </Link>
+                <DoneReportRow key={r.id} report={r} onDelete={handleDelete} />
               ))}
             </div>
           )}
