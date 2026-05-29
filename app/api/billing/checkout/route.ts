@@ -39,15 +39,18 @@ export async function POST(req: NextRequest) {
 
     // Create transaction WITHOUT checkout.url to avoid domain approval requirement.
     // We redirect the customer to Paddle's standard hosted checkout page.
+    const successUrl = `${appUrl}/dashboard?paid=1&assetId=${encodeURIComponent(assetId)}&depth=${depth}`;
+
     const transaction = await paddle.transactions.create({
       items: [{ priceId, quantity: 1 }],
       customData: { uid: String(uid), assetId: String(assetId), depth: String(depth) },
+      checkout: { url: successUrl },
     });
 
-    console.log('[billing/checkout] Transaction created:', transaction.id);
+    console.log('[billing/checkout] Transaction created:', transaction.id, 'checkout.url:', transaction.checkout?.url);
 
-    // Paddle hosted checkout URL (clean, no unsupported query params)
-    const checkoutUrl = `https://checkout.paddle.com/checkout/${transaction.id}`;
+    const checkoutUrl = transaction.checkout?.url
+      ?? `https://checkout.paddle.com/checkout/${transaction.id}`;
 
     return NextResponse.json({ url: checkoutUrl });
   } catch (e: unknown) {

@@ -21,9 +21,12 @@ export async function POST() {
 
   try {
     const paddle = getPaddle();
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://stocksage.io';
+
     const transaction = await paddle.transactions.create({
       items: [{ priceId: PADDLE_PRO_PRICE_ID, quantity: 1 }],
       customData: { uid: String(uid), plan: 'pro' },
+      checkout: { url: `${appUrl}/settings` },
     });
 
     console.log('[billing/subscribe] Transaction created:', transaction.id);
