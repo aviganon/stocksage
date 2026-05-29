@@ -292,11 +292,6 @@ function compactForSynthesis(data: Partial<ResearchReportData>) {
       redFlags: f.redFlags?.slice(0, 5),
       greenFlags: f.greenFlags?.slice(0, 5),
       ratios: f.ratios,
-      periods: f.income?.slice(-3).map((p) => ({
-        period: p.period,
-        revenue: p.totalRevenue,
-        netIncome: p.netIncome,
-      })),
     }) : 'failed',
 
     eventsSummary: e ? JSON.stringify({
