@@ -46,7 +46,7 @@ function DoneReportRow({ report, onDelete, getIdToken }: {
   onDelete: (id: string) => void;
   getIdToken: () => Promise<string | null>;
 }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const { openCheckout } = usePaddleCheckout();
   const STATUS_LABELS: Record<string, string> = {
     completed: t('status.completed'), partial: t('status.partial'),
