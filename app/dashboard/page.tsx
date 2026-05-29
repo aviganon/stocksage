@@ -115,7 +115,7 @@ function DoneReportRow({ report, onDelete, getIdToken }: {
           <button
             onClick={handleUpgrade}
             disabled={upgrading}
-            className="opacity-0 group-hover:opacity-100 text-xs bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/30 px-2.5 py-1 rounded-lg transition-all disabled:opacity-40"
+            className="text-xs bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/30 px-2.5 py-1 rounded-lg transition-all disabled:opacity-40"
             title={nextUpgrade.label}
           >
             {upgrading ? '...' : `↑ ${nextUpgrade.label}`}

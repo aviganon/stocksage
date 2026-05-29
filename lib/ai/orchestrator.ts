@@ -31,15 +31,14 @@ import { ResearchReportsRepository, type ReportDepth, type ReportStep } from '@/
 
 // ─── Model selection ──────────────────────────────────────────────────────────
 
-const MODEL_BY_DEPTH: Record<ReportDepth, ClaudeModel> = {
-  quick:    'claude-haiku-4-5',
-  standard: 'claude-haiku-4-5',
-  deep:     'claude-haiku-4-5',
-};
-
+// Model strategy:
+// quick/standard → Haiku everywhere (fast, cheap)
+// deep → Sonnet for events, risks, synthesis (better quality)
 function modelForStep(depth: ReportDepth, stepId: string): ClaudeModel {
-  if (stepId === 'events' || stepId === 'risks') return 'claude-sonnet-4-6';
-  return MODEL_BY_DEPTH[depth];
+  if (depth === 'deep' && (stepId === 'events' || stepId === 'risks' || stepId === 'synthesis')) {
+    return 'claude-sonnet-4-6';
+  }
+  return 'claude-haiku-4-5';
 }
 
 const STEPS_BY_DEPTH: Record<ReportDepth, string[]> = {
@@ -177,7 +176,7 @@ async function runProfile(ctx: PipelineContext, model: ClaudeModel) {
       language: ctx.language,
     }),
     schema: ProfileSchema,
-    maxTokens: 4000,
+    maxTokens: 3000,
   });
 }
 
@@ -204,7 +203,7 @@ async function runFinancials(ctx: PipelineContext, model: ClaudeModel) {
       language: ctx.language,
     }),
     schema: FinancialsSchema,
-    maxTokens: 6000,
+    maxTokens: 4000,
   });
 }
 
@@ -224,7 +223,7 @@ async function runEvents(ctx: PipelineContext, model: ClaudeModel) {
       language: ctx.language,
     }),
     schema: EventsSchema,
-    maxTokens: 16000,
+    maxTokens: 5000,
   });
 }
 
@@ -245,7 +244,7 @@ async function runCompetitive(ctx: PipelineContext, profile: Profile | null, mod
       language: ctx.language,
     }),
     schema: CompetitiveSchema,
-    maxTokens: 5000,
+    maxTokens: 3500,
     webSearch: true,
   });
 }
@@ -266,7 +265,7 @@ async function runRisks(ctx: PipelineContext, sectionData: Partial<ResearchRepor
       language: ctx.language,
     }),
     schema: RisksSchema,
-    maxTokens: 16000,
+    maxTokens: 5000,
   });
 }
 
@@ -306,7 +305,7 @@ async function runSynthesis(ctx: PipelineContext, sectionData: Partial<ResearchR
       language: ctx.language,
     }),
     schema: SynthesisSchema,
-    maxTokens: 9000,
+    maxTokens: 5000,
   });
 }
 
