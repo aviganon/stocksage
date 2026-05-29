@@ -25,27 +25,41 @@ export async function POST(req: NextRequest) {
 
   const { depth, assetId } = parsed.data;
   const priceId = PADDLE_PRICES[depth];
-  if (!priceId) return NextResponse.json({ error: 'Price not configured' }, { status: 500 });
+
+  console.log('[billing/checkout] priceId:', priceId, 'depth:', depth, 'uid:', uid?.slice(0,8));
+
+  if (!priceId) {
+    console.error('[billing/checkout] Price not configured for depth:', depth);
+    return NextResponse.json({ error: 'Price not configured' }, { status: 500 });
+  }
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://stocksage.io';
   await ensureUserProfile(uid, email);
 
   try {
     const paddle = getPaddle();
+
     const transaction = await paddle.transactions.create({
       items: [{ priceId, quantity: 1 }],
-      customData: { uid, assetId, depth },
+      customData: { uid: String(uid), assetId: String(assetId), depth: String(depth) },
       checkout: {
         url: `${appUrl}/dashboard?paid=1&assetId=${encodeURIComponent(assetId)}&depth=${depth}`,
       },
     });
 
+    console.log('[billing/checkout] Transaction created:', transaction.id, 'checkout:', transaction.checkout);
+
+    // Paddle returns checkout.url as the hosted checkout page URL
     const checkoutUrl = transaction.checkout?.url
-      ?? `https://checkout.paddle.com/checkout/${transaction.id}`;
+      ?? `https://checkout.paddle.com/${transaction.id}`;
 
     return NextResponse.json({ url: checkoutUrl });
-  } catch (e) {
-    console.error('[billing/checkout] Paddle error', String(e));
-    return NextResponse.json({ error: 'Failed to create checkout' }, { status: 500 });
+  } catch (e: unknown) {
+    // Log full Paddle error for debugging
+    const errStr = e instanceof Error
+      ? `${e.message} | ${JSON.stringify((e as Record<string,unknown>)['errors'] ?? (e as Record<string,unknown>)['code'] ?? '')}`
+      : String(e);
+    console.error('[billing/checkout] Paddle error:', errStr);
+    return NextResponse.json({ error: errStr }, { status: 500 });
   }
 }

@@ -24,10 +24,13 @@ const StartResearchSchema = z.object({
   language: z.enum(['he', 'en']).default('he'),
 });
 
+const OWNER_EMAIL = process.env.ADMIN_EMAIL ?? 'ganonavi@gmail.com';
+
 export async function POST(req: NextRequest) {
   let uid: string;
+  let email: string | null;
   try {
-    ({ uid } = await verifyAuth());
+    ({ uid, email } = await verifyAuth());
   } catch (e) {
     if (e instanceof AuthError) return fail(e.code, e.message, 401);
     return fail('internal', 'Auth error', 500);
@@ -38,6 +41,7 @@ export async function POST(req: NextRequest) {
   if (!parsed.success) return fail('validation_error', parsed.error.issues[0]?.message ?? 'Invalid input');
 
   const { assetId, depth, language } = parsed.data;
+  const isOwner = email === OWNER_EMAIL;
 
   // Check depth permissions
   const usage = await canRunReport(uid, depth);
@@ -45,20 +49,16 @@ export async function POST(req: NextRequest) {
     return fail('usage_limit', 'מגבלת שימוש הגיעה.', 402);
   }
 
-  // Standard/Deep: check credits first, then paid flag
-  if (depth === 'standard' || depth === 'deep') {
+  // Standard/Deep: owner gets free access; others need credit or payment
+  if (!isOwner && (depth === 'standard' || depth === 'deep')) {
     const credits = await getCreditsRemaining(uid, depth);
     if (credits > 0) {
-      // Use a free credit
       await consumeCredit(uid, depth);
     } else {
-      // Check if this request comes after a successful Paddle payment
-      // The 'paid' header is set by the dashboard after Paddle redirect
       const paidHeader = req.headers.get('x-paid-research');
       if (paidHeader !== 'true') {
         return fail('payment_required', 'תשלום נדרש לסריקה זו.', 402);
       }
-      // Payment confirmed — proceed (webhook will log it)
     }
   }
 
