@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/components/auth/auth-provider';
+import { LanguageSwitcher } from '@/components/ui/language-switcher';
+import { useI18n } from '@/lib/i18n/context';
 
 interface ReportStep {
   stepId: string;
@@ -390,6 +392,7 @@ const EXCHANGE_COLORS: Record<string, string> = {
 
 function DashboardInner() {
   const { user, loading: authLoading, getIdToken, logout } = useAuth();
+  const { t } = useI18n();
   const router   = useRouter();
   const params   = useSearchParams();
   const upgradeAssetId = params.get('upgrade');
@@ -595,11 +598,12 @@ function DashboardInner() {
               </span>
             )}
             <span className="text-sm text-gray-500 hidden sm:block">{user.email}</span>
-            <Link href="/settings" className="text-sm text-gray-500 hover:text-gray-300 transition-colors">הגדרות</Link>
+            <LanguageSwitcher />
+            <Link href="/settings" className="text-sm text-gray-500 hover:text-gray-300 transition-colors">{t('nav.settings')}</Link>
             {user.email === 'ganonavi@gmail.com' && (
               <Link href="/admin" className="text-sm text-red-400/70 hover:text-red-300 transition-colors">Admin</Link>
             )}
-            <button onClick={logout} className="text-sm text-gray-500 hover:text-gray-300 transition-colors">יציאה</button>
+            <button onClick={logout} className="text-sm text-gray-500 hover:text-gray-300 transition-colors">{t('nav.logout')}</button>
           </div>
         </div>
       </nav>

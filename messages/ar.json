@@ -1,0 +1,112 @@
+{
+  "nav": {
+    "signin": "تسجيل الدخول",
+    "getStarted": "ابدأ مجاناً",
+    "dashboard": "لوحة التحكم",
+    "settings": "الإعدادات",
+    "logout": "تسجيل الخروج",
+    "admin": "Admin"
+  },
+  "landing": {
+    "badge": "بحث بالذكاء الاصطناعي للسوق الإسرائيلية",
+    "headline": "تحليل عميق للأسهم",
+    "headlineSub": "في دقائق، لا ساعات",
+    "description": "StockSage يحلل أسهم بورصة تل أبيب والأوراق المالية الدولية باستخدام Claude AI — ملف الشركة، التحليل المالي، الأحداث، المنافسة، المخاطر والتوليف الشامل.",
+    "ctaFree": "ابدأ مجاناً — التحليل السريع مجاني دائماً",
+    "ctaLogin": "تسجيل الدخول",
+    "featuresTitle": "تحليل كامل في 6 خطوات",
+    "featuresSub": "كل تقرير يمر بعملية تلقائية لجمع البيانات وتحليل الذكاء الاصطناعي",
+    "pricingTitle": "تسعير شفاف",
+    "pricingSub": "التحليل السريع مجاني دائماً — ادفع فقط مقابل التحليل العميق",
+    "disclaimer": "لأغراض المعلومات فقط — ليس نصيحة استثمارية"
+  },
+  "pricing": {
+    "free": "مجاني",
+    "perReport": "لكل تقرير",
+    "forever": "دائماً، بلا حدود",
+    "getStarted": "ابدأ مجاناً",
+    "tryIt": "سجّل وجرّب"
+  },
+  "dashboard": {
+    "newResearch": "بحث جديد عن سهم",
+    "searchPlaceholder": "ابحث عن أسهم — TEVA، Apple، HSBC...",
+    "myReports": "تقاريري",
+    "noReports": "لا توجد تقارير بعد — ابحث عن سهم أعلاه للبدء",
+    "activeResearch": "بحث نشط",
+    "startResearch": "بدء البحث",
+    "upgradeToFull": "الترقية إلى التحليل الكامل",
+    "depthLabel": "اختر عمق التحليل",
+    "popularTASE": "أسهم TASE الشائعة"
+  },
+  "depth": {
+    "quick": "سريع",
+    "standard": "كامل",
+    "deep": "عميق",
+    "quickDesc": "ملف الشركة، المالية والملخص",
+    "standardDesc": "تحليل شامل من 6 خطوات",
+    "deepDesc": "6 خطوات + بحث ويب",
+    "quickTime": "~20 ثانية",
+    "standardTime": "~60 ثانية",
+    "deepTime": "~دقيقتان",
+    "recommended": "موصى به"
+  },
+  "status": {
+    "completed": "مكتمل",
+    "partial": "جزئي",
+    "running": "جارٍ...",
+    "pending": "في الانتظار",
+    "failed": "فشل",
+    "cancelled": "ملغى"
+  },
+  "steps": {
+    "data_collection": "جمع البيانات",
+    "profile": "ملف الشركة",
+    "financials": "التحليل المالي",
+    "events": "الأحداث",
+    "competitive": "المنافسة",
+    "risks": "تقييم المخاطر",
+    "synthesis": "التوليف"
+  },
+  "report": {
+    "backToDashboard": "← لوحة التحكم",
+    "upgradePrompt": "هل تريد تحليلاً أعمق؟",
+    "upgradeDesc": "تحليل كامل يشمل الأحداث والمنافسة والمخاطر — 1.99$ لكل تقرير",
+    "upgradeBtn": "الترقية إلى التحليل الكامل ←"
+  },
+  "auth": {
+    "loginTitle": "تسجيل الدخول إلى StockSage",
+    "signupTitle": "إنشاء حساب",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "loginBtn": "تسجيل الدخول",
+    "signupBtn": "إنشاء حساب",
+    "googleBtn": "المتابعة مع Google",
+    "noAccount": "ليس لديك حساب؟",
+    "hasAccount": "لديك حساب بالفعل؟",
+    "orContinueWith": "أو المتابعة مع"
+  },
+  "settings": {
+    "title": "إعدادات الحساب",
+    "accountInfo": "بيانات الحساب",
+    "email": "البريد الإلكتروني",
+    "joined": "تاريخ الإنشاء",
+    "pricing": "التسعير",
+    "supportEmail": "أسئلة الفواتير",
+    "logout": "تسجيل الخروج",
+    "dangerZone": "منطقة الخطر",
+    "deleteAccount": "حذف الحساب",
+    "deleteConfirm": "سيؤدي حذف حسابك إلى حذف جميع تقاريرك بشكل دائم.",
+    "language": "اللغة"
+  },
+  "common": {
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "delete": "حذف",
+    "confirm": "تأكيد",
+    "loading": "جارٍ التحميل...",
+    "error": "خطأ",
+    "back": "رجوع",
+    "yes": "نعم",
+    "no": "لا"
+  }
+}

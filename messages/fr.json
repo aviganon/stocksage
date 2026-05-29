@@ -1,0 +1,112 @@
+{
+  "nav": {
+    "signin": "Connexion",
+    "getStarted": "Commencer gratuitement",
+    "dashboard": "Tableau de bord",
+    "settings": "Paramètres",
+    "logout": "Déconnexion",
+    "admin": "Admin"
+  },
+  "landing": {
+    "badge": "Recherche IA pour le marché israélien",
+    "headline": "Analyse approfondie des actions",
+    "headlineSub": "en minutes, pas en heures",
+    "description": "StockSage analyse les actions de la Bourse de Tel-Aviv et les titres internationaux grâce à Claude AI — profil d'entreprise, finances, événements, concurrence, risques et synthèse complète.",
+    "ctaFree": "Commencer gratuitement — analyse rapide toujours gratuite",
+    "ctaLogin": "Se connecter",
+    "featuresTitle": "Analyse complète en 6 étapes",
+    "featuresSub": "Chaque rapport passe par un processus automatisé de collecte de données et d'analyse IA",
+    "pricingTitle": "Tarification transparente",
+    "pricingSub": "Analyse rapide toujours gratuite — payez uniquement pour l'analyse approfondie",
+    "disclaimer": "À titre informatif uniquement — ne constitue pas un conseil en investissement"
+  },
+  "pricing": {
+    "free": "Gratuit",
+    "perReport": "par rapport",
+    "forever": "Toujours, sans limite",
+    "getStarted": "Commencer gratuitement",
+    "tryIt": "S'inscrire et essayer"
+  },
+  "dashboard": {
+    "newResearch": "Nouvelle analyse d'action",
+    "searchPlaceholder": "Rechercher des actions — TEVA, Check Point, Apple, BNP...",
+    "myReports": "Mes rapports",
+    "noReports": "Aucun rapport pour l'instant — recherchez une action ci-dessus pour commencer",
+    "activeResearch": "Analyse en cours",
+    "startResearch": "Lancer l'analyse",
+    "upgradeToFull": "Obtenir l'analyse complète",
+    "depthLabel": "Choisir la profondeur d'analyse",
+    "popularTASE": "Actions TASE populaires"
+  },
+  "depth": {
+    "quick": "Rapide",
+    "standard": "Complète",
+    "deep": "Approfondie",
+    "quickDesc": "Profil, finances et synthèse",
+    "standardDesc": "Analyse complète en 6 étapes",
+    "deepDesc": "6 étapes + recherche web",
+    "quickTime": "~20 sec",
+    "standardTime": "~60 sec",
+    "deepTime": "~2 min",
+    "recommended": "Recommandé"
+  },
+  "status": {
+    "completed": "Terminé",
+    "partial": "Partiel",
+    "running": "En cours...",
+    "pending": "En attente",
+    "failed": "Échoué",
+    "cancelled": "Annulé"
+  },
+  "steps": {
+    "data_collection": "Collecte de données",
+    "profile": "Profil de l'entreprise",
+    "financials": "Analyse financière",
+    "events": "Événements",
+    "competitive": "Concurrence",
+    "risks": "Évaluation des risques",
+    "synthesis": "Synthèse"
+  },
+  "report": {
+    "backToDashboard": "← Tableau de bord",
+    "upgradePrompt": "Vous souhaitez une analyse plus approfondie ?",
+    "upgradeDesc": "Analyse complète incluant événements, concurrence et risques — 1,99 $ par rapport",
+    "upgradeBtn": "Passer à l'analyse complète →"
+  },
+  "auth": {
+    "loginTitle": "Connexion à StockSage",
+    "signupTitle": "Créer un compte",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "loginBtn": "Se connecter",
+    "signupBtn": "Créer un compte",
+    "googleBtn": "Continuer avec Google",
+    "noAccount": "Pas de compte ?",
+    "hasAccount": "Déjà un compte ?",
+    "orContinueWith": "ou continuer avec"
+  },
+  "settings": {
+    "title": "Paramètres du compte",
+    "accountInfo": "Informations du compte",
+    "email": "E-mail",
+    "joined": "Compte créé le",
+    "pricing": "Tarification",
+    "supportEmail": "Questions de facturation",
+    "logout": "Déconnexion",
+    "dangerZone": "Zone dangereuse",
+    "deleteAccount": "Supprimer le compte",
+    "deleteConfirm": "La suppression du compte supprimera définitivement tous vos rapports.",
+    "language": "Langue"
+  },
+  "common": {
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "confirm": "Confirmer",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "back": "Retour",
+    "yes": "Oui",
+    "no": "Non"
+  }
+}

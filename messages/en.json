@@ -1,0 +1,112 @@
+{
+  "nav": {
+    "signin": "Sign in",
+    "getStarted": "Get Started Free",
+    "dashboard": "Dashboard",
+    "settings": "Settings",
+    "logout": "Sign out",
+    "admin": "Admin"
+  },
+  "landing": {
+    "badge": "AI Research for the Israeli Market",
+    "headline": "Deep Stock Research",
+    "headlineSub": "in Minutes, Not Hours",
+    "description": "StockSage analyzes Tel Aviv and international stocks using Claude AI — company profile, financials, events, competitive analysis, risks, and comprehensive synthesis.",
+    "ctaFree": "Start Free — Quick research is always free",
+    "ctaLogin": "Sign in",
+    "featuresTitle": "Full Analysis in 6 Steps",
+    "featuresSub": "Every report goes through an automated process of data collection and AI analysis",
+    "pricingTitle": "Transparent Pricing",
+    "pricingSub": "Quick research is always free — pay only for deep analysis",
+    "disclaimer": "For informational purposes only — not investment advice"
+  },
+  "pricing": {
+    "free": "Free",
+    "perReport": "per report",
+    "forever": "Always, unlimited",
+    "getStarted": "Get Started Free",
+    "tryIt": "Sign up & try"
+  },
+  "dashboard": {
+    "newResearch": "New Stock Research",
+    "searchPlaceholder": "Search stocks — TEVA, Check Point, Apple, HSBC...",
+    "myReports": "My Reports",
+    "noReports": "No reports yet — search for a stock above to get started",
+    "activeResearch": "Active Research",
+    "startResearch": "Start Research",
+    "upgradeToFull": "Upgrade to Full Analysis",
+    "depthLabel": "Select research depth",
+    "popularTASE": "Popular TASE stocks"
+  },
+  "depth": {
+    "quick": "Quick",
+    "standard": "Full",
+    "deep": "Deep",
+    "quickDesc": "Profile, financials and synthesis",
+    "standardDesc": "Comprehensive 6-step analysis",
+    "deepDesc": "All 6 steps + web search",
+    "quickTime": "~20 sec",
+    "standardTime": "~60 sec",
+    "deepTime": "~2 min",
+    "recommended": "Recommended"
+  },
+  "status": {
+    "completed": "Completed",
+    "partial": "Partial",
+    "running": "Running...",
+    "pending": "Pending",
+    "failed": "Failed",
+    "cancelled": "Cancelled"
+  },
+  "steps": {
+    "data_collection": "Data Collection",
+    "profile": "Company Profile",
+    "financials": "Financial Analysis",
+    "events": "Events",
+    "competitive": "Competitive",
+    "risks": "Risk Assessment",
+    "synthesis": "Synthesis"
+  },
+  "report": {
+    "backToDashboard": "← Dashboard",
+    "upgradePrompt": "Want a deeper analysis?",
+    "upgradeDesc": "Full analysis including events, competitive & risks — $1.99 per report",
+    "upgradeBtn": "Upgrade to Full Analysis →"
+  },
+  "auth": {
+    "loginTitle": "Sign in to StockSage",
+    "signupTitle": "Create an account",
+    "email": "Email",
+    "password": "Password",
+    "loginBtn": "Sign in",
+    "signupBtn": "Create account",
+    "googleBtn": "Continue with Google",
+    "noAccount": "No account?",
+    "hasAccount": "Already have an account?",
+    "orContinueWith": "or continue with"
+  },
+  "settings": {
+    "title": "Account Settings",
+    "accountInfo": "Account Details",
+    "email": "Email",
+    "joined": "Account created",
+    "pricing": "Pricing",
+    "supportEmail": "Billing questions",
+    "logout": "Sign out",
+    "dangerZone": "Danger Zone",
+    "deleteAccount": "Delete account",
+    "deleteConfirm": "Deleting your account will permanently delete all your reports.",
+    "language": "Language"
+  },
+  "common": {
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "loading": "Loading...",
+    "error": "Error",
+    "back": "Back",
+    "yes": "Yes",
+    "no": "No"
+  }
+}

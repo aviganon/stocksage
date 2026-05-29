@@ -1,0 +1,112 @@
+{
+  "nav": {
+    "signin": "כניסה",
+    "getStarted": "התחל חינם",
+    "dashboard": "לוח בקרה",
+    "settings": "הגדרות",
+    "logout": "יציאה",
+    "admin": "Admin"
+  },
+  "landing": {
+    "badge": "מחקר AI לשוק ישראלי",
+    "headline": "מחקר מניות מעמיק",
+    "headlineSub": "בדקות, לא שעות",
+    "description": "StockSage מנתח מניות בורסה תל אביב ובינלאומיות באמצעות Claude AI — פרופיל חברה, ניתוח פיננסי, אירועים, תחרות, סיכונים וסינתזה מקיפה.",
+    "ctaFree": "התחל חינם — מחקר מהיר בחינם",
+    "ctaLogin": "כניסה לחשבון",
+    "featuresTitle": "ניתוח מלא ב-6 שלבים",
+    "featuresSub": "כל דוח עובר תהליך אוטומטי של איסוף נתונים וניתוח AI",
+    "pricingTitle": "תמחור שקוף",
+    "pricingSub": "מחקר מהיר חינמי תמיד — משלמים רק על ניתוח מעמיק",
+    "disclaimer": "לצרכי מידע בלבד — אינו ייעוץ השקעות"
+  },
+  "pricing": {
+    "free": "חינמי",
+    "perReport": "לדוח",
+    "forever": "תמיד, ללא הגבלה",
+    "getStarted": "התחל חינם",
+    "tryIt": "הרשם ונסה"
+  },
+  "dashboard": {
+    "newResearch": "מחקר מניה חדש",
+    "searchPlaceholder": "חפש מניה — TEVA, Check Point, Apple, בנק לאומי...",
+    "myReports": "הדוחות שלי",
+    "noReports": "אין דוחות עדיין — חפש מניה למעלה כדי להתחיל",
+    "activeResearch": "מחקר פעיל",
+    "startResearch": "התחל מחקר",
+    "upgradeToFull": "שדרג לניתוח מלא",
+    "depthLabel": "בחר עומק מחקר",
+    "popularTASE": "מניות ת״א פופולריות"
+  },
+  "depth": {
+    "quick": "מהיר",
+    "standard": "מלא",
+    "deep": "עמוק",
+    "quickDesc": "פרופיל, פיננסים וסינתזה",
+    "standardDesc": "ניתוח מקיף של 6 שלבים",
+    "deepDesc": "כל 6 שלבים + חיפוש רשת",
+    "quickTime": "~20 שנ׳",
+    "standardTime": "~60 שנ׳",
+    "deepTime": "~2 דקות",
+    "recommended": "מומלץ"
+  },
+  "status": {
+    "completed": "הושלם",
+    "partial": "חלקי",
+    "running": "בריצה...",
+    "pending": "ממתין",
+    "failed": "נכשל",
+    "cancelled": "בוטל"
+  },
+  "steps": {
+    "data_collection": "איסוף נתונים",
+    "profile": "פרופיל חברה",
+    "financials": "ניתוח פיננסי",
+    "events": "אירועים",
+    "competitive": "תחרות",
+    "risks": "סיכונים",
+    "synthesis": "סינתזה"
+  },
+  "report": {
+    "backToDashboard": "← לוח בקרה",
+    "upgradePrompt": "רוצה ניתוח מעמיק יותר?",
+    "upgradeDesc": "ניתוח מלא כולל אירועים, תחרות וסיכונים — $1.99 לדוח",
+    "upgradeBtn": "שדרג לניתוח מלא →"
+  },
+  "auth": {
+    "loginTitle": "כניסה ל-StockSage",
+    "signupTitle": "יצירת חשבון",
+    "email": "אימייל",
+    "password": "סיסמה",
+    "loginBtn": "כניסה",
+    "signupBtn": "יצירת חשבון",
+    "googleBtn": "המשך עם Google",
+    "noAccount": "אין חשבון?",
+    "hasAccount": "כבר יש חשבון?",
+    "orContinueWith": "או המשך עם"
+  },
+  "settings": {
+    "title": "הגדרות חשבון",
+    "accountInfo": "פרטי חשבון",
+    "email": "אימייל",
+    "joined": "חשבון נוצר",
+    "pricing": "תמחור",
+    "supportEmail": "לשאלות על חיוב",
+    "logout": "יציאה מהחשבון",
+    "dangerZone": "אזור מסוכן",
+    "deleteAccount": "מחק חשבון",
+    "deleteConfirm": "מחיקת החשבון תמחק לצמיתות את כל הדוחות שלך.",
+    "language": "שפה"
+  },
+  "common": {
+    "cancel": "ביטול",
+    "save": "שמור",
+    "delete": "מחק",
+    "confirm": "אשר",
+    "loading": "טוען...",
+    "error": "שגיאה",
+    "back": "חזרה",
+    "yes": "כן",
+    "no": "לא"
+  }
+}
