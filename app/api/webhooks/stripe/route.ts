@@ -22,10 +22,7 @@ export async function POST(req: NextRequest) {
       const session = event.data.object as Stripe.Checkout.Session;
       const uid = session.metadata?.uid;
       if (uid) {
-        await updateUserPlan(uid, 'pro', {
-          customerId: typeof session.customer === 'string' ? session.customer : undefined,
-          subscriptionId: typeof session.subscription === 'string' ? session.subscription : undefined,
-        });
+        await updateUserPlan(uid, 'pro');
       }
       break;
     }

@@ -37,15 +37,22 @@ export async function GET() {
     }
   }
 
+  const onlineThreshold = new Date(Date.now() - 10 * 60 * 1000).toISOString(); // 10 minutes
+
   const users = usersSnap.docs
     .map((doc) => {
       const d = doc.data();
       const stats = reportsByUser[doc.id] ?? { count: 0, cost: 0 };
+      const lastSeenAt = (d['lastSeenAt'] as string) ?? null;
       return {
         uid: doc.id,
         email: d['email'] ?? null,
+        firstName: (d['firstName'] as string) ?? null,
+        lastName:  (d['lastName']  as string) ?? null,
         plan: (d['plan'] as string) ?? 'free',
         createdAt: (d['createdAt'] as string) ?? null,
+        lastSeenAt,
+        online: lastSeenAt ? lastSeenAt >= onlineThreshold : false,
         reportsThisMonth: stats.count,
         costThisMonth: Number(stats.cost.toFixed(4)),
         lastReport: stats.lastReport ?? null,
@@ -59,10 +66,12 @@ export async function GET() {
 // ─── POST /api/admin/users — create new user ─────────────────────────────────
 
 const CreateSchema = z.object({
-  email:    z.string().email(),
-  password: z.string().min(8),
-  plan:     z.enum(['free', 'pro']).default('free'),
-  notes:    z.string().max(1000).optional(),
+  email:     z.string().email(),
+  password:  z.string().min(8),
+  firstName: z.string().min(1).max(50),
+  lastName:  z.string().max(50).optional(),
+  plan:      z.enum(['free', 'pro']).default('free'),
+  notes:     z.string().max(1000).optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -76,7 +85,7 @@ export async function POST(req: NextRequest) {
   const parsed = CreateSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0]?.message ?? 'Invalid input' }, { status: 400 });
 
-  const { email, password, plan, notes } = parsed.data;
+  const { email, password, firstName, lastName, plan, notes } = parsed.data;
 
   // Create Firebase Auth user
   let uid: string;
@@ -94,7 +103,8 @@ export async function POST(req: NextRequest) {
 
   // Create Firestore profile
   const profile = {
-    uid, email, plan,
+    uid, email, firstName, lastName: lastName ?? '',
+    plan,
     notes: notes ?? '',
     suspended: false,
     reportLimitOverride: null,

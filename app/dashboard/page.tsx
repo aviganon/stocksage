@@ -455,6 +455,7 @@ function DashboardInner() {
 
   const [reports, setReports]           = useState<Report[]>([]);
   const [usage, setUsage]               = useState<Usage | null>(null);
+  const [firstName, setFirstName]       = useState<string>('');
   const [query, setQuery]               = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searching, setSearching]       = useState(false);
@@ -490,7 +491,11 @@ function DashboardInner() {
       fetch('/api/user', { headers }),
     ]);
     if (reportsRes.ok) setReports((await reportsRes.json()).reports ?? []);
-    if (userRes.ok)    setUsage((await userRes.json()).usage);
+    if (userRes.ok) {
+      const userData = await userRes.json();
+      setUsage(userData.usage);
+      setFirstName(userData.profile?.firstName ?? '');
+    }
     setLoadingData(false);
   }, [getIdToken]);
 
@@ -646,15 +651,13 @@ function DashboardInner() {
             Stock<span className="text-indigo-400">Sage</span>
           </Link>
           <div className="flex items-center gap-4">
-            {usage?.plan === 'pro' && (
-              <span className="text-sm text-indigo-300 font-medium">Pro ✦</span>
-            )}
-            <span className="text-sm text-gray-500 hidden sm:block">{user.email}</span>
+            {/* Greeting */}
+            <span className="text-white font-medium hidden sm:block">
+              {firstName ? `ברוך הבא, ${firstName}` : 'ברוך הבא'}
+              {usage?.plan === 'pro' && <span className="mr-1.5 text-xs text-indigo-300">Pro ✦</span>}
+            </span>
             <LanguageSwitcher />
             <Link href="/settings" className="text-sm text-gray-500 hover:text-gray-300 transition-colors">{t('nav.settings')}</Link>
-            {user.email === 'ganonavi@gmail.com' && (
-              <Link href="/admin" className="text-sm text-red-400/70 hover:text-red-300 transition-colors">Admin</Link>
-            )}
             <button onClick={logout} className="text-sm text-gray-500 hover:text-gray-300 transition-colors">{t('nav.logout')}</button>
           </div>
         </div>

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { verifyAuth, AuthError } from '@/lib/auth/server';
-import { ensureUserProfile, canRunReport } from '@/lib/usage/tracker';
+import { ensureUserProfile, canRunReport, touchLastSeen } from '@/lib/usage/tracker';
 
 const OWNER_EMAIL = process.env.ADMIN_EMAIL ?? 'ganonavi@gmail.com';
 
@@ -17,6 +17,7 @@ export async function GET() {
   const [profile, usage] = await Promise.all([
     ensureUserProfile(uid, email),
     canRunReport(uid),
+    touchLastSeen(uid),
   ]);
 
   return NextResponse.json({ profile, usage, isOwner: email === OWNER_EMAIL });

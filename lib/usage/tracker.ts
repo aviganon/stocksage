@@ -7,10 +7,11 @@ const COLLECTION = 'users';
 export interface UserProfile {
   uid: string;
   email: string | null;
+  firstName?: string;
+  lastName?: string;
   plan: 'free' | 'pro';
-  stripeCustomerId?: string;
-  stripeSubscriptionId?: string;
   createdAt: string;
+  lastSeenAt?: string;
 }
 
 export async function getUserProfile(uid: string): Promise<UserProfile | null> {
@@ -56,12 +57,28 @@ export async function canRunReport(
   return { allowed: true, used: 0, limit: Infinity, plan, requiresPayment: true };
 }
 
-export async function updateUserPlan(uid: string, plan: 'free' | 'pro', stripeData?: { customerId?: string; subscriptionId?: string }): Promise<void> {
+export async function updateUserPlan(uid: string, plan: 'free' | 'pro'): Promise<void> {
   const db = getAdminDb();
   await db.collection(COLLECTION).doc(uid).update({
     plan,
-    ...(stripeData?.customerId ? { stripeCustomerId: stripeData.customerId } : {}),
-    ...(stripeData?.subscriptionId ? { stripeSubscriptionId: stripeData.subscriptionId } : {}),
     updatedAt: FieldValue.serverTimestamp(),
   });
+}
+
+export async function updateUserProfile(
+  uid: string,
+  data: { firstName?: string; lastName?: string },
+): Promise<void> {
+  const db = getAdminDb();
+  await db.collection(COLLECTION).doc(uid).update({
+    ...data,
+    updatedAt: FieldValue.serverTimestamp(),
+  });
+}
+
+export async function touchLastSeen(uid: string): Promise<void> {
+  const db = getAdminDb();
+  await db.collection(COLLECTION).doc(uid).update({
+    lastSeenAt: new Date().toISOString(),
+  }).catch(() => { /* ignore if doc doesn't exist yet */ });
 }

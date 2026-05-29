@@ -6,19 +6,33 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/auth/auth-provider';
 
 export default function SignupPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const { signUp, signInWithGoogle } = useAuth();
+  const [firstName, setFirstName] = useState('');
+  const [lastName,  setLastName]  = useState('');
+  const [email,     setEmail]     = useState('');
+  const [password,  setPassword]  = useState('');
+  const [error,     setError]     = useState('');
+  const [loading,   setLoading]   = useState(false);
+  const { signUp, signInWithGoogle, getIdToken } = useAuth();
   const router = useRouter();
+
+  async function saveProfile(token: string, first: string, last: string) {
+    if (!first && !last) return;
+    await fetch('/api/profile', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ firstName: first || undefined, lastName: last || undefined }),
+    }).catch(() => {});
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!firstName.trim()) { setError('שם פרטי נדרש'); return; }
     if (password.length < 6) { setError('הסיסמה חייבת להיות לפחות 6 תווים'); return; }
     setError(''); setLoading(true);
     try {
       await signUp(email, password);
+      const token = await getIdToken();
+      if (token) await saveProfile(token, firstName.trim(), lastName.trim());
       router.push('/dashboard');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'שגיאת הרשמה');
@@ -46,7 +60,7 @@ export default function SignupPage() {
           <Link href="/" className="text-2xl font-bold text-white">
             Stock<span className="text-indigo-400">Sage</span>
           </Link>
-          <p className="text-gray-400 mt-2 text-sm">הרשמה — חינם, ללא כרטיס אשראי</p>
+          <p className="text-gray-400 mt-2 text-sm">יצירת חשבון חדש</p>
         </div>
 
         <div className="bg-white/5 border border-white/10 rounded-2xl p-8">
@@ -71,8 +85,31 @@ export default function SignupPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm text-gray-400 mb-1.5">שם פרטי *</label>
+                <input
+                  type="text"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  required
+                  className="w-full bg-white/5 border border-white/10 focus:border-indigo-500 text-white rounded-xl px-4 py-3 text-sm outline-none transition-colors"
+                  placeholder="ישראל"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-400 mb-1.5">שם משפחה</label>
+                <input
+                  type="text"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 focus:border-indigo-500 text-white rounded-xl px-4 py-3 text-sm outline-none transition-colors"
+                  placeholder="ישראלי"
+                />
+              </div>
+            </div>
             <div>
-              <label className="block text-sm text-gray-400 mb-1.5">אימייל</label>
+              <label className="block text-sm text-gray-400 mb-1.5">אימייל *</label>
               <input
                 type="email"
                 value={email}
@@ -84,7 +121,7 @@ export default function SignupPage() {
               />
             </div>
             <div>
-              <label className="block text-sm text-gray-400 mb-1.5">סיסמה</label>
+              <label className="block text-sm text-gray-400 mb-1.5">סיסמה *</label>
               <input
                 type="password"
                 value={password}
@@ -102,13 +139,14 @@ export default function SignupPage() {
               disabled={loading}
               className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-medium py-3 rounded-xl transition-colors text-sm"
             >
-              {loading ? 'נרשם...' : 'הרשמה חינם'}
+              {loading ? 'נרשם...' : 'צור חשבון'}
             </button>
           </form>
         </div>
 
         <p className="text-center text-xs text-gray-600 mt-4">
-          בהרשמה אתה מסכים לתנאי השימוש. לצרכי מידע בלבד — אינו ייעוץ השקעות.
+          בהרשמה אתה מסכים ל<Link href="/terms" className="hover:text-gray-400">תנאי השימוש</Link>.
+          לצרכי מידע בלבד — אינו ייעוץ השקעות.
         </p>
         <p className="text-center text-sm text-gray-500 mt-3">
           יש לך חשבון?{' '}

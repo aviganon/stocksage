@@ -23,8 +23,12 @@ interface AdminStats {
 interface AdminUser {
   uid: string;
   email: string | null;
+  firstName: string | null;
+  lastName: string | null;
   plan: 'free' | 'pro';
   createdAt: string | null;
+  lastSeenAt: string | null;
+  online: boolean;
   reportsThisMonth: number;
   costThisMonth: number;
   lastReport: string | null;
@@ -263,13 +267,15 @@ function CreateUserModal({ getIdToken, onClose, onCreated }: {
   onClose: () => void;
   onCreated: (user: AdminUser) => void;
 }) {
-  const [email, setEmail]     = useState('');
-  const [password, setPassword] = useState('');
-  const [plan, setPlan]       = useState<'free' | 'pro'>('free');
-  const [notes, setNotes]     = useState('');
-  const [creating, setCreating] = useState(false);
-  const [error, setError]     = useState('');
-  const [showPass, setShowPass] = useState(false);
+  const [firstName, setFirstName] = useState('');
+  const [lastName,  setLastName]  = useState('');
+  const [email, setEmail]         = useState('');
+  const [password, setPassword]   = useState('');
+  const [plan, setPlan]           = useState<'free' | 'pro'>('free');
+  const [notes, setNotes]         = useState('');
+  const [creating, setCreating]   = useState(false);
+  const [error, setError]         = useState('');
+  const [showPass, setShowPass]   = useState(false);
 
   function generatePassword() {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#';
@@ -278,18 +284,19 @@ function CreateUserModal({ getIdToken, onClose, onCreated }: {
   }
 
   async function handleCreate() {
+    if (!firstName.trim()) { setError('שם פרטי נדרש'); return; }
     if (!email || !password) { setError('אימייל וסיסמה נדרשים'); return; }
     setCreating(true); setError('');
     const token = await getIdToken();
     const res = await fetch('/api/admin/users', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token ?? ''}` },
-      body: JSON.stringify({ email, password, plan, notes }),
+      body: JSON.stringify({ email, password, firstName: firstName.trim(), lastName: lastName.trim() || undefined, plan, notes }),
     });
     const d = await res.json();
     setCreating(false);
     if (!res.ok) { setError(d.error ?? 'שגיאה ביצירת משתמש'); return; }
-    onCreated({ uid: d.uid, email, plan, createdAt: new Date().toISOString(), reportsThisMonth: 0, costThisMonth: 0, lastReport: null });
+    onCreated({ uid: d.uid, email, firstName: firstName.trim(), lastName: lastName.trim() || null, plan, createdAt: new Date().toISOString(), lastSeenAt: null, online: false, reportsThisMonth: 0, costThisMonth: 0, lastReport: null });
     onClose();
   }
 
@@ -304,6 +311,21 @@ function CreateUserModal({ getIdToken, onClose, onCreated }: {
           </div>
 
           <div className="p-6 space-y-4">
+            {/* Name */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <label className="text-sm text-gray-400">שם פרטי *</label>
+                <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)}
+                  placeholder="ישראל"
+                  className="w-full bg-white/5 border border-white/10 focus:border-indigo-500 text-white rounded-lg px-4 py-2.5 text-sm outline-none transition-colors" />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm text-gray-400">שם משפחה</label>
+                <input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)}
+                  placeholder="ישראלי"
+                  className="w-full bg-white/5 border border-white/10 focus:border-indigo-500 text-white rounded-lg px-4 py-2.5 text-sm outline-none transition-colors" />
+              </div>
+            </div>
             {/* Email */}
             <div className="space-y-1.5">
               <label className="text-sm text-gray-400">אימייל *</label>
@@ -486,7 +508,11 @@ function OwnerSettings({ user, data, getIdToken, logout }: {
                   {p === 'all' ? 'הכל' : p}
                 </button>
               ))}
-              <span className="text-xs text-gray-600 mr-auto">{filtered.length} משתמשים</span>
+              <span className="text-xs text-gray-600 mr-auto">
+                {filtered.length} משתמשים
+                {' · '}
+                <span className="text-green-400">{users.filter(u => u.online).length} מחוברים</span>
+              </span>
               <button onClick={() => setShowCreate(true)}
                 className="bg-indigo-600 hover:bg-indigo-500 text-white text-sm px-4 py-2 rounded-lg transition-colors font-medium">
                 + משתמש חדש
@@ -498,30 +524,39 @@ function OwnerSettings({ user, data, getIdToken, logout }: {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-white/8 text-gray-500 text-xs uppercase tracking-wider">
-                    <th className="text-right px-5 py-3 font-medium">אימייל</th>
-                    <th className="text-right px-5 py-3 font-medium">פלאן</th>
-                    <th className="text-right px-5 py-3 font-medium">דוחות</th>
-                    <th className="text-right px-5 py-3 font-medium">עלות</th>
-                    <th className="text-right px-5 py-3 font-medium">הצטרף</th>
-                    <th className="px-5 py-3" />
+                    <th className="text-right px-4 py-3 font-medium">שם</th>
+                    <th className="text-right px-4 py-3 font-medium">אימייל</th>
+                    <th className="text-right px-4 py-3 font-medium">פלאן</th>
+                    <th className="text-right px-4 py-3 font-medium">דוחות</th>
+                    <th className="text-right px-4 py-3 font-medium">עלות</th>
+                    <th className="text-right px-4 py-3 font-medium">הצטרף</th>
+                    <th className="px-4 py-3" />
                   </tr>
                 </thead>
                 <tbody>
                   {filtered.length === 0 && (
-                    <tr><td colSpan={6} className="text-center text-gray-500 py-10">אין משתמשים</td></tr>
+                    <tr><td colSpan={7} className="text-center text-gray-500 py-10">אין משתמשים</td></tr>
                   )}
                   {filtered.map((u) => (
                     <tr key={u.uid} className="border-b border-white/5 last:border-0 hover:bg-white/3 transition-colors">
-                      <td className="px-5 py-3.5 text-gray-200 font-mono text-xs">{u.email ?? '—'}</td>
-                      <td className="px-5 py-3.5">
+                      <td className="px-4 py-3.5">
+                        <div className="flex items-center gap-2">
+                          <span className={`w-2 h-2 rounded-full shrink-0 ${u.online ? 'bg-green-400' : 'bg-white/15'}`} title={u.online ? 'מחובר' : 'לא מחובר'} />
+                          <span className="text-white text-sm">
+                            {[u.firstName, u.lastName].filter(Boolean).join(' ') || '—'}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3.5 text-gray-400 font-mono text-xs">{u.email ?? '—'}</td>
+                      <td className="px-4 py-3.5">
                         <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${u.plan === 'pro' ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30' : 'bg-white/8 text-gray-400'}`}>
-                          {u.plan === 'pro' ? 'Pro' : 'Free'}
+                          {u.plan === 'pro' ? 'Pro' : '—'}
                         </span>
                       </td>
-                      <td className="px-5 py-3.5 text-gray-300">{u.reportsThisMonth}</td>
-                      <td className="px-5 py-3.5 text-gray-300">{u.costThisMonth > 0 ? `$${u.costThisMonth.toFixed(3)}` : '—'}</td>
-                      <td className="px-5 py-3.5 text-gray-500 text-xs">{u.createdAt ? new Date(u.createdAt).toLocaleDateString('he-IL') : '—'}</td>
-                      <td className="px-5 py-3.5">
+                      <td className="px-4 py-3.5 text-gray-300">{u.reportsThisMonth}</td>
+                      <td className="px-4 py-3.5 text-gray-300">{u.costThisMonth > 0 ? `$${u.costThisMonth.toFixed(3)}` : '—'}</td>
+                      <td className="px-4 py-3.5 text-gray-500 text-xs">{u.createdAt ? new Date(u.createdAt).toLocaleDateString('he-IL') : '—'}</td>
+                      <td className="px-4 py-3.5">
                         <button onClick={() => setEditingUid(u.uid)}
                           className="text-xs bg-white/8 hover:bg-indigo-500/20 hover:text-indigo-300 text-gray-400 px-3 py-1.5 rounded-lg transition-colors">
                           ✏️ ערוך
