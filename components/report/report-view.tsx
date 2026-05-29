@@ -127,6 +127,24 @@ export default function ReportView({ reportId }: { reportId: string }) {
         )}
       </div>
 
+      {/* Upgrade banner — shown on completed quick reports */}
+      {report.depth === 'quick' && report.status === 'completed' && (
+        <div className="bg-amber-500/8 border border-amber-500/20 rounded-2xl p-5 flex items-center justify-between">
+          <div>
+            <p className="text-white font-medium text-sm">רוצה ניתוח מעמיק יותר?</p>
+            <p className="text-gray-400 text-xs mt-0.5">
+              ניתוח מלא כולל אירועים, תחרות וסיכונים — $1.99 לדוח
+            </p>
+          </div>
+          <Link
+            href={`/dashboard?upgrade=${report.assetId}`}
+            className="shrink-0 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 text-amber-300 text-sm font-medium px-4 py-2 rounded-xl transition-colors"
+          >
+            שדרג לניתוח מלא →
+          </Link>
+        </div>
+      )}
+
       {/* Progress steps */}
       {isRunning && (
         <div className="bg-white/5 border border-white/8 rounded-2xl p-6">

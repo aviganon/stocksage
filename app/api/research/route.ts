@@ -39,13 +39,14 @@ export async function POST(req: NextRequest) {
 
   const { assetId, depth, language } = parsed.data;
 
-  // Check usage limit
-  const usage = await canRunReport(uid);
+  // Check depth permissions
+  const usage = await canRunReport(uid, depth);
   if (!usage.allowed) {
-    return fail('usage_limit', `You've used ${usage.used}/${usage.limit} free reports this month. Upgrade to Pro for unlimited reports.`, 402);
+    return fail('usage_limit', 'מגבלת שימוש הגיעה. שדרג לPro.', 402);
   }
+  // requiresPayment — when Paddle is ready, redirect to checkout here
 
-const reportId = randomUUID();
+  const reportId = randomUUID();
   const STEPS_BY_DEPTH: Record<string, string[]> = {
     quick:    ['data_collection', 'profile', 'financials', 'synthesis'],
     standard: ['data_collection', 'profile', 'financials', 'events', 'competitive', 'risks', 'synthesis'],

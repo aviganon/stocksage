@@ -31,23 +31,29 @@ export async function ensureUserProfile(uid: string, email: string | null): Prom
   return profile;
 }
 
-export async function canRunReport(uid: string): Promise<{ allowed: boolean; used: number; limit: number; plan: 'free' | 'pro' }> {
+export async function canRunReport(
+  uid: string,
+  depth: 'quick' | 'standard' | 'deep' = 'quick',
+): Promise<{ allowed: boolean; used: number; limit: number; plan: 'free' | 'pro'; requiresPayment: boolean }> {
   const db = getAdminDb();
   const profile = await getUserProfile(uid);
   const plan = profile?.plan ?? 'free';
 
-  if (plan === 'pro') return { allowed: true, used: 0, limit: Infinity, plan };
+  // Quick depth is always free and unlimited for everyone
+  if (depth === 'quick') {
+    return { allowed: true, used: 0, limit: Infinity, plan, requiresPayment: false };
+  }
 
-  const startOfMonth = new Date();
-  startOfMonth.setDate(1); startOfMonth.setHours(0, 0, 0, 0);
+  // Standard / Deep require a paid plan
+  // Pro users have paid access; free users need to pay per report
+  // (payment enforcement will be wired up when Paddle is configured)
+  if (plan === 'pro') {
+    return { allowed: true, used: 0, limit: Infinity, plan, requiresPayment: false };
+  }
 
-  const snap = await db.collection('reports')
-    .where('uid', '==', uid)
-    .where('startedAt', '>=', startOfMonth.toISOString())
-    .get();
-
-  const used = snap.size;
-  return { allowed: used < FREE_REPORTS_PER_MONTH, used, limit: FREE_REPORTS_PER_MONTH, plan };
+  // Free user requesting Standard/Deep — mark as requiring payment
+  // For now during beta, allow it; when Paddle is ready this will redirect to checkout
+  return { allowed: true, used: 0, limit: Infinity, plan, requiresPayment: true };
 }
 
 export async function updateUserPlan(uid: string, plan: 'free' | 'pro', stripeData?: { customerId?: string; subscriptionId?: string }): Promise<void> {

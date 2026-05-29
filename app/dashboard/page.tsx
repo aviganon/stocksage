@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/components/auth/auth-provider';
 
@@ -43,7 +43,12 @@ function DoneReportRow({ report, onDelete }: { report: Report; onDelete: (id: st
     onDelete(report.id);
   }
 
-  const depthLabel = report.depth === 'quick' ? 'מהיר' : report.depth === 'standard' ? 'מלא' : 'עמוק';
+  const depthLabel  = report.depth === 'quick' ? 'מהיר' : report.depth === 'standard' ? 'מלא' : 'עמוק';
+  const depthBadge  = report.depth === 'quick'
+    ? 'bg-green-500/15 text-green-300'
+    : report.depth === 'standard'
+    ? 'bg-amber-500/15 text-amber-300'
+    : 'bg-purple-500/15 text-purple-300';
 
   return (
     <div className="flex items-center justify-between bg-white/5 border border-white/8 hover:bg-white/8 rounded-xl px-5 py-4 transition-colors group">
@@ -52,9 +57,14 @@ function DoneReportRow({ report, onDelete }: { report: Report; onDelete: (id: st
           {report.assetId.split(':')[1]?.slice(0, 2) ?? '??'}
         </div>
         <div className="min-w-0">
-          <p className="text-white font-medium">{report.assetName}</p>
-          <p className="text-gray-500 text-xs mt-0.5 truncate">
-            {report.assetId} · {depthLabel} · {new Date(report.startedAt).toLocaleDateString('he-IL')}
+          <div className="flex items-center gap-2 mb-0.5">
+            <p className="text-white font-medium">{report.assetName}</p>
+            <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium shrink-0 ${depthBadge}`}>
+              {depthLabel}
+            </span>
+          </div>
+          <p className="text-gray-500 text-xs truncate">
+            {report.assetId} · {new Date(report.startedAt).toLocaleDateString('he-IL')}
           </p>
         </div>
       </Link>
@@ -291,10 +301,10 @@ const STATUS_LABELS: Record<string, string> = {
   completed: 'הושלם', partial: 'חלקי', running: 'בריצה...', pending: 'ממתין', failed: 'נכשל',
 };
 
-const DEPTH_OPTIONS: { value: Depth; label: string; icon: string; desc: string; time: string; steps: string; recommended?: boolean }[] = [
-  { value: 'quick',    label: 'מהיר',    icon: '⚡', desc: 'פרופיל, פיננסים וסינתזה', time: '~20 שנ׳', steps: '3 שלבים' },
-  { value: 'standard', label: 'מלא',     icon: '📊', desc: 'ניתוח מקיף של 6 שלבים',  time: '~60 שנ׳', steps: '6 שלבים', recommended: true },
-  { value: 'deep',     label: 'עמוק',    icon: '🔬', desc: 'כל 6 שלבים + חיפוש רשת', time: '~2 דקות', steps: '6 + Web' },
+const DEPTH_OPTIONS: { value: Depth; label: string; icon: string; desc: string; time: string; steps: string; price: string; badge?: string; recommended?: boolean }[] = [
+  { value: 'quick',    label: 'מהיר',  icon: '⚡', desc: 'פרופיל, פיננסים וסינתזה', time: '~20 שנ׳', steps: '3 שלבים', price: 'חינמי',  badge: 'חינמי'  },
+  { value: 'standard', label: 'מלא',   icon: '📊', desc: 'ניתוח מקיף של 6 שלבים',  time: '~60 שנ׳', steps: '6 שלבים', price: '$1.99',  badge: '$1.99', recommended: true },
+  { value: 'deep',     label: 'עמוק',  icon: '🔬', desc: 'כל 6 שלבים + חיפוש רשת', time: '~2 דקות', steps: '6 + Web',  price: '$3.99',  badge: '$3.99'  },
 ];
 
 const POPULAR_TASE: SearchResult[] = [
@@ -315,9 +325,11 @@ const EXCHANGE_COLORS: Record<string, string> = {
   CRYPTO: 'bg-orange-500/15 text-orange-300',
 };
 
-export default function DashboardPage() {
+function DashboardInner() {
   const { user, loading: authLoading, getIdToken, logout } = useAuth();
-  const router = useRouter();
+  const router   = useRouter();
+  const params   = useSearchParams();
+  const upgradeAssetId = params.get('upgrade');
 
   const [reports, setReports]           = useState<Report[]>([]);
   const [usage, setUsage]               = useState<Usage | null>(null);
@@ -333,6 +345,19 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!authLoading && !user) router.push('/login');
   }, [user, authLoading, router]);
+
+  // Auto-fill search if coming from "שדרג דוח" button
+  useEffect(() => {
+    if (!upgradeAssetId) return;
+    const parts = upgradeAssetId.split(':');
+    const sym   = parts[1] ?? parts[0] ?? '';
+    const exch  = parts[0] ?? 'TASE';
+    const pre: SearchResult = { id: upgradeAssetId, symbol: sym, name: sym, exchange: exch };
+    setSelected(pre);
+    setQuery(`${sym}`);
+    setDepth('standard');
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [upgradeAssetId]);
 
   const fetchData = useCallback(async () => {
     const token = await getIdToken();
@@ -619,7 +644,14 @@ export default function DashboardPage() {
                       {opt.label}
                     </div>
                     <div className="text-xs text-gray-500 mb-1">{opt.steps}</div>
-                    <div className="text-xs text-gray-600">{opt.time}</div>
+                    <div className="text-xs text-gray-600 mb-2">{opt.time}</div>
+                    <div className={`text-xs font-semibold px-2 py-0.5 rounded-full w-fit ${
+                      opt.value === 'quick'
+                        ? 'bg-green-500/20 text-green-300'
+                        : 'bg-amber-500/20 text-amber-300'
+                    }`}>
+                      {opt.price}
+                    </div>
                   </button>
                 ))}
               </div>
@@ -671,5 +703,17 @@ export default function DashboardPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <DashboardInner />
+    </Suspense>
   );
 }
