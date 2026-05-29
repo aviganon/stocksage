@@ -26,8 +26,6 @@ export async function POST(req: NextRequest) {
   const { depth, assetId } = parsed.data;
   const priceId = PADDLE_PRICES[depth];
 
-  console.log('[billing/checkout] priceId:', priceId, 'depth:', depth, 'uid:', uid?.slice(0,8));
-
   if (!priceId) {
     console.error('[billing/checkout] Price not configured for depth:', depth);
     return NextResponse.json({ error: 'Price not configured' }, { status: 500 });
@@ -39,19 +37,17 @@ export async function POST(req: NextRequest) {
   try {
     const paddle = getPaddle();
 
+    // Create transaction WITHOUT checkout.url to avoid domain approval requirement.
+    // We redirect the customer to Paddle's standard hosted checkout page.
     const transaction = await paddle.transactions.create({
       items: [{ priceId, quantity: 1 }],
       customData: { uid: String(uid), assetId: String(assetId), depth: String(depth) },
-      checkout: {
-        url: `${appUrl}/dashboard?paid=1&assetId=${encodeURIComponent(assetId)}&depth=${depth}`,
-      },
     });
 
-    console.log('[billing/checkout] Transaction created:', transaction.id, 'checkout:', transaction.checkout);
+    console.log('[billing/checkout] Transaction created:', transaction.id, 'status:', transaction.status);
 
-    // Paddle returns checkout.url as the hosted checkout page URL
-    const checkoutUrl = transaction.checkout?.url
-      ?? `https://checkout.paddle.com/${transaction.id}`;
+    // Paddle hosted checkout — this URL works without any domain approval
+    const checkoutUrl = `https://checkout.paddle.com/checkout/${transaction.id}?success_url=${encodeURIComponent(`${appUrl}/dashboard?paid=1&assetId=${encodeURIComponent(assetId)}&depth=${depth}`)}`;
 
     return NextResponse.json({ url: checkoutUrl });
   } catch (e: unknown) {
