@@ -109,6 +109,62 @@ function DoneReportRow({ report, onDelete }: { report: Report; onDelete: (id: st
   );
 }
 
+// Default market per locale
+const LOCALE_DEFAULT_MARKET: Record<string, string> = {
+  he: '🇮🇱 ת"א', en: '🇺🇸 US', ru: '🇺🇸 US',
+  fr: '🇫🇷 France', ar: '🇮🇱 ת"א',
+};
+
+function PopularStocks({ onSelect, locale }: {
+  onSelect: (s: SearchResult) => void;
+  locale: string;
+}) {
+  const defaultMarket = LOCALE_DEFAULT_MARKET[locale] ?? '🇮🇱 ת"א';
+  const [activeMarket, setActiveMarket] = useState(defaultMarket);
+
+  // Update active market when locale changes
+  useEffect(() => {
+    setActiveMarket(LOCALE_DEFAULT_MARKET[locale] ?? '🇮🇱 ת"א');
+  }, [locale]);
+
+  const activeGroup = POPULAR_STOCKS.find(g => g.label === activeMarket) ?? POPULAR_STOCKS[0]!;
+
+  return (
+    <div className="mb-6">
+      {/* Market tab pills */}
+      <div className="flex gap-1 flex-wrap mb-3">
+        {POPULAR_STOCKS.map((g) => (
+          <button
+            key={g.label}
+            onClick={() => setActiveMarket(g.label)}
+            className={`text-xs px-2.5 py-1 rounded-lg transition-colors ${
+              g.label === activeMarket
+                ? 'bg-white/15 text-white'
+                : 'text-gray-600 hover:text-gray-400 hover:bg-white/5'
+            }`}
+          >
+            {g.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Stocks for active market */}
+      <div className="flex flex-wrap gap-1.5">
+        {activeGroup.stocks.map((s) => (
+          <button
+            key={s.id}
+            onClick={() => onSelect(s)}
+            className="text-xs bg-white/5 hover:bg-indigo-500/10 border border-white/8 hover:border-indigo-500/30 text-gray-300 px-2.5 py-1.5 rounded-lg transition-colors"
+          >
+            <span className="font-semibold text-white">{s.symbol}</span>
+            <span className="text-gray-600 mr-1"> · {s.name}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function useElapsed(startedAt: string) {
   const [elapsed, setElapsed] = useState('');
   useEffect(() => {
@@ -392,7 +448,7 @@ const EXCHANGE_COLORS: Record<string, string> = {
 
 function DashboardInner() {
   const { user, loading: authLoading, getIdToken, logout } = useAuth();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const router   = useRouter();
   const params   = useSearchParams();
   const upgradeAssetId = params.get('upgrade');
@@ -688,27 +744,9 @@ function DashboardInner() {
             )}
           </div>
 
-          {/* Popular stocks by market (shown when no query and no selection) */}
+          {/* Popular stocks — one market at a time with tab switcher */}
           {!query && !selected && (
-            <div className="mb-6 space-y-3">
-              {POPULAR_STOCKS.map((group) => (
-                <div key={group.label}>
-                  <p className="text-xs text-gray-600 mb-2">{group.label}</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {group.stocks.map((s) => (
-                      <button
-                        key={s.id}
-                        onClick={() => handleSelect(s)}
-                        className="text-xs bg-white/5 hover:bg-indigo-500/10 border border-white/8 hover:border-indigo-500/30 text-gray-300 px-2.5 py-1.5 rounded-lg transition-colors"
-                      >
-                        <span className="font-semibold text-white">{s.symbol}</span>
-                        <span className="text-gray-600 mr-1"> · {s.name}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
+            <PopularStocks onSelect={handleSelect} locale={locale} />
           )}
 
           {/* Depth selector (shown after selecting an asset) */}
