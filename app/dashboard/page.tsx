@@ -5,6 +5,11 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/components/auth/auth-provider';
 
+interface ReportStep {
+  stepId: string;
+  status: 'pending' | 'running' | 'completed' | 'failed';
+}
+
 interface Report {
   id: string;
   assetId: string;
@@ -15,6 +20,43 @@ interface Report {
   startedAt: string;
   completedAt?: string;
   costUSD: number;
+  steps?: ReportStep[];
+}
+
+const STEP_LABELS: Record<string, string> = {
+  data_collection: 'איסוף נתונים',
+  profile:         'פרופיל חברה',
+  financials:      'ניתוח פיננסי',
+  events:          'אירועים',
+  competitive:     'תחרות',
+  risks:           'סיכונים',
+  synthesis:       'סינתזה',
+};
+
+function ReportProgress({ steps }: { steps: ReportStep[] }) {
+  const analysis = steps.filter((s) => s.stepId !== 'data_collection');
+  const completed = analysis.filter((s) => s.status === 'completed' || s.status === 'failed').length;
+  const running   = analysis.find((s) => s.status === 'running');
+  const pct       = analysis.length > 0 ? Math.round((completed / analysis.length) * 100) : 0;
+
+  return (
+    <div className="mt-3 pt-3 border-t border-white/5">
+      <div className="flex items-center justify-between mb-1.5">
+        <span className="text-xs text-gray-500">
+          {running
+            ? <span className="text-blue-400">⬤ {STEP_LABELS[running.stepId] ?? running.stepId}</span>
+            : <span>{completed}/{analysis.length} שלבים</span>}
+        </span>
+        <span className="text-xs text-gray-600">{pct}%</span>
+      </div>
+      <div className="h-1 bg-white/8 rounded-full overflow-hidden">
+        <div
+          className="h-full bg-indigo-500 rounded-full transition-all duration-500"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+    </div>
+  );
 }
 
 interface Usage {
@@ -375,31 +417,45 @@ export default function DashboardPage() {
             </div>
           ) : (
             <div className="space-y-3">
-              {reports.map((r) => (
-                <Link
-                  key={r.id}
-                  href={`/report/${r.id}`}
-                  className="flex items-center justify-between bg-white/5 border border-white/8 hover:bg-white/8 rounded-xl px-5 py-4 transition-colors group"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-lg bg-indigo-500/20 flex items-center justify-center text-sm font-bold text-indigo-300">
-                      {r.assetId.split(':')[1]?.slice(0, 2) ?? '??'}
+              {reports.map((r) => {
+                const isActive = r.status === 'running' || r.status === 'pending';
+                return (
+                  <Link
+                    key={r.id}
+                    href={`/report/${r.id}`}
+                    className={`block rounded-xl px-5 py-4 transition-colors group border ${
+                      isActive
+                        ? 'bg-blue-500/5 border-blue-500/20 hover:bg-blue-500/10'
+                        : 'bg-white/5 border-white/8 hover:bg-white/8'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold shrink-0 ${
+                          isActive ? 'bg-blue-500/20 text-blue-300' : 'bg-indigo-500/20 text-indigo-300'
+                        }`}>
+                          {r.assetId.split(':')[1]?.slice(0, 2) ?? '??'}
+                        </div>
+                        <div>
+                          <p className="text-white font-medium">{r.assetName}</p>
+                          <p className="text-gray-500 text-xs mt-0.5">
+                            {r.assetId} · {r.depth === 'quick' ? 'מהיר' : r.depth === 'standard' ? 'מלא' : 'עמוק'} · {new Date(r.startedAt).toLocaleDateString('he-IL')}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0">
+                        <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${STATUS_COLORS[r.status] ?? 'text-gray-400 bg-gray-400/10'}`}>
+                          {STATUS_LABELS[r.status] ?? r.status}
+                        </span>
+                        <span className="text-gray-600 group-hover:text-gray-400 transition-colors">→</span>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-white font-medium">{r.assetName}</p>
-                      <p className="text-gray-500 text-xs mt-0.5">
-                        {r.assetId} · {r.depth === 'quick' ? 'מהיר' : r.depth === 'standard' ? 'מלא' : 'עמוק'} · {new Date(r.startedAt).toLocaleDateString('he-IL')}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${STATUS_COLORS[r.status] ?? 'text-gray-400 bg-gray-400/10'}`}>
-                      {STATUS_LABELS[r.status] ?? r.status}
-                    </span>
-                    <span className="text-gray-600 group-hover:text-gray-400 transition-colors">→</span>
-                  </div>
-                </Link>
-              ))}
+                    {isActive && r.steps && r.steps.length > 0 && (
+                      <ReportProgress steps={r.steps} />
+                    )}
+                  </Link>
+                );
+              })}
             </div>
           )}
         </div>
