@@ -3,17 +3,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/components/auth/auth-provider';
+import { useI18n } from '@/lib/i18n/context';
 import type { ResearchReport } from '@/lib/storage/research-reports';
-
-const STEP_LABELS: Record<string, string> = {
-  data_collection: 'איסוף נתונים',
-  profile: 'פרופיל חברה',
-  financials: 'ניתוח פיננסי',
-  events: 'אירועים',
-  competitive: 'תחרות',
-  risks: 'סיכונים',
-  synthesis: 'סינתזה',
-};
 
 const RISK_COLORS: Record<string, string> = {
   low: 'text-green-400', moderate: 'text-yellow-400', elevated: 'text-orange-400',
@@ -60,6 +51,17 @@ function Badge({ children, color = 'indigo' }: { children: React.ReactNode; colo
 
 export default function ReportView({ reportId }: { reportId: string }) {
   const { getIdToken } = useAuth();
+  const { t } = useI18n();
+
+  const STEP_LABELS: Record<string, string> = {
+    data_collection: t('steps.data_collection'),
+    profile:         t('steps.profile'),
+    financials:      t('steps.financials'),
+    events:          t('steps.events'),
+    competitive:     t('steps.competitive'),
+    risks:           t('steps.risks'),
+    synthesis:       t('steps.synthesis'),
+  };
   const [report, setReport] = useState<ResearchReport | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -107,7 +109,7 @@ export default function ReportView({ reportId }: { reportId: string }) {
             href="/dashboard"
             className="flex items-center gap-1.5 bg-white/8 hover:bg-white/15 text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors border border-white/10"
           >
-            ← לוח בקרה
+            {t('report.backToDashboard')}
           </Link>
 
           <span className="text-white/20 text-sm">|</span>
@@ -131,16 +133,14 @@ export default function ReportView({ reportId }: { reportId: string }) {
       {report.depth === 'quick' && report.status === 'completed' && (
         <div className="bg-amber-500/8 border border-amber-500/20 rounded-2xl p-5 flex items-center justify-between">
           <div>
-            <p className="text-white font-medium text-sm">רוצה ניתוח מעמיק יותר?</p>
-            <p className="text-gray-400 text-xs mt-0.5">
-              ניתוח מלא כולל אירועים, תחרות וסיכונים — $1.99 לדוח
-            </p>
+            <p className="text-white font-medium text-sm">{t('report.upgradePrompt')}</p>
+            <p className="text-gray-400 text-xs mt-0.5">{t('report.upgradeDesc')}</p>
           </div>
           <Link
             href={`/dashboard?upgrade=${report.assetId}`}
             className="shrink-0 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 text-amber-300 text-sm font-medium px-4 py-2 rounded-xl transition-colors"
           >
-            שדרג לניתוח מלא →
+            {t('report.upgradeBtn')}
           </Link>
         </div>
       )}

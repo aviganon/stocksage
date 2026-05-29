@@ -45,6 +45,11 @@ function DoneReportRow({ report, onDelete, getIdToken }: {
   onDelete: (id: string) => void;
   getIdToken: () => Promise<string | null>;
 }) {
+  const { t } = useI18n();
+  const STATUS_LABELS: Record<string, string> = {
+    completed: t('status.completed'), partial: t('status.partial'),
+    running: t('status.running'), pending: t('status.pending'), failed: t('status.failed'),
+  };
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting]           = useState(false);
   const [upgrading, setUpgrading]         = useState(false);
@@ -383,14 +388,10 @@ type Depth = 'quick' | 'standard' | 'deep';
 
 const STATUS_COLORS: Record<string, string> = {
   completed: 'text-green-400 bg-green-400/10',
-  partial: 'text-yellow-400 bg-yellow-400/10',
-  running: 'text-blue-400 bg-blue-400/10 animate-pulse',
-  pending: 'text-gray-400 bg-gray-400/10',
-  failed: 'text-red-400 bg-red-400/10',
-};
-
-const STATUS_LABELS: Record<string, string> = {
-  completed: 'הושלם', partial: 'חלקי', running: 'בריצה...', pending: 'ממתין', failed: 'נכשל',
+  partial:   'text-yellow-400 bg-yellow-400/10',
+  running:   'text-blue-400 bg-blue-400/10 animate-pulse',
+  pending:   'text-gray-400 bg-gray-400/10',
+  failed:    'text-red-400 bg-red-400/10',
 };
 
 const DEPTH_OPTIONS: { value: Depth; label: string; icon: string; desc: string; time: string; steps: string; price: string; badge?: string; recommended?: boolean }[] = [
@@ -482,7 +483,13 @@ const EXCHANGE_COLORS: Record<string, string> = {
 
 function DashboardInner() {
   const { user, loading: authLoading, getIdToken, logout } = useAuth();
-  const { t, locale } = useI18n();
+  const { t, locale, dir } = useI18n();
+
+  const STATUS_LABELS: Record<string, string> = {
+    completed: t('status.completed'), partial: t('status.partial'),
+    running: t('status.running'), pending: t('status.pending'),
+    failed: t('status.failed'),
+  };
   const router   = useRouter();
   const params   = useSearchParams();
   const upgradeAssetId = params.get('upgrade');
@@ -617,7 +624,7 @@ function DashboardInner() {
       const res = await fetch('/api/research', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token ?? ''}` },
-        body: JSON.stringify({ assetId: selected.id, depth, language: 'he' }),
+        body: JSON.stringify({ assetId: selected.id, depth, language: ['he','ar'].includes(locale) ? 'he' : 'en' }),
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error?.message ?? 'שגיאה'); return; }
@@ -691,7 +698,7 @@ function DashboardInner() {
   );
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-[#e8e8f0]">
+    <div className="min-h-screen bg-[#0a0a0f] text-[#e8e8f0]" dir={dir}>
       {/* Nav */}
       <nav className="border-b border-white/5 px-6 py-4">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
@@ -727,7 +734,7 @@ function DashboardInner() {
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-3">
               <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
-              <h2 className="text-sm font-semibold text-blue-300 uppercase tracking-wider">מחקר פעיל</h2>
+              <h2 className="text-sm font-semibold text-blue-300 uppercase tracking-wider">{t('dashboard.activeResearch')}</h2>
             </div>
             <div className="space-y-3">
               {activeReports.map((r) => (
@@ -739,7 +746,7 @@ function DashboardInner() {
 
         {/* Search section */}
         <div className="mb-10">
-          <h1 className="text-2xl font-bold text-white mb-6">מחקר מניה חדש</h1>
+          <h1 className="text-2xl font-bold text-white mb-6">{t('dashboard.newResearch')}</h1>
 
           {/* Search input */}
           <div className="relative mb-4">
@@ -747,7 +754,7 @@ function DashboardInner() {
               type="text"
               value={query}
               onChange={(e) => handleSearch(e.target.value)}
-              placeholder="חפש מניה — TEVA, Check Point, Apple, בנק לאומי..."
+              placeholder={t('dashboard.searchPlaceholder')}
               className="w-full bg-white/5 border border-white/10 focus:border-indigo-500 text-white rounded-2xl px-5 py-4 text-base outline-none transition-colors"
               disabled={starting || isAtLimit}
             />
@@ -871,8 +878,8 @@ function DashboardInner() {
                     מתחיל מחקר...
                   </>
                 ) : (
-                  <>התחל מחקר ←</>
-                )}
+                  <>{t('dashboard.startResearch')} ←</>
+)}
               </button>
             </div>
           )}
@@ -880,7 +887,7 @@ function DashboardInner() {
 
         {/* Completed reports list */}
         <div>
-          <h2 className="text-lg font-semibold text-white mb-4">הדוחות שלי</h2>
+          <h2 className="text-lg font-semibold text-white mb-4">{t('dashboard.myReports')}</h2>
           {loadingData ? (
             <div className="space-y-3">
               {[1, 2, 3].map((i) => <div key={i} className="h-20 bg-white/5 rounded-xl animate-pulse" />)}
@@ -888,7 +895,7 @@ function DashboardInner() {
           ) : doneReports.length === 0 ? (
             <div className="text-center py-16 text-gray-500">
               <p className="text-4xl mb-4">📊</p>
-              <p>{activeReports.length > 0 ? 'המחקר הראשון שלך עדיין רץ — הוא יופיע כאן כשיסיים' : 'אין דוחות עדיין — חפש מניה למעלה כדי להתחיל'}</p>
+              <p>{activeReports.length > 0 ? t('dashboard.noReports') : t('dashboard.noReports')}</p>
             </div>
           ) : (
             <div className="space-y-3">
