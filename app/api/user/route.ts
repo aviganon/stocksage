@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { verifyAuth, AuthError } from '@/lib/auth/server';
 import { ensureUserProfile, canRunReport } from '@/lib/usage/tracker';
 
+const OWNER_EMAIL = process.env.ADMIN_EMAIL ?? 'ganonavi@gmail.com';
+
 export async function GET() {
   let uid: string;
   let email: string | null;
@@ -17,5 +19,5 @@ export async function GET() {
     canRunReport(uid),
   ]);
 
-  return NextResponse.json({ profile, usage });
+  return NextResponse.json({ profile, usage, isOwner: email === OWNER_EMAIL });
 }
