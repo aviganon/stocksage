@@ -32,12 +32,14 @@ import { ResearchReportsRepository, type ReportDepth, type ReportStep } from '@/
 // ─── Model selection ──────────────────────────────────────────────────────────
 
 // Model strategy:
-// quick/standard → Haiku everywhere (fast, cheap)
-// deep → Sonnet for events, risks, synthesis (better quality)
+// quick    → Haiku everywhere (fast)
+// standard → Sonnet for events + risks (quality on news-heavy steps), Haiku elsewhere
+// deep     → Sonnet for events, risks, synthesis (maximum quality)
 function modelForStep(depth: ReportDepth, stepId: string): ClaudeModel {
-  if (depth === 'deep' && (stepId === 'events' || stepId === 'risks' || stepId === 'synthesis')) {
-    return 'claude-sonnet-4-6';
+  if (stepId === 'events' || stepId === 'risks') {
+    return depth === 'quick' ? 'claude-haiku-4-5' : 'claude-sonnet-4-6';
   }
+  if (stepId === 'synthesis' && depth === 'deep') return 'claude-sonnet-4-6';
   return 'claude-haiku-4-5';
 }
 
@@ -176,7 +178,7 @@ async function runProfile(ctx: PipelineContext, model: ClaudeModel) {
       language: ctx.language,
     }),
     schema: ProfileSchema,
-    maxTokens: 3000,
+    maxTokens: 4000,
   });
 }
 
@@ -197,7 +199,7 @@ async function runFinancials(ctx: PipelineContext, model: ClaudeModel) {
       sharesOutstanding: String(fin?.sharesOutstanding ?? ctx.asset.metadata?.sharesOutstanding ?? 'unknown'),
       macroSnapshotJson: JSON.stringify(ctx.macro, null, 2),
       priceHistoryJson: JSON.stringify(priceHistory, null, 2),
-      currentQuoteJson: ctx.quote ? JSON.stringify({ price: ctx.quote.price, change1d: ctx.quote.changePercent, volume: ctx.quote.volume, currency: ctx.quote.currency }) : 'null',
+      currentQuoteJson: ctx.quote ? JSON.stringify({ price: ctx.quote.price, change1d: ctx.quote.changePercent, volume: ctx.quote.volume, high: ctx.quote.high, low: ctx.quote.low, currency: ctx.quote.currency, marketState: ctx.quote.marketState }) : 'null',
       analystJson: ctx.analystData ? JSON.stringify(ctx.analystData, null, 2) : undefined,
       zodSchema: schemaHint(FinancialsSchema),
       language: ctx.language,
@@ -223,7 +225,7 @@ async function runEvents(ctx: PipelineContext, model: ClaudeModel) {
       language: ctx.language,
     }),
     schema: EventsSchema,
-    maxTokens: 5000,
+    maxTokens: 10000,
   });
 }
 
@@ -265,7 +267,7 @@ async function runRisks(ctx: PipelineContext, sectionData: Partial<ResearchRepor
       language: ctx.language,
     }),
     schema: RisksSchema,
-    maxTokens: 5000,
+    maxTokens: 10000,
   });
 }
 
@@ -276,11 +278,52 @@ function compactForSynthesis(data: Partial<ResearchReportData>) {
   const c = data.competitive;
   const r = data.risks;
   return {
-    profileSummary: p ? JSON.stringify({ oneLineSummary: p.oneLineSummary, revenueStreams: p.revenueStreams?.map((s) => s.name), keyProducts: p.keyProducts?.slice(0, 5) }) : 'failed',
-    financialsSummary: f ? JSON.stringify({ valuationVerdict: f.valuationVerdict, healthVerdict: f.healthVerdict, redFlags: f.redFlags?.slice(0, 5), greenFlags: f.greenFlags?.slice(0, 5), ratios: f.ratios }) : 'failed',
-    eventsSummary: e ? JSON.stringify({ overallSentiment: e.overallSentiment, timeline: e.timeline?.filter((t) => t.importance === 'high').slice(0, 8).map((t) => ({ date: t.date, title: t.title, sentiment: t.sentiment })) }) : 'failed',
-    competitiveSummary: c ? JSON.stringify({ marketPosition: c.marketPosition, ourMoats: c.ourMoats?.slice(0, 4), tailwinds: c.tailwinds?.slice(0, 3), headwinds: c.headwinds?.slice(0, 3) }) : 'failed',
-    risksSummary: r ? JSON.stringify({ overallRiskRating: r.overallRiskRating, riskSummary: r.riskSummary, companySpecific: r.companySpecific?.slice(0, 4).map((x) => ({ title: x.title, severity: x.severity })) }) : 'failed',
+    profileSummary: p ? JSON.stringify({
+      oneLineSummary: p.oneLineSummary,
+      revenueStreams: p.revenueStreams?.map((s) => s.name),
+      keyProducts: p.keyProducts?.slice(0, 5),
+    }) : 'failed',
+
+    financialsSummary: f ? JSON.stringify({
+      valuationVerdict: f.valuationVerdict,
+      valuationReasoning: (f as Record<string, unknown>)['valuationReasoning'],
+      healthVerdict: f.healthVerdict,
+      healthReasoning: (f as Record<string, unknown>)['healthReasoning'],
+      redFlags: f.redFlags?.slice(0, 5),
+      greenFlags: f.greenFlags?.slice(0, 5),
+      ratios: f.ratios,
+      periods: f.income?.slice(-3).map((p) => ({
+        period: p.period,
+        revenue: p.totalRevenue,
+        netIncome: p.netIncome,
+      })),
+    }) : 'failed',
+
+    eventsSummary: e ? JSON.stringify({
+      overallSentiment: e.overallSentiment,
+      patternObservations: (e as Record<string, unknown>)['patternObservations'],
+      upcomingEvents: (e as Record<string, unknown>)['upcomingEvents'],
+      timeline: e.timeline?.filter((t) => t.importance === 'high').slice(0, 10).map((t) => ({
+        date: t.date, title: t.title, sentiment: t.sentiment, description: t.description,
+      })),
+    }) : 'failed',
+
+    competitiveSummary: c ? JSON.stringify({
+      marketPosition: c.marketPosition,
+      marketPositionReasoning: (c as Record<string, unknown>)['marketPositionReasoning'],
+      ourMoats: c.ourMoats?.slice(0, 4),
+      ourWeaknesses: (c as Record<string, unknown>)['ourWeaknesses'],
+      tailwinds: c.tailwinds?.slice(0, 3),
+      headwinds: c.headwinds?.slice(0, 3),
+    }) : 'failed',
+
+    risksSummary: r ? JSON.stringify({
+      overallRiskRating: r.overallRiskRating,
+      riskSummary: r.riskSummary,
+      companySpecific: r.companySpecific?.slice(0, 5).map((x) => ({ title: x.title, severity: x.severity, description: x.description })),
+      industryRisks: (r as Record<string, unknown>)['industryRisks'],
+      macroRisks: (r as Record<string, unknown>)['macroRisks'],
+    }) : 'failed',
   };
 }
 
@@ -305,7 +348,7 @@ async function runSynthesis(ctx: PipelineContext, sectionData: Partial<ResearchR
       language: ctx.language,
     }),
     schema: SynthesisSchema,
-    maxTokens: 5000,
+    maxTokens: 8000,
   });
 }
 

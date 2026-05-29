@@ -129,7 +129,7 @@ export async function callClaude<T>(options: CallClaudeOptions<T>): Promise<Call
       let inputTokens: number;
       let outputTokens: number;
 
-      const TIMEOUT_MS = 90_000; // 90 seconds — with reduced tokens this is enough
+      const TIMEOUT_MS = 150_000; // 2.5 minutes — Sonnet with 10k tokens needs room
       if (webSearch) {
         const result = await runWithToolLoop(client, requestParams, 5);
         response = result.response;
