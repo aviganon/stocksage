@@ -16,6 +16,7 @@ interface UserData {
     createdAt: string;
     credits?: { standard: number; deep: number };
     creditsUsed?: { standard: number; deep: number };
+    proResetDate?: string;
   };
   usage: { used: number; limit: number; plan: 'free' | 'pro'; allowed: boolean };
   isOwner: boolean;
@@ -732,29 +733,71 @@ function UserSettings({ user, data, getIdToken, logout }: {
 
         {/* Plan section */}
         {plan === 'pro' ? (
-          <div className="bg-indigo-500/8 border border-indigo-500/20 rounded-2xl p-6 space-y-3">
-            <div className="flex items-center gap-3">
-              <span className="text-lg font-bold text-indigo-300">Pro ✦</span>
-              <span className="text-sm text-gray-400">מנוי פעיל</span>
+          <div className="bg-indigo-500/8 border border-indigo-500/20 rounded-2xl p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-lg font-bold text-indigo-300">Pro ✦</span>
+                <span className="text-sm text-gray-400">מנוי פעיל · $19/חודש</span>
+              </div>
+              {data.profile.proResetDate && (
+                <span className="text-xs text-gray-600">
+                  מתאפס: {new Date(new Date(data.profile.proResetDate).setMonth(new Date(data.profile.proResetDate).getMonth() + 1)).toLocaleDateString('he-IL')}
+                </span>
+              )}
             </div>
-            <p className="text-sm text-gray-400">ניתוח מלא ועמוק ללא הגבלה</p>
+
+            {/* Monthly credit usage */}
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { icon: '📊', label: 'מלא', total: 30, used: data.profile.creditsUsed?.standard ?? 0, remain: data.profile.credits?.standard ?? 0 },
+                { icon: '🔬', label: 'עמוק', total: 10, used: data.profile.creditsUsed?.deep ?? 0, remain: data.profile.credits?.deep ?? 0 },
+              ].map((c) => (
+                <div key={c.label} className="bg-white/5 rounded-xl p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs text-gray-500">{c.icon} {c.label}</span>
+                    <span className="text-xs text-gray-600">{c.used}/{c.total} שימוש</span>
+                  </div>
+                  <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-indigo-500 rounded-full transition-all"
+                      style={{ width: `${Math.min(100, (c.used / c.total) * 100)}%` }}
+                    />
+                  </div>
+                  <p className="text-sm font-bold text-white mt-2">{c.remain} נותרו</p>
+                </div>
+              ))}
+            </div>
+
+            <p className="text-xs text-gray-600">
+              נגמרו הקרדיטים? ניתן לרכוש סריקות נוספות: מלא $1.99 · עמוק $3.99
+            </p>
             <p className="text-xs text-gray-600">
               לביטול: <a href="mailto:support@stocksage.io" className="text-indigo-400 hover:underline">support@stocksage.io</a>
             </p>
           </div>
         ) : (
           <div className="bg-white/5 border border-white/8 rounded-2xl p-6 space-y-4">
-            <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">שדרג ל-Pro</h2>
+            <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">שדרג ל-Pro — $19/חודש</h2>
+            <div className="grid grid-cols-2 gap-3 text-center">
+              <div className="bg-white/5 rounded-xl p-4">
+                <p className="text-2xl font-bold text-white">30</p>
+                <p className="text-xs text-gray-500 mt-1">📊 מלא/חודש</p>
+              </div>
+              <div className="bg-white/5 rounded-xl p-4">
+                <p className="text-2xl font-bold text-white">10</p>
+                <p className="text-xs text-gray-500 mt-1">🔬 עמוק/חודש</p>
+              </div>
+            </div>
             <div className="space-y-2 text-sm text-gray-300">
-              <p className="flex items-center gap-2"><span className="text-indigo-400">✓</span> ניתוח מלא (6 שלבים) ללא הגבלה</p>
-              <p className="flex items-center gap-2"><span className="text-indigo-400">✓</span> ניתוח עמוק עם חיפוש רשת</p>
+              <p className="flex items-center gap-2"><span className="text-indigo-400">✓</span> קרדיטים מתאפסים כל חודש</p>
+              <p className="flex items-center gap-2"><span className="text-indigo-400">✓</span> מהיר — חינמי ללא הגבלה תמיד</p>
               <p className="flex items-center gap-2"><span className="text-indigo-400">✓</span> כל הבורסות — ת"א, US, UK, EU ועוד</p>
             </div>
             <button
               onClick={handleUpgrade}
               className="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-3 rounded-xl text-sm font-semibold transition-colors"
             >
-              שדרג ל-Pro →
+              שדרג ל-Pro ←
             </button>
             <p className="text-xs text-gray-600 text-center">
               לשאלות: <a href="mailto:support@stocksage.io" className="text-indigo-400 hover:underline">support@stocksage.io</a>

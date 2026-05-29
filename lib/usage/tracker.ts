@@ -6,6 +6,8 @@ const COLLECTION = 'users';
 
 export interface Credits { standard: number; deep: number }
 
+export const PRO_MONTHLY_CREDITS: Credits = { standard: 30, deep: 10 };
+
 export interface UserProfile {
   uid: string;
   email: string | null;
@@ -14,6 +16,8 @@ export interface UserProfile {
   plan: 'free' | 'pro';
   credits?: Credits;
   creditsUsed?: Credits;
+  proResetDate?: string;   // ISO — when credits were last reset
+  paddleSubscriptionId?: string;
   createdAt: string;
   lastSeenAt?: string;
 }
@@ -103,6 +107,51 @@ export async function consumeCredit(uid: string, depth: 'standard' | 'deep'): Pr
     consumed = true;
   });
   return consumed;
+}
+
+/**
+ * Activate Pro plan + grant monthly credits.
+ * Called when Paddle subscription activates or renews.
+ */
+export async function activateProCredits(uid: string, subscriptionId?: string): Promise<void> {
+  const db = getAdminDb();
+  const now = new Date().toISOString();
+  await db.collection(COLLECTION).doc(uid).update({
+    plan:               'pro',
+    'credits.standard': PRO_MONTHLY_CREDITS.standard,
+    'credits.deep':     PRO_MONTHLY_CREDITS.deep,
+    'creditsUsed.standard': 0,
+    'creditsUsed.deep':     0,
+    proResetDate: now,
+    ...(subscriptionId ? { paddleSubscriptionId: subscriptionId } : {}),
+    updatedAt: new Date().toISOString(),
+  });
+}
+
+/**
+ * Lazy monthly reset: if Pro user's credits are from a previous month, reset them.
+ * Called on every /api/user GET so credits stay current.
+ */
+export async function checkAndResetProCredits(uid: string): Promise<void> {
+  const profile = await getUserProfile(uid);
+  if (!profile || profile.plan !== 'pro' || !profile.proResetDate) return;
+
+  const lastReset = new Date(profile.proResetDate);
+  const now       = new Date();
+  const newMonth  = now.getFullYear() > lastReset.getFullYear()
+    || now.getMonth() > lastReset.getMonth();
+
+  if (!newMonth) return;
+
+  // New month — reset to full Pro credits
+  const db = getAdminDb();
+  await db.collection(COLLECTION).doc(uid).update({
+    'credits.standard':     PRO_MONTHLY_CREDITS.standard,
+    'credits.deep':         PRO_MONTHLY_CREDITS.deep,
+    'creditsUsed.standard': 0,
+    'creditsUsed.deep':     0,
+    proResetDate: now.toISOString(),
+  });
 }
 
 /** Admin: set credits for a user (absolute value, not increment). */

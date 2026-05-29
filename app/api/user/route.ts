@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { verifyAuth, AuthError } from '@/lib/auth/server';
-import { ensureUserProfile, canRunReport, touchLastSeen } from '@/lib/usage/tracker';
+import { ensureUserProfile, canRunReport, touchLastSeen, checkAndResetProCredits } from '@/lib/usage/tracker';
 
 const OWNER_EMAIL = process.env.ADMIN_EMAIL ?? 'ganonavi@gmail.com';
 
@@ -13,6 +13,9 @@ export async function GET() {
     if (e instanceof AuthError) return NextResponse.json({ error: e.message }, { status: 401 });
     return NextResponse.json({ error: 'Auth error' }, { status: 500 });
   }
+
+  // Lazy monthly credit reset for Pro users (before reading profile)
+  await checkAndResetProCredits(uid).catch(() => {});
 
   const [profile, usage] = await Promise.all([
     ensureUserProfile(uid, email),
