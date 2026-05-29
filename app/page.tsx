@@ -175,6 +175,7 @@ export default function LandingPage() {
           <div className="flex items-center gap-4 text-xs">
             <Link href="/terms" className="hover:text-gray-400 transition-colors">{locale === 'he' || locale === 'ar' ? 'תנאי שימוש' : 'Terms'}</Link>
             <Link href="/privacy" className="hover:text-gray-400 transition-colors">{locale === 'he' || locale === 'ar' ? 'מדיניות פרטיות' : 'Privacy'}</Link>
+            <Link href="/accessibility" className="hover:text-gray-400 transition-colors">{locale === 'he' || locale === 'ar' ? 'נגישות' : 'Accessibility'}</Link>
             <span>{t('landing.disclaimer')}</span>
           </div>
         </div>

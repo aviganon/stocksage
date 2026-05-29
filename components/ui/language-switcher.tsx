@@ -15,6 +15,9 @@ export function LanguageSwitcher() {
         onClick={() => setOpen(!open)}
         className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 px-2.5 py-1.5 rounded-lg transition-colors"
         title="Change language"
+        aria-label="Change language"
+        aria-expanded={open}
+        aria-haspopup="listbox"
       >
         <span>{current.flag}</span>
         <span className="hidden sm:inline text-xs">{current.label}</span>

@@ -8,6 +8,25 @@ export interface Credits { standard: number; deep: number }
 
 export const PRO_MONTHLY_CREDITS: Credits = { standard: 30, deep: 10 };
 
+// Abuse protection: max reports a single user can start per hour.
+// Prevents cost abuse from spamming free quick reports (~$0.05 each).
+const MAX_REPORTS_PER_HOUR = 15;
+
+/**
+ * Returns true if the user is allowed to start another report,
+ * false if they've exceeded the hourly rate limit.
+ */
+export async function checkRateLimit(uid: string): Promise<{ allowed: boolean; count: number; limit: number }> {
+  const db = getAdminDb();
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+  const snap = await db.collection('reports')
+    .where('uid', '==', uid)
+    .where('startedAt', '>=', oneHourAgo)
+    .get();
+  const count = snap.size;
+  return { allowed: count < MAX_REPORTS_PER_HOUR, count, limit: MAX_REPORTS_PER_HOUR };
+}
+
 export interface UserProfile {
   uid: string;
   email: string | null;

@@ -3,6 +3,7 @@ import { Geist } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/components/auth/auth-provider';
 import { I18nProvider } from '@/lib/i18n/context';
+import { CookieConsent } from '@/components/legal/cookie-consent';
 
 const geist = Geist({ variable: '--font-geist-sans', subsets: ['latin', 'latin-ext'] });
 
@@ -17,6 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-full flex flex-col bg-[#0a0a0f] text-[#e8e8f0]">
         <I18nProvider>
           <AuthProvider>{children}</AuthProvider>
+          <CookieConsent />
         </I18nProvider>
       </body>
     </html>

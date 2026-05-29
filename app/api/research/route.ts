@@ -9,7 +9,7 @@ import { z } from 'zod';
 import { verifyAuth, AuthError } from '@/lib/auth/server';
 import { ResearchReportsRepository } from '@/lib/storage/research-reports';
 import { runResearchPipeline } from '@/lib/ai/orchestrator';
-import { canRunReport, consumeCredit, getCreditsRemaining } from '@/lib/usage/tracker';
+import { canRunReport, consumeCredit, getCreditsRemaining, checkRateLimit } from '@/lib/usage/tracker';
 
 function ok(data: unknown, status = 200) {
   return NextResponse.json({ ok: true, ...((data && typeof data === 'object') ? data : { data }) }, { status });
@@ -42,6 +42,14 @@ export async function POST(req: NextRequest) {
 
   const { assetId, depth, language } = parsed.data;
   const isOwner = email === OWNER_EMAIL;
+
+  // Rate limit — abuse protection (owner exempt)
+  if (!isOwner) {
+    const rl = await checkRateLimit(uid);
+    if (!rl.allowed) {
+      return fail('rate_limited', `הגעת למגבלת ${rl.limit} דוחות בשעה. נסה שוב בעוד זמן מה.`, 429);
+    }
+  }
 
   // Check depth permissions
   const usage = await canRunReport(uid, depth);

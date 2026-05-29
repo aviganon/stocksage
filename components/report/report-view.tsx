@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/components/auth/auth-provider';
 import { useI18n } from '@/lib/i18n/context';
+import { InvestmentDisclaimer, AiGeneratedBadge } from '@/components/legal/investment-disclaimer';
 import type { ResearchReport } from '@/lib/storage/research-reports';
 
 const RISK_COLORS: Record<string, string> = {
@@ -121,6 +122,7 @@ export default function ReportView({ reportId }: { reportId: string }) {
           {report.status === 'partial' && <Badge color="yellow">חלקי</Badge>}
           {report.status === 'failed' && <Badge color="red">נכשל</Badge>}
           {isRunning && <Badge color="indigo">בריצה...</Badge>}
+          <AiGeneratedBadge />
         </div>
         {report.completedAt && (
           <p className="text-gray-600 text-xs mt-2">
@@ -128,6 +130,9 @@ export default function ReportView({ reportId }: { reportId: string }) {
           </p>
         )}
       </div>
+
+      {/* Investment disclaimer — prominent, on every report (legal requirement) */}
+      <InvestmentDisclaimer />
 
       {/* Upgrade banner — shown on completed quick reports */}
       {report.depth === 'quick' && report.status === 'completed' && (
