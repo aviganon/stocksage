@@ -664,11 +664,11 @@ function DashboardInner() {
         </div>
       </nav>
 
-      <div className="max-w-5xl mx-auto px-6 py-10">
+      <div className="max-w-6xl mx-auto px-6 py-10">
 
-        {/* Pricing reminder — shown once, dismissible */}
+        {/* Pricing reminder */}
         {usage?.plan === 'free' && (
-          <div className="mb-8 rounded-xl px-5 py-3 bg-white/3 border border-white/8 flex items-center justify-between">
+          <div className="mb-6 rounded-xl px-5 py-3 bg-white/3 border border-white/8">
             <p className="text-xs text-gray-500">
               ⚡ מהיר = חינמי תמיד &nbsp;·&nbsp; 📊 מלא = $1.99/דוח &nbsp;·&nbsp; 🔬 עמוק = $3.99/דוח
             </p>
@@ -690,8 +690,11 @@ function DashboardInner() {
           </div>
         )}
 
-        {/* Search section */}
-        <div className="mb-12">
+        {/* Two-column layout: search left, reports right */}
+        <div className="flex flex-col lg:flex-row gap-8 items-start">
+
+        {/* LEFT — Search section */}
+        <div className="w-full lg:w-1/2 lg:sticky lg:top-6">
           <h1 className="text-2xl font-bold text-white mb-6">מחקר מניה חדש</h1>
 
           {/* Search input */}
@@ -822,11 +825,11 @@ function DashboardInner() {
               </button>
             </div>
           )}
-        </div>
+        </div>{/* end LEFT column */}
 
-        {/* Completed reports list */}
-        <div>
-          <h2 className="text-lg font-semibold text-white mb-4">הדוחות שלי</h2>
+        {/* RIGHT — Reports list */}
+        <div className="w-full lg:w-1/2">
+          <h2 className="text-2xl font-bold text-white mb-6">הדוחות שלי</h2>
           {loadingData ? (
             <div className="space-y-3">
               {[1, 2, 3].map((i) => <div key={i} className="h-20 bg-white/5 rounded-xl animate-pulse" />)}
@@ -843,7 +846,9 @@ function DashboardInner() {
               ))}
             </div>
           )}
-        </div>
+        </div>{/* end RIGHT column */}
+
+        </div>{/* end two-column layout */}
       </div>
     </div>
   );
