@@ -19,6 +19,8 @@ export const PADDLE_PRICES: Record<'standard' | 'deep', string> = {
   deep:     process.env.PADDLE_DEEP_PRICE_ID ?? '',
 };
 
+export const PADDLE_PRO_PRICE_ID = process.env.PADDLE_PRO_PRICE_ID ?? '';
+
 export const PADDLE_AMOUNTS: Record<'standard' | 'deep', string> = {
   standard: '$1.99',
   deep:     '$3.99',

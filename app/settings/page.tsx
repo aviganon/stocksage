@@ -801,9 +801,15 @@ function UserSettings({ user, data, getIdToken, logout }: {
     setEditing(false);
   }
 
-  function handleUpgrade() {
-    // Pro subscription via Paddle — contact support to set up
-    window.location.href = 'mailto:support@stocksage.io?subject=שדרוג%20ל-Pro&body=שלום%2C%20אני%20מעוניין%20לשדרג%20לחבילת%20Pro%20($19%2Fחודש).';
+  async function handleUpgrade() {
+    const token = await getIdToken();
+    const res = await fetch('/api/billing/subscribe', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token ?? ''}` },
+    });
+    const d = await res.json();
+    if (d.url) window.location.href = d.url;
+    else alert(d.error ?? 'שגיאה בהפעלת המנוי');
   }
 
   async function handleDeleteAccount() {
