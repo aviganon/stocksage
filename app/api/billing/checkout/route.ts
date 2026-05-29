@@ -44,10 +44,10 @@ export async function POST(req: NextRequest) {
       customData: { uid: String(uid), assetId: String(assetId), depth: String(depth) },
     });
 
-    console.log('[billing/checkout] Transaction created:', transaction.id, 'status:', transaction.status);
+    console.log('[billing/checkout] Transaction created:', transaction.id);
 
-    // Paddle hosted checkout — this URL works without any domain approval
-    const checkoutUrl = `https://checkout.paddle.com/checkout/${transaction.id}?success_url=${encodeURIComponent(`${appUrl}/dashboard?paid=1&assetId=${encodeURIComponent(assetId)}&depth=${depth}`)}`;
+    // Paddle hosted checkout URL (clean, no unsupported query params)
+    const checkoutUrl = `https://checkout.paddle.com/checkout/${transaction.id}`;
 
     return NextResponse.json({ url: checkoutUrl });
   } catch (e: unknown) {

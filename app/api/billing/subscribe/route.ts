@@ -28,7 +28,8 @@ export async function POST() {
 
     console.log('[billing/subscribe] Transaction created:', transaction.id);
 
-    const checkoutUrl = `https://checkout.paddle.com/checkout/${transaction.id}`;
+    const checkoutUrl = transaction.checkout?.url
+      ?? `https://checkout.paddle.com/checkout/${transaction.id}`;
     return NextResponse.json({ url: checkoutUrl });
   } catch (e: unknown) {
     const asObj = e as Record<string, unknown>;
