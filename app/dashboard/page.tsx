@@ -35,9 +35,19 @@ const STEP_LABELS: Record<string, string> = {
   synthesis:       'סינתזה',
 };
 
-function DoneReportRow({ report, onDelete }: { report: Report; onDelete: (id: string) => void }) {
+const UPGRADE_NEXT: Record<string, { depth: 'standard' | 'deep'; label: string }> = {
+  quick:    { depth: 'standard', label: 'שדרג למלא' },
+  standard: { depth: 'deep',     label: 'שדרג לעמוק' },
+};
+
+function DoneReportRow({ report, onDelete, getIdToken }: {
+  report: Report;
+  onDelete: (id: string) => void;
+  getIdToken: () => Promise<string | null>;
+}) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting]           = useState(false);
+  const [upgrading, setUpgrading]         = useState(false);
 
   async function handleConfirmDelete(e: React.MouseEvent) {
     e.preventDefault();
@@ -45,12 +55,30 @@ function DoneReportRow({ report, onDelete }: { report: Report; onDelete: (id: st
     onDelete(report.id);
   }
 
+  async function handleUpgrade(e: React.MouseEvent) {
+    e.preventDefault();
+    const next = UPGRADE_NEXT[report.depth];
+    if (!next) return;
+    setUpgrading(true);
+    const token = await getIdToken();
+    const res = await fetch('/api/billing/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token ?? ''}` },
+      body: JSON.stringify({ depth: next.depth, assetId: report.assetId }),
+    });
+    const data = await res.json();
+    setUpgrading(false);
+    if (data.url) window.location.href = data.url;
+  }
+
   const depthLabel  = report.depth === 'quick' ? 'מהיר' : report.depth === 'standard' ? 'מלא' : 'עמוק';
-  const depthBadge  = report.depth === 'quick'
-    ? 'bg-green-500/15 text-green-300'
+  const depthStyle  = report.depth === 'quick'
+    ? 'bg-green-500/15 text-green-300 border-green-500/20'
     : report.depth === 'standard'
-    ? 'bg-amber-500/15 text-amber-300'
-    : 'bg-purple-500/15 text-purple-300';
+    ? 'bg-amber-500/15 text-amber-300 border-amber-500/20'
+    : 'bg-purple-500/15 text-purple-300 border-purple-500/20';
+
+  const nextUpgrade = report.status === 'completed' ? UPGRADE_NEXT[report.depth] : null;
 
   return (
     <div className="flex items-center justify-between bg-white/5 border border-white/8 hover:bg-white/8 rounded-xl px-5 py-4 transition-colors group">
@@ -61,7 +89,8 @@ function DoneReportRow({ report, onDelete }: { report: Report; onDelete: (id: st
         <div className="min-w-0">
           <div className="flex items-center gap-2 mb-0.5">
             <p className="text-white font-medium">{report.assetName}</p>
-            <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium shrink-0 ${depthBadge}`}>
+            {/* Depth badge — prominent */}
+            <span className={`text-xs px-2 py-0.5 rounded-full font-semibold border shrink-0 ${depthStyle}`}>
               {depthLabel}
             </span>
           </div>
@@ -76,29 +105,34 @@ function DoneReportRow({ report, onDelete }: { report: Report; onDelete: (id: st
           {STATUS_LABELS[report.status] ?? report.status}
         </span>
 
+        {/* Upgrade button — quick→standard or standard→deep */}
+        {nextUpgrade && !confirmDelete && (
+          <button
+            onClick={handleUpgrade}
+            disabled={upgrading}
+            className="opacity-0 group-hover:opacity-100 text-xs bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/30 px-2.5 py-1 rounded-lg transition-all disabled:opacity-40"
+            title={nextUpgrade.label}
+          >
+            {upgrading ? '...' : `↑ ${nextUpgrade.label}`}
+          </button>
+        )}
+
         {confirmDelete ? (
           <>
             <span className="text-xs text-red-300">למחוק?</span>
-            <button
-              onClick={handleConfirmDelete}
-              disabled={deleting}
-              className="text-xs bg-red-600/80 hover:bg-red-600 text-white px-2.5 py-1 rounded-lg transition-colors"
-            >
+            <button onClick={handleConfirmDelete} disabled={deleting}
+              className="text-xs bg-red-600/80 hover:bg-red-600 text-white px-2.5 py-1 rounded-lg transition-colors">
               {deleting ? '...' : 'כן'}
             </button>
-            <button
-              onClick={() => setConfirmDelete(false)}
-              className="text-xs bg-white/8 hover:bg-white/15 text-gray-300 px-2.5 py-1 rounded-lg transition-colors"
-            >
+            <button onClick={() => setConfirmDelete(false)}
+              className="text-xs bg-white/8 hover:bg-white/15 text-gray-300 px-2.5 py-1 rounded-lg transition-colors">
               לא
             </button>
           </>
         ) : (
-          <button
-            onClick={() => setConfirmDelete(true)}
+          <button onClick={() => setConfirmDelete(true)}
             className="opacity-0 group-hover:opacity-100 text-xs text-gray-600 hover:text-red-400 hover:bg-red-500/10 p-1.5 rounded-lg transition-all"
-            title="מחק דוח"
-          >
+            title="מחק דוח">
             ✕
           </button>
         )}
@@ -838,7 +872,7 @@ function DashboardInner() {
           ) : (
             <div className="space-y-3">
               {doneReports.map((r) => (
-                <DoneReportRow key={r.id} report={r} onDelete={handleDelete} />
+                <DoneReportRow key={r.id} report={r} onDelete={handleDelete} getIdToken={getIdToken} />
               ))}
             </div>
           )}
