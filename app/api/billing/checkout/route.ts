@@ -55,10 +55,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ url: checkoutUrl });
   } catch (e: unknown) {
-    // Log full Paddle error for debugging
-    const errStr = e instanceof Error
-      ? `${e.message} | ${JSON.stringify((e as Record<string,unknown>)['errors'] ?? (e as Record<string,unknown>)['code'] ?? '')}`
-      : String(e);
+    const asObj = e as Record<string, unknown>;
+    const extra = JSON.stringify(asObj['errors'] ?? asObj['code'] ?? asObj['type'] ?? '');
+    const errStr = e instanceof Error ? `${e.message} | ${extra}` : String(e);
     console.error('[billing/checkout] Paddle error:', errStr);
     return NextResponse.json({ error: errStr }, { status: 500 });
   }
