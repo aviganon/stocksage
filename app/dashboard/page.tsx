@@ -664,7 +664,7 @@ function DashboardInner() {
         </div>
       </nav>
 
-      <div className="max-w-6xl mx-auto px-6 py-10">
+      <div className="max-w-5xl mx-auto px-6 py-10">
 
         {/* Pricing reminder */}
         {usage?.plan === 'free' && (
@@ -822,6 +822,8 @@ function DashboardInner() {
               </button>
             </div>
           )}
+        </div>
+
         {/* Completed reports list */}
         <div>
           <h2 className="text-lg font-semibold text-white mb-4">הדוחות שלי</h2>
