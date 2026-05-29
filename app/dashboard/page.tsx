@@ -164,7 +164,7 @@ export default function DashboardPage() {
             )}
             <span className="text-sm text-gray-500 hidden sm:block">{user.email}</span>
             <Link href="/settings" className="text-sm text-gray-500 hover:text-gray-300 transition-colors">הגדרות</Link>
-            {user.email === 'galfainbur@gmail.com' && (
+            {user.email === 'ganonavi@gmail.com' && (
               <Link href="/admin" className="text-sm text-red-400/70 hover:text-red-300 transition-colors">Admin</Link>
             )}
             <button onClick={logout} className="text-sm text-gray-500 hover:text-gray-300 transition-colors">יציאה</button>
@@ -204,24 +204,27 @@ export default function DashboardPage() {
               <div className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
             )}
             {searchResults.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-[#14141f] border border-white/10 rounded-2xl overflow-hidden z-50 shadow-2xl">
+              <div
+                className="absolute top-full left-0 right-0 mt-2 bg-[#14141f] border border-white/10 rounded-2xl overflow-hidden z-50 shadow-2xl"
+                onMouseDown={(e) => e.preventDefault()}
+              >
                 {searchResults.map((r) => (
                   <button
                     key={r.id}
-                    onClick={() => startReport(r.id, r.name)}
+                    onMouseDown={() => startReport(r.id, r.name)}
                     disabled={starting}
-                    className="w-full flex items-center gap-4 px-5 py-3.5 hover:bg-white/5 transition-colors text-left disabled:opacity-50"
+                    className="w-full flex items-center gap-4 px-5 py-4 hover:bg-indigo-500/10 active:bg-indigo-500/20 transition-colors text-left disabled:opacity-50 border-b border-white/5 last:border-0 cursor-pointer"
                   >
-                    <div className="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center text-xs font-bold text-indigo-300 shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center text-sm font-bold text-indigo-300 shrink-0">
                       {r.symbol.slice(0, 2)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-white text-sm font-medium">{r.name}</p>
-                      <p className="text-gray-500 text-xs">{r.symbol} · {r.exchange}</p>
+                      <p className="text-white text-sm font-semibold">{r.name}</p>
+                      <p className="text-gray-500 text-xs mt-0.5">{r.symbol} · {r.exchange}</p>
                     </div>
-                    <span className="text-xs text-indigo-400 shrink-0">
-                      {starting ? 'מתחיל...' : 'נתח →'}
-                    </span>
+                    <div className="shrink-0 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors">
+                      {starting ? 'מתחיל...' : 'התחל מחקר'}
+                    </div>
                   </button>
                 ))}
               </div>
