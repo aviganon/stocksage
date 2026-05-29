@@ -235,6 +235,18 @@ export default function DashboardPage() {
 
   useEffect(() => { if (user) fetchData(); }, [user, fetchData]);
 
+  // Refetch when user navigates back to this tab/page (handles Next.js router cache)
+  useEffect(() => {
+    const onVisible = () => { if (!document.hidden && user) fetchData(); };
+    const onFocus   = () => { if (user) fetchData(); };
+    document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('focus', onFocus);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('focus', onFocus);
+    };
+  }, [user, fetchData]);
+
   useEffect(() => {
     const hasRunning = reports.some((r) => r.status === 'running' || r.status === 'pending');
     if (!hasRunning) return;
