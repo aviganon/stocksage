@@ -105,12 +105,16 @@ export class ResearchReportsRepository {
 
   async listForUser(uid: string, options?: { limit?: number; assetId?: AssetId }): Promise<ResearchReport[]> {
     const db = getDb();
-    let q = db.collection(COLLECTION).where('uid', '==', uid).where('deletedAt', '==', null);
-    if (options?.assetId) q = q.where('assetId', '==', options.assetId);
-    const snap = await q.limit(options?.limit ?? 20).get();
+    // Note: avoid filtering deletedAt in Firestore — the null/missing-field
+    // distinction in Admin SDK causes composite-index issues. Filter in memory.
+    let q = db.collection(COLLECTION).where('uid', '==', uid);
+    if (options?.assetId) q = (q as typeof q).where('assetId', '==', options.assetId);
+    const snap = await q.get();
     return snap.docs
       .map((d) => fromFirestore(d.id, d.data()))
-      .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
+      .filter((r) => !r.deletedAt)
+      .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime())
+      .slice(0, options?.limit ?? 20);
   }
 
   async countThisMonth(uid: string): Promise<number> {
