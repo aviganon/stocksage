@@ -2,9 +2,12 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Users can only read/write their own profile
+    // Users can READ their own profile. ALL writes go through the server
+    // (Admin SDK), so client writes are blocked — this prevents users from
+    // self-granting plan='pro' or credits directly from the browser console.
     match /users/{uid} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
+      allow read:  if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
     }
 
     // Reports: users can only read their own; all writes are server-side (Admin SDK)
