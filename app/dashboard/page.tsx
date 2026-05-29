@@ -498,6 +498,7 @@ function DashboardInner() {
   const [usage, setUsage]               = useState<Usage | null>(null);
   const [firstName, setFirstName]       = useState<string>('');
   const [credits, setCredits]           = useState<{ standard: number; deep: number }>({ standard: 0, deep: 0 });
+  const [isOwner, setIsOwner]           = useState(false);
   const [query, setQuery]               = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searching, setSearching]       = useState(false);
@@ -537,6 +538,7 @@ function DashboardInner() {
       const userData = await userRes.json();
       setUsage(userData.usage);
       setFirstName(userData.profile?.firstName ?? '');
+      setIsOwner(userData.isOwner ?? false);
       setCredits({
         standard: userData.profile?.credits?.standard ?? 0,
         deep:     userData.profile?.credits?.deep     ?? 0,
@@ -603,11 +605,10 @@ function DashboardInner() {
     try {
       const token = await getIdToken();
 
-      // Standard/Deep: check credits first, otherwise go to Paddle
-      if (depth === 'standard' || depth === 'deep') {
+      // Standard/Deep: owner is free; others need credit or payment
+      if (!isOwner && (depth === 'standard' || depth === 'deep')) {
         const hasCredit = credits[depth] > 0;
         if (!hasCredit) {
-          // No credits → Paddle checkout
           const res = await fetch('/api/billing/checkout', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token ?? ''}` },
@@ -617,7 +618,6 @@ function DashboardInner() {
           if (!res.ok) { setError(data.error ?? 'שגיאה'); return; }
           if (data.url) { window.location.href = data.url; return; }
         }
-        // Has credits → run free (server will consume the credit)
       }
 
       // Start research

@@ -755,6 +755,11 @@ function UserSettings({ user, data, getIdToken, logout }: {
   const [lastName,  setLastName]      = useState(data.profile.lastName  ?? '');
   const [phone,     setPhone]         = useState(data.profile.phone     ?? '');
   const [city,      setCity]          = useState(data.profile.city      ?? '');
+  // Saved values for display (updated after successful save without needing refresh)
+  const [savedFirst, setSavedFirst]   = useState(data.profile.firstName ?? '');
+  const [savedLast,  setSavedLast]    = useState(data.profile.lastName  ?? '');
+  const [savedPhone, setSavedPhone]   = useState(data.profile.phone     ?? '');
+  const [savedCity,  setSavedCity]    = useState(data.profile.city      ?? '');
 
   // Delete state
   const [deleting, setDeleting]             = useState(false);
@@ -767,28 +772,38 @@ function UserSettings({ user, data, getIdToken, logout }: {
   async function handleSaveProfile() {
     setSaving(true);
     const token = await getIdToken();
-    await fetch('/api/profile', {
+    const res = await fetch('/api/profile', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token ?? ''}` },
-      body: JSON.stringify({ firstName: firstName.trim() || undefined, lastName: lastName.trim() || undefined, phone: phone.trim() || undefined, city: city.trim() || undefined }),
+      body: JSON.stringify({
+        firstName: firstName.trim() || undefined,
+        lastName:  lastName.trim()  || undefined,
+        phone:     phone.trim()     || undefined,
+        city:      city.trim()      || undefined,
+      }),
     });
     setSaving(false);
-    setEditing(false);
+    if (res.ok) {
+      // Update displayed values immediately — no refresh needed
+      setSavedFirst(firstName.trim());
+      setSavedLast(lastName.trim());
+      setSavedPhone(phone.trim());
+      setSavedCity(city.trim());
+      setEditing(false);
+    }
   }
 
   function handleCancelEdit() {
-    setFirstName(data.profile.firstName ?? '');
-    setLastName(data.profile.lastName   ?? '');
-    setPhone(data.profile.phone         ?? '');
-    setCity(data.profile.city           ?? '');
+    setFirstName(savedFirst);
+    setLastName(savedLast);
+    setPhone(savedPhone);
+    setCity(savedCity);
     setEditing(false);
   }
 
-  async function handleUpgrade() {
-    const token = await getIdToken();
-    const res = await fetch('/api/billing/checkout', { method: 'POST', headers: { Authorization: `Bearer ${token ?? ''}` } });
-    const d = await res.json();
-    if (d.url) window.location.href = d.url;
+  function handleUpgrade() {
+    // Pro subscription via Paddle — contact support to set up
+    window.location.href = 'mailto:support@stocksage.io?subject=שדרוג%20ל-Pro&body=שלום%2C%20אני%20מעוניין%20לשדרג%20לחבילת%20Pro%20($19%2Fחודש).';
   }
 
   async function handleDeleteAccount() {
@@ -847,10 +862,10 @@ function UserSettings({ user, data, getIdToken, logout }: {
             </div>
           ) : (
             <div className="divide-y divide-white/5">
-              <Field label="שם מלא"  value={[data.profile.firstName, data.profile.lastName].filter(Boolean).join(' ')} />
+              <Field label="שם מלא"  value={[savedFirst, savedLast].filter(Boolean).join(' ')} />
               <Field label="אימייל"  value={user.email ?? ''} />
-              <Field label="טלפון"   value={data.profile.phone ?? ''} />
-              <Field label="עיר"     value={data.profile.city  ?? ''} />
+              <Field label="טלפון"   value={savedPhone} />
+              <Field label="עיר"     value={savedCity} />
               {data.profile.createdAt && <Field label="חשבון נוצר" value={new Date(data.profile.createdAt).toLocaleDateString('he-IL')} />}
             </div>
           )}
