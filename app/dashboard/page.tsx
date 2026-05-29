@@ -492,6 +492,20 @@ function DashboardInner() {
     setError('');
     try {
       const token = await getIdToken();
+
+      // Standard/Deep require payment — redirect to Paddle checkout
+      if (depth === 'standard' || depth === 'deep') {
+        const res = await fetch('/api/billing/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token ?? ''}` },
+          body: JSON.stringify({ depth, assetId: selected.id }),
+        });
+        const data = await res.json();
+        if (!res.ok) { setError(data.error ?? 'שגיאה'); return; }
+        if (data.url) { window.location.href = data.url; return; }
+      }
+
+      // Quick is free — start immediately
       const res = await fetch('/api/research', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token ?? ''}` },
@@ -504,6 +518,32 @@ function DashboardInner() {
       setStarting(false);
     }
   }
+
+  // Handle return from Paddle payment (?paid=1&assetId=...&depth=...)
+  useEffect(() => {
+    const paidParam = params.get('paid');
+    const paidAsset = params.get('assetId') ?? upgradeAssetId;
+    const paidDepth = params.get('depth') as 'standard' | 'deep' | null;
+    if (paidParam !== '1' || !paidAsset || !paidDepth || !user) return;
+
+    // Clear the URL params
+    window.history.replaceState({}, '', '/dashboard');
+
+    // Start the paid research
+    (async () => {
+      setStarting(true);
+      const token = await getIdToken();
+      const res = await fetch('/api/research', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token ?? ''}` },
+        body: JSON.stringify({ assetId: paidAsset, depth: paidDepth, language: 'he' }),
+      });
+      const data = await res.json();
+      setStarting(false);
+      if (res.ok) router.push(`/report/${data.reportId}`);
+    })();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   async function handleUpgrade() {
     const token = await getIdToken();
