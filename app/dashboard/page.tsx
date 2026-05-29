@@ -690,11 +690,8 @@ function DashboardInner() {
           </div>
         )}
 
-        {/* Two-column layout: search left, reports right */}
-        <div className="flex flex-col lg:flex-row gap-8 items-start">
-
-        {/* LEFT — Search section */}
-        <div className="w-full lg:w-1/2 lg:sticky lg:top-6">
+        {/* Search section */}
+        <div className="mb-10">
           <h1 className="text-2xl font-bold text-white mb-6">מחקר מניה חדש</h1>
 
           {/* Search input */}
@@ -825,11 +822,9 @@ function DashboardInner() {
               </button>
             </div>
           )}
-        </div>{/* end LEFT column */}
-
-        {/* RIGHT — Reports list */}
-        <div className="w-full lg:w-1/2">
-          <h2 className="text-2xl font-bold text-white mb-6">הדוחות שלי</h2>
+        {/* Completed reports list */}
+        <div>
+          <h2 className="text-lg font-semibold text-white mb-4">הדוחות שלי</h2>
           {loadingData ? (
             <div className="space-y-3">
               {[1, 2, 3].map((i) => <div key={i} className="h-20 bg-white/5 rounded-xl animate-pulse" />)}
@@ -846,9 +841,7 @@ function DashboardInner() {
               ))}
             </div>
           )}
-        </div>{/* end RIGHT column */}
-
-        </div>{/* end two-column layout */}
+        </div>
       </div>
     </div>
   );
