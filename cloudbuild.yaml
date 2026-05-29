@@ -44,7 +44,7 @@ steps:
       - --allow-unauthenticated
       - --memory=1Gi
       - --cpu=1
-      - --min-instances=0
+      - --min-instances=1
       - --max-instances=10
       - --set-env-vars=FIREBASE_ADMIN_PROJECT_ID=stocks-age,NEXT_PUBLIC_APP_URL=https://stocksage.io
       - --set-secrets=FIREBASE_ADMIN_PRIVATE_KEY=FIREBASE_ADMIN_PRIVATE_KEY:latest,FIREBASE_ADMIN_CLIENT_EMAIL=FIREBASE_ADMIN_CLIENT_EMAIL:latest,ANTHROPIC_API_KEY=ANTHROPIC_API_KEY:latest,STRIPE_SECRET_KEY=STRIPE_SECRET_KEY:latest,STRIPE_WEBHOOK_SECRET=STRIPE_WEBHOOK_SECRET:latest,STRIPE_PRO_PRICE_ID=STRIPE_PRO_PRICE_ID:latest,FRED_API_KEY=FRED_API_KEY:latest
