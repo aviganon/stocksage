@@ -22,7 +22,7 @@ steps:
       - --build-arg
       - NEXT_PUBLIC_APP_URL=https://stocksage.io
       - --build-arg
-      - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=$_NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+      - NEXT_PUBLIC_PADDLE_CLIENT_TOKEN=live_b858657f4d4863ed71ad9aa7a7a
       - -t
       - $_IMAGE:$SHORT_SHA
       - -t

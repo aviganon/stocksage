@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useAuth } from '@/components/auth/auth-provider';
 import { LanguageSwitcher } from '@/components/ui/language-switcher';
 import { useI18n } from '@/lib/i18n/context';
+import { usePaddleCheckout } from '@/components/paddle/checkout-overlay';
 
 interface ReportStep {
   stepId: string;
@@ -46,6 +47,7 @@ function DoneReportRow({ report, onDelete, getIdToken }: {
   getIdToken: () => Promise<string | null>;
 }) {
   const { t } = useI18n();
+  const { openCheckout } = usePaddleCheckout();
   const STATUS_LABELS: Record<string, string> = {
     completed: t('status.completed'), partial: t('status.partial'),
     running: t('status.running'), pending: t('status.pending'), failed: t('status.failed'),
@@ -73,7 +75,13 @@ function DoneReportRow({ report, onDelete, getIdToken }: {
     });
     const data = await res.json();
     setUpgrading(false);
-    if (data.url) window.location.href = data.url;
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://stocksage.io';
+    const successUrl = `${appUrl}/dashboard?paid=1&assetId=${encodeURIComponent(report.assetId)}&depth=${next.depth}`;
+    if (data.transactionId) {
+      await openCheckout(data.transactionId, successUrl);
+    } else if (data.url) {
+      window.location.href = data.url;
+    }
   }
 
   const depthLabel  = report.depth === 'quick' ? 'מהיר' : report.depth === 'standard' ? 'מלא' : 'עמוק';
@@ -484,6 +492,7 @@ const EXCHANGE_COLORS: Record<string, string> = {
 function DashboardInner() {
   const { user, loading: authLoading, getIdToken, logout } = useAuth();
   const { t, locale, dir } = useI18n();
+  const { openCheckout } = usePaddleCheckout();
 
   const STATUS_LABELS: Record<string, string> = {
     completed: t('status.completed'), partial: t('status.partial'),
@@ -616,7 +625,18 @@ function DashboardInner() {
           });
           const data = await res.json();
           if (!res.ok) { setError(data.error ?? 'שגיאה'); return; }
+
+          const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://stocksage.io';
+          const successUrl = `${appUrl}/dashboard?paid=1&assetId=${encodeURIComponent(selected.id)}&depth=${depth}`;
+
+          if (data.transactionId) {
+            setStarting(false);
+            // Open Paddle overlay — stays on stocksage.io
+            await openCheckout(data.transactionId, successUrl);
+            return;
+          }
           if (data.url) { window.location.href = data.url; return; }
+          return;
         }
       }
 

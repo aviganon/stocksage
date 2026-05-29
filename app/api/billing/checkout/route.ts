@@ -47,12 +47,14 @@ export async function POST(req: NextRequest) {
       checkout: { url: successUrl },
     });
 
-    console.log('[billing/checkout] Transaction created:', transaction.id, 'checkout.url:', transaction.checkout?.url);
+    console.log('[billing/checkout] Transaction created:', transaction.id);
 
-    const checkoutUrl = transaction.checkout?.url
+    // Return transactionId for Paddle.js overlay (opens in-app)
+    // Also return url as fallback for browsers without JS
+    const fallbackUrl = transaction.checkout?.url
       ?? `https://checkout.paddle.com/checkout/${transaction.id}`;
 
-    return NextResponse.json({ url: checkoutUrl });
+    return NextResponse.json({ transactionId: transaction.id, url: fallbackUrl });
   } catch (e: unknown) {
     const asObj = e as Record<string, unknown>;
     const extra = JSON.stringify(asObj['errors'] ?? asObj['code'] ?? asObj['type'] ?? '');
