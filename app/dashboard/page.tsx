@@ -534,11 +534,57 @@ const STATUS_COLORS: Record<string, string> = {
   failed:    'text-red-400 bg-red-400/10',
 };
 
-const DEPTH_OPTIONS: { value: Depth; label: string; icon: string; desc: string; time: string; steps: string; price: string; badge?: string; recommended?: boolean }[] = [
-  { value: 'quick',    label: 'מהיר',  icon: '⚡', desc: 'פרופיל, פיננסים וסינתזה', time: '~20 שנ׳', steps: '3 שלבים', price: 'חינמי',  badge: 'חינמי'  },
-  { value: 'standard', label: 'מלא',   icon: '📊', desc: 'ניתוח מקיף של 6 שלבים',  time: '~60 שנ׳', steps: '6 שלבים', price: '$1.99',  badge: '$1.99', recommended: true },
-  { value: 'deep',     label: 'עמוק',  icon: '🔬', desc: 'כל 6 שלבים + חיפוש רשת', time: '~2 דקות', steps: '6 + Web',  price: '$3.99',  badge: '$3.99'  },
-];
+// SVG icons for depth cards
+const DEPTH_ICONS = {
+  quick: (
+    <svg viewBox="0 0 24 24" fill="none" className="w-7 h-7">
+      <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="currentColor" strokeWidth="1.8"
+        strokeLinecap="round" strokeLinejoin="round" fill="currentColor" fillOpacity="0.15"/>
+    </svg>
+  ),
+  standard: (
+    <svg viewBox="0 0 24 24" fill="none" className="w-7 h-7">
+      <rect x="3" y="12" width="4" height="9" rx="1" fill="currentColor" fillOpacity="0.3" stroke="currentColor" strokeWidth="1.5"/>
+      <rect x="10" y="7" width="4" height="14" rx="1" fill="currentColor" fillOpacity="0.5" stroke="currentColor" strokeWidth="1.5"/>
+      <rect x="17" y="3" width="4" height="18" rx="1" fill="currentColor" fillOpacity="0.8" stroke="currentColor" strokeWidth="1.5"/>
+    </svg>
+  ),
+  deep: (
+    <svg viewBox="0 0 24 24" fill="none" className="w-7 h-7">
+      <circle cx="12" cy="12" r="3" fill="currentColor" fillOpacity="0.8" stroke="currentColor" strokeWidth="1.5"/>
+      <circle cx="12" cy="12" r="6.5" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 2"/>
+      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1" opacity="0.4"/>
+      <path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  ),
+};
+
+const DEPTH_META: Record<Depth, {
+  color: string; glow: string; border: string; selectedBg: string;
+  label: string; steps: string; time: string; price: string; desc: string; recommended?: boolean;
+}> = {
+  quick: {
+    color: 'text-emerald-400', glow: 'shadow-emerald-500/25',
+    border: 'border-emerald-500/40', selectedBg: 'bg-emerald-500/12',
+    label: 'מהיר', steps: '3 שלבים', time: '~20 שנ׳', price: 'חינמי',
+    desc: 'פרופיל חברה, ניתוח פיננסי וסינתזה',
+  },
+  standard: {
+    color: 'text-indigo-400', glow: 'shadow-indigo-500/30',
+    border: 'border-indigo-500/50', selectedBg: 'bg-indigo-500/12',
+    label: 'מלא', steps: '6 שלבים', time: '~90 שנ׳', price: '$1.99',
+    desc: 'ניתוח מקיף: פרופיל, פיננסים, אירועים, תחרות, סיכונים וסינתזה',
+    recommended: true,
+  },
+  deep: {
+    color: 'text-violet-400', glow: 'shadow-violet-500/25',
+    border: 'border-violet-500/40', selectedBg: 'bg-violet-500/10',
+    label: 'עמוק', steps: '6 + Web', time: '~4 דק׳', price: '$3.99',
+    desc: 'כל 6 שלבים עם Claude Sonnet + חיפוש רשת בזמן אמת',
+  },
+};
+
+const DEPTH_OPTIONS = ['quick', 'standard', 'deep'] as const;
 
 const POPULAR_STOCKS: { label: string; stocks: SearchResult[] }[] = [
   {
@@ -1042,53 +1088,74 @@ function DashboardInner() {
                 </span>
               </div>
 
-              {/* Depth cards */}
+              {/* Depth cards — redesigned */}
               <p className="text-sm text-gray-400 mb-4">בחר עומק מחקר</p>
-              <div className="grid grid-cols-3 gap-3 mb-6">
-                {DEPTH_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    onClick={() => setDepth(opt.value)}
-                    className={`relative p-4 rounded-xl border text-right transition-all ${
-                      depth === opt.value
-                        ? 'border-indigo-500 bg-indigo-500/10'
-                        : 'border-white/8 bg-white/3 hover:border-white/20'
-                    }`}
-                  >
-                    {opt.recommended && (
-                      <span className="absolute -top-2.5 right-3 text-xs bg-indigo-600 text-white px-2 py-0.5 rounded-full">מומלץ</span>
-                    )}
-                    <div className="text-2xl mb-2">{opt.icon}</div>
-                    <div className={`font-semibold text-sm mb-1 ${depth === opt.value ? 'text-indigo-300' : 'text-white'}`}>
-                      {opt.label}
-                    </div>
-                    <div className="text-xs text-gray-500 mb-1">{opt.steps}</div>
-                    <div className="text-xs text-gray-600 mb-2">{opt.time}</div>
-                    {/* Badge: lock for anon standard/deep, free credits, or price */}
-                    {isAnonymous && (opt.value === 'standard' || opt.value === 'deep') ? (
-                      <div className="text-xs font-semibold px-2 py-0.5 rounded-full w-fit bg-white/8 text-gray-400">
-                        🔒 דרוש חשבון
+              <div className="grid grid-cols-3 gap-3 mb-5">
+                {DEPTH_OPTIONS.map((v) => {
+                  const m      = DEPTH_META[v];
+                  const active = depth === v;
+                  const locked = isAnonymous && v !== 'quick';
+                  const freeC  = !isAnonymous && v !== 'quick' && credits[v] > 0;
+                  return (
+                    <button
+                      key={v}
+                      onClick={() => setDepth(v)}
+                      className={`
+                        relative p-4 rounded-2xl border text-right transition-all duration-200
+                        ${active
+                          ? `${m.selectedBg} ${m.border} shadow-lg ${m.glow} scale-[1.02]`
+                          : `bg-white/3 border-white/8 hover:border-white/18 hover:bg-white/6 hover:scale-[1.01]`}
+                      `}
+                    >
+                      {m.recommended && (
+                        <span className="absolute -top-2.5 right-3 text-xs bg-indigo-600 text-white px-2 py-0.5 rounded-full font-medium">
+                          {t('depth.recommended')}
+                        </span>
+                      )}
+
+                      {/* Icon */}
+                      <div className={`mb-3 ${active ? m.color : 'text-gray-500'} transition-colors`}>
+                        {DEPTH_ICONS[v]}
                       </div>
-                    ) : (opt.value === 'standard' || opt.value === 'deep') && credits[opt.value] > 0 ? (
-                      <div className="text-xs font-semibold px-2 py-0.5 rounded-full w-fit bg-green-500/20 text-green-300">
-                        {credits[opt.value]} חינמיות
+
+                      {/* Label */}
+                      <div className={`font-bold text-sm mb-0.5 transition-colors ${active ? m.color : 'text-white'}`}>
+                        {m.label}
                       </div>
-                    ) : (
-                      <div className={`text-xs font-semibold px-2 py-0.5 rounded-full w-fit ${
-                        opt.value === 'quick'
-                          ? 'bg-green-500/20 text-green-300'
-                          : 'bg-amber-500/20 text-amber-300'
-                      }`}>
-                        {opt.price}
-                      </div>
-                    )}
-                  </button>
-                ))}
+
+                      {/* Steps + time */}
+                      <div className="text-xs text-gray-500">{m.steps}</div>
+                      <div className="text-xs text-gray-700 mb-3">{m.time}</div>
+
+                      {/* Badge */}
+                      {locked ? (
+                        <div className="text-xs font-medium px-2 py-0.5 rounded-lg w-fit bg-white/6 text-gray-500 flex items-center gap-1">
+                          <svg viewBox="0 0 16 16" fill="currentColor" className="w-2.5 h-2.5"><path d="M12 7H11V5a3 3 0 0 0-6 0v2H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1zM7 11.73V13h2v-1.27a1 1 0 1 0-2 0zM10 7H6V5a2 2 0 0 1 4 0v2z"/></svg>
+                          חשבון
+                        </div>
+                      ) : freeC ? (
+                        <div className="text-xs font-semibold px-2 py-0.5 rounded-lg w-fit bg-emerald-500/20 text-emerald-300 border border-emerald-500/20">
+                          {credits[v]} חינמיות
+                        </div>
+                      ) : (
+                        <div className={`text-xs font-semibold px-2 py-0.5 rounded-lg w-fit border ${
+                          v === 'quick'
+                            ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
+                            : v === 'standard'
+                            ? 'bg-indigo-500/15 text-indigo-300 border-indigo-500/20'
+                            : 'bg-violet-500/15 text-violet-300 border-violet-500/20'
+                        }`}>
+                          {m.price}
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
 
               {/* Description of selected depth */}
-              <p className="text-xs text-gray-500 mb-5">
-                {DEPTH_OPTIONS.find((o) => o.value === depth)?.desc}
+              <p className={`text-xs mb-5 transition-colors ${DEPTH_META[depth].color} opacity-80`}>
+                {DEPTH_META[depth].desc}
               </p>
 
               {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
