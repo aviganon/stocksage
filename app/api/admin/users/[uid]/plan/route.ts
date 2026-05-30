@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdmin, AuthError } from '@/lib/admin';
-import { updateUserPlan } from '@/lib/usage/tracker';
+import { updateUserPlan, activateProCredits } from '@/lib/usage/tracker';
 import { z } from 'zod';
 
 const Schema = z.object({ plan: z.enum(['free', 'pro']) });
@@ -23,6 +23,13 @@ export async function PATCH(
   const parsed = Schema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: 'Invalid plan value' }, { status: 400 });
 
-  await updateUserPlan(uid, parsed.data.plan);
+  if (parsed.data.plan === 'pro') {
+    // Upgrading to Pro — grant full monthly credits
+    await activateProCredits(uid);
+  } else {
+    // Downgrading to free — just update the plan field
+    await updateUserPlan(uid, parsed.data.plan);
+  }
+  
   return NextResponse.json({ ok: true, uid, plan: parsed.data.plan });
 }
