@@ -346,7 +346,7 @@ function CreateUserModal({ getIdToken, onClose, onCreated }: {
 
   async function handleCreate() {
     if (!firstName.trim()) { setError('שם פרטי נדרש'); return; }
-    if (!email || !password) { setError('אימייל וסיסמה נדרשים'); return; }
+    if (!email || !password) { setError('א��מייל וסיסמה נדרשים'); return; }
     setCreating(true); setError('');
     const token = await getIdToken();
     const res = await fetch('/api/admin/users', {
@@ -511,7 +511,7 @@ function OwnerSettings({ user, data, getIdToken, logout }: {
     <div className="min-h-screen text-[#e8e8f0]">
       <nav className="glass-nav sticky top-0 z-40 px-6 py-4">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 text-xl font-bold text-white">
+          <Link href="/" dir="ltr" className="flex items-center gap-2 text-xl font-bold text-white">
             <span className="w-8 h-8 rounded-lg btn-glow flex items-center justify-center text-base">S</span>
             Stock<span className="text-gradient">Sage</span>
           </Link>

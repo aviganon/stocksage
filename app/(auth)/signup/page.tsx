@@ -57,7 +57,7 @@ export default function SignupPage() {
     <div className="min-h-screen flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md animate-fade-up">
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 text-2xl font-bold text-white">
+          <Link href="/" dir="ltr" className="inline-flex items-center gap-2 text-2xl font-bold text-white">
             <span className="w-9 h-9 rounded-xl btn-glow flex items-center justify-center text-lg">S</span>
             Stock<span className="text-gradient">Sage</span>
           </Link>
