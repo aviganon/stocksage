@@ -17,19 +17,19 @@ export default function ReportPage({ params }: { params: Promise<{ reportId: str
 
   if (loading || !user) {
     return (
-      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-[#e8e8f0]">
+    <div className="min-h-screen text-[#e8e8f0]">
       {/* Minimal nav — just logo */}
-      <nav className="border-b border-white/5 px-6 py-4">
+      <nav className="glass-nav sticky top-0 z-40 px-6 py-4">
         <div className="max-w-4xl mx-auto">
           <Link href="/" className="text-xl font-bold text-white">
-            Stock<span className="text-indigo-400">Sage</span>
+            Stock<span className="text-gradient">Sage</span>
           </Link>
         </div>
       </nav>

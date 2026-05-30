@@ -508,7 +508,7 @@ function OwnerSettings({ user, data, getIdToken, logout }: {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-[#e8e8f0]">
+    <div className="min-h-screen text-[#e8e8f0]">
       <nav className="border-b border-white/5 px-6 py-4">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <Link href="/" className="text-xl font-bold text-white">Stock<span className="text-indigo-400">Sage</span></Link>
@@ -822,7 +822,7 @@ function UserSettings({ user, data, getIdToken, logout }: {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-[#e8e8f0]">
+    <div className="min-h-screen text-[#e8e8f0]">
       <nav className="border-b border-white/5 px-6 py-4">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <Link href="/" className="text-xl font-bold text-white">Stock<span className="text-indigo-400">Sage</span></Link>
@@ -1059,7 +1059,7 @@ export default function SettingsPage() {
   }, [user, getIdToken]);
 
   if (authLoading || loading || !user || !data) return (
-    <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center">
       <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
     </div>
   );

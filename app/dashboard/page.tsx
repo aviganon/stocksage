@@ -788,18 +788,18 @@ function DashboardInner() {
   }
 
   if (authLoading || !user) return (
-    <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center">
       <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-[#e8e8f0]" dir={dir}>
+    <div className="min-h-screen text-[#e8e8f0]" dir={dir}>
       {/* Nav */}
       <nav className="glass-nav sticky top-0 z-40 px-6 py-4">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <Link href="/" className="text-xl font-bold text-white">
-            Stock<span className="text-indigo-400">Sage</span>
+            Stock<span className="text-gradient">Sage</span>
           </Link>
           <div className="flex items-center gap-4">
             {isAnonymous ? (
@@ -999,7 +999,7 @@ function DashboardInner() {
               <button
                 onClick={startReport}
                 disabled={starting}
-                className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed text-white py-3 rounded-xl font-semibold text-sm transition-colors flex items-center justify-center gap-2"
+                className="w-full btn-glow disabled:opacity-50 disabled:cursor-not-allowed text-white py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2"
               >
                 {starting ? (
                   <>
@@ -1042,7 +1042,7 @@ function DashboardInner() {
 export default function DashboardPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
       </div>
     }>

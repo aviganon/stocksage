@@ -7,11 +7,11 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-[#e8e8f0]">
-      <nav className="border-b border-white/5 px-6 py-4">
+    <div className="min-h-screen text-[#e8e8f0]">
+      <nav className="glass-nav sticky top-0 z-40 px-6 py-4">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
           <Link href="/" className="text-xl font-bold text-white">
-            Stock<span className="text-indigo-400">Sage</span>
+            Stock<span className="text-gradient">Sage</span>
           </Link>
         </div>
       </nav>

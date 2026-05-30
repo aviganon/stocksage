@@ -57,19 +57,19 @@ export default function LandingPage() {
   const features = FEATURES_MAP[locale] ?? FEATURES_HE;
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-[#e8e8f0]" dir={dir}>
+    <div className="min-h-screen text-[#e8e8f0]" dir={dir}>
       {/* Nav */}
-      <nav className="border-b border-white/5 px-6 py-4">
+      <nav className="glass-nav sticky top-0 z-40 px-6 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-xl font-bold text-white">Stock<span className="text-indigo-400">Sage</span></span>
+            <span className="text-xl font-bold text-white">Stock<span className="text-gradient">Sage</span></span>
             <span className="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Beta</span>
           </div>
           <div className="flex items-center gap-3">
             <Link href="/login" className="text-sm text-gray-400 hover:text-white transition-colors px-4 py-2">
               {t('nav.signin')}
             </Link>
-            <Link href="/signup" className="text-sm bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg transition-colors">
+            <Link href="/signup" className="text-sm btn-glow text-white px-4 py-2 rounded-lg">
               {t('nav.getStarted')}
             </Link>
           </div>
@@ -90,7 +90,7 @@ export default function LandingPage() {
           {t('landing.description')}
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link href="/dashboard" className="inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-8 py-4 rounded-xl text-lg transition-colors">
+          <Link href="/dashboard" className="inline-flex items-center justify-center gap-2 btn-glow text-white font-semibold px-8 py-4 rounded-xl text-lg">
             {t('landing.ctaTry')}
           </Link>
           <Link href="/login" className="inline-flex items-center justify-center border border-white/10 hover:border-white/20 text-gray-300 hover:text-white px-8 py-4 rounded-xl text-lg transition-colors">
@@ -106,7 +106,7 @@ export default function LandingPage() {
         <p className="text-gray-400 text-center mb-16">{t('landing.featuresSub')}</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {features.map((f) => (
-            <div key={f.step} className="bg-white/5 border border-white/8 rounded-2xl p-6 hover:bg-white/8 transition-colors">
+            <div key={f.step} className="glass-card rounded-2xl p-6">
               <div className="text-indigo-400 text-sm font-mono mb-3">{f.step}</div>
               <h3 className="text-white font-semibold text-lg mb-2">{f.title}</h3>
               <p className="text-gray-400 text-sm leading-relaxed">{f.desc}</p>
@@ -121,7 +121,7 @@ export default function LandingPage() {
         <p className="text-gray-400 text-center mb-16">{t('landing.pricingSub')}</p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
           {/* Quick - Free */}
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-8">
+          <div className="glass rounded-2xl p-8">
             <div className="text-2xl mb-3">⚡</div>
             <div className="text-green-300 text-sm font-medium mb-2">{t('depth.quick')}</div>
             <div className="text-4xl font-bold text-white mb-1">{t('pricing.free')}</div>
