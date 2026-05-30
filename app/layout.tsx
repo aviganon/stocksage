@@ -17,6 +17,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="he" dir="rtl" className={`${geist.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-[#0a0a0f] text-[#e8e8f0]">
         <I18nProvider>
+          {/* Ambient background — fixed, renders behind all pages */}
+          <div className="ambient-bg" aria-hidden="true" />
+          <div className="ambient-grid" aria-hidden="true" />
           <AuthProvider>{children}</AuthProvider>
           <CookieConsent />
         </I18nProvider>

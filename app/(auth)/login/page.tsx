@@ -40,46 +40,55 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center px-4" dir={dir}>
-      <div className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center px-4 py-12" dir={dir}>
+      <div className="w-full max-w-md animate-fade-up">
         <div className="text-center mb-8">
-          <Link href="/" className="text-2xl font-bold text-white">Stock<span className="text-indigo-400">Sage</span></Link>
-          <p className="text-gray-400 mt-2 text-sm">{t('auth.loginTitle')}</p>
+          <Link href="/" dir="ltr" className="inline-flex items-center gap-2 text-2xl font-bold text-white">
+            <span className="w-9 h-9 rounded-xl btn-glow flex items-center justify-center text-lg">S</span>
+            Stock<span className="text-gradient">Sage</span>
+          </Link>
+          <p className="text-gray-400 mt-3 text-sm">{t('auth.loginTitle')}</p>
         </div>
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-8">
+
+        <div className="glass-card rounded-3xl p-8">
           <button onClick={handleGoogle} disabled={loading}
-            className="w-full flex items-center justify-center gap-3 border border-white/10 hover:border-white/20 text-gray-300 hover:text-white py-3 rounded-xl transition-colors text-sm font-medium mb-6 disabled:opacity-50">
+            className="w-full flex items-center justify-center gap-3 glass-input hover:border-white/25 text-gray-200 hover:text-white py-3 rounded-2xl transition-all text-sm font-medium mb-6 disabled:opacity-50">
             {GOOGLE_ICON}
             {t('auth.googleBtn')}
           </button>
+
           <div className="flex items-center gap-3 mb-6">
             <div className="flex-1 h-px bg-white/10" />
             <span className="text-xs text-gray-500">{t('auth.orContinueWith')}</span>
             <div className="flex-1 h-px bg-white/10" />
           </div>
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm text-gray-400 mb-1.5">{t('auth.email')}</label>
               <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
-                className="w-full bg-white/5 border border-white/10 focus:border-indigo-500 text-white rounded-xl px-4 py-3 text-sm outline-none transition-colors"
+                className="w-full glass-input text-white rounded-2xl px-4 py-3 text-sm"
                 placeholder="you@example.com" dir="ltr" />
             </div>
             <div>
               <label className="block text-sm text-gray-400 mb-1.5">{t('auth.password')}</label>
               <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required
-                className="w-full bg-white/5 border border-white/10 focus:border-indigo-500 text-white rounded-xl px-4 py-3 text-sm outline-none transition-colors"
+                className="w-full glass-input text-white rounded-2xl px-4 py-3 text-sm"
                 placeholder="••••••••" dir="ltr" />
             </div>
-            {error && <p className="text-red-400 text-sm">{error}</p>}
+            {error && (
+              <p className="text-red-300 text-sm bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2">{error}</p>
+            )}
             <button type="submit" disabled={loading}
-              className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-medium py-3 rounded-xl transition-colors text-sm">
+              className="w-full btn-glow disabled:opacity-50 text-white font-semibold py-3 rounded-2xl text-sm">
               {loading ? t('common.loading') : t('auth.loginBtn')}
             </button>
           </form>
         </div>
+
         <p className="text-center text-sm text-gray-500 mt-6">
           {t('auth.noAccount')}{' '}
-          <Link href="/signup" className="text-indigo-400 hover:text-indigo-300">{t('nav.getStarted')}</Link>
+          <Link href="/signup" className="text-indigo-300 hover:text-indigo-200 font-medium transition-colors">{t('nav.getStarted')}</Link>
         </p>
       </div>
     </div>

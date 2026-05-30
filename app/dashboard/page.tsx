@@ -7,6 +7,59 @@ import { useAuth } from '@/components/auth/auth-provider';
 import { LanguageSwitcher } from '@/components/ui/language-switcher';
 import { useI18n } from '@/lib/i18n/context';
 import { usePaddleCheckout } from '@/components/paddle/checkout-overlay';
+import type { SpotlightQuote } from '@/app/api/markets/spotlight/route';
+
+// ─── Spotlight stock cards (live prices) ─────────────────────────────────────
+
+function SpotlightStocks({ onSelect, getIdToken }: {
+  onSelect: (s: SearchResult) => void;
+  getIdToken: () => Promise<string | null>;
+}) {
+  const [quotes, setQuotes] = useState<SpotlightQuote[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      const token = await getIdToken();
+      if (!token) return;
+      const res = await fetch('/api/markets/spotlight', { headers: { Authorization: `Bearer ${token}` } });
+      if (res.ok) setQuotes((await res.json()).quotes ?? []);
+    })();
+  }, [getIdToken]);
+
+  if (!quotes.length) return null;
+
+  return (
+    <div className="mb-8">
+      <p className="text-xs text-gray-600 mb-3 uppercase tracking-wider">שוק עכשיו</p>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+        {quotes.map((q) => {
+          const up = (q.changePercent ?? 0) >= 0;
+          return (
+            <button
+              key={q.id}
+              onClick={() => onSelect({ id: q.id, symbol: q.symbol, name: q.name, exchange: q.exchange })}
+              className="glass-card rounded-2xl p-3.5 text-right transition-all group"
+            >
+              <div className="flex items-start justify-between mb-2">
+                <div className={`text-xs font-semibold px-1.5 py-0.5 rounded-full ${up ? 'text-green-400 bg-green-400/10' : 'text-red-400 bg-red-400/10'}`}>
+                  {q.changePercent != null ? `${up ? '+' : ''}${q.changePercent.toFixed(2)}%` : '—'}
+                </div>
+                <span className="text-xs text-gray-600">{q.exchange}</span>
+              </div>
+              <p className="text-white font-semibold text-sm leading-tight">{q.symbol}</p>
+              <p className="text-gray-500 text-xs truncate mt-0.5">{q.name}</p>
+              {q.price != null && (
+                <p className="text-gray-300 text-xs mt-1.5 font-mono">
+                  {q.currency === 'ILS' ? '₪' : '$'}{q.price.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                </p>
+              )}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 interface ReportStep {
   stepId: string;
@@ -743,7 +796,7 @@ function DashboardInner() {
   return (
     <div className="min-h-screen bg-[#0a0a0f] text-[#e8e8f0]" dir={dir}>
       {/* Nav */}
-      <nav className="border-b border-white/5 px-6 py-4">
+      <nav className="glass-nav sticky top-0 z-40 px-6 py-4">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <Link href="/" className="text-xl font-bold text-white">
             Stock<span className="text-indigo-400">Sage</span>
@@ -867,9 +920,12 @@ function DashboardInner() {
             )}
           </div>
 
-          {/* Popular stocks — one market at a time with tab switcher */}
+          {/* Spotlight: live prices first, then popular tabs */}
           {!query && !selected && (
-            <PopularStocks onSelect={handleSelect} locale={locale} />
+            <>
+              <SpotlightStocks onSelect={handleSelect} getIdToken={getIdToken} />
+              <PopularStocks onSelect={handleSelect} locale={locale} />
+            </>
           )}
 
           {/* Depth selector (shown after selecting an asset) */}
