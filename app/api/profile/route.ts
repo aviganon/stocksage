@@ -8,6 +8,11 @@ const Schema = z.object({
   lastName:  z.string().max(50).optional(),
   phone:     z.string().max(20).optional(),
   city:      z.string().max(50).optional(),
+  // Legal consent — stored at signup time as evidence
+  consentAt:         z.string().optional(),
+  consentTerms:      z.boolean().optional(),
+  consentDisclaimer: z.boolean().optional(),
+  consentAge18:      z.boolean().optional(),
 });
 
 export async function PATCH(req: NextRequest) {

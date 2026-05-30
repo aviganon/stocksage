@@ -4,6 +4,7 @@ import './globals.css';
 import { AuthProvider } from '@/components/auth/auth-provider';
 import { I18nProvider } from '@/lib/i18n/context';
 import { CookieConsent } from '@/components/legal/cookie-consent';
+import { AccessibilityButton } from '@/components/legal/accessibility-button';
 
 const geist = Geist({ variable: '--font-geist-sans', subsets: ['latin', 'latin-ext'] });
 
@@ -22,6 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="ambient-grid" aria-hidden="true" />
           <AuthProvider>{children}</AuthProvider>
           <CookieConsent />
+          <AccessibilityButton />
         </I18nProvider>
       </body>
     </html>

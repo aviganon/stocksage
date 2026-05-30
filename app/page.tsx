@@ -174,6 +174,8 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-gray-600">
           <span>© 2026 StockSage. All rights reserved.</span>
           <div className="flex items-center gap-4 text-xs">
+            <Link href="/about" className="hover:text-gray-400 transition-colors">{locale === 'he' || locale === 'ar' ? 'אודות' : 'About'}</Link>
+            <Link href="/help" className="hover:text-gray-400 transition-colors">{locale === 'he' || locale === 'ar' ? 'עזרה' : 'Help'}</Link>
             <Link href="/terms" className="hover:text-gray-400 transition-colors">{locale === 'he' || locale === 'ar' ? 'תנאי שימוש' : 'Terms'}</Link>
             <Link href="/privacy" className="hover:text-gray-400 transition-colors">{locale === 'he' || locale === 'ar' ? 'מדיניות פרטיות' : 'Privacy'}</Link>
             <Link href="/accessibility" className="hover:text-gray-400 transition-colors">{locale === 'he' || locale === 'ar' ? 'נגישות' : 'Accessibility'}</Link>
