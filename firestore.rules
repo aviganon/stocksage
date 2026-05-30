@@ -16,6 +16,22 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Watchlists: users can read their own; all writes are server-side
+    match /watchlists/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    // Payments log: server-only
+    match /payments/{docId} {
+      allow read, write: if false;
+    }
+
+    // Marketing posts: server-only
+    match /marketing_posts/{docId} {
+      allow read, write: if false;
+    }
+
     // Everything else is server-only
     match /{document=**} {
       allow read, write: if false;
