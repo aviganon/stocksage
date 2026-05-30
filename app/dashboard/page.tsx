@@ -212,6 +212,109 @@ function PopularStocks({ onSelect, locale }: {
   );
 }
 
+const CURRENCY_SYMBOL: Record<string, string> = {
+  USD: '$', ILS: '₪', EUR: '€', GBP: '£',
+};
+
+interface SpotlightQuote {
+  id: string;
+  symbol: string;
+  name: string;
+  exchange: string;
+  price: number | null;
+  change: number | null;
+  changePercent: number | null;
+  currency: string | null;
+  marketState: string | null;
+}
+
+function formatPrice(price: number | null, currency: string | null) {
+  if (price == null) return '—';
+  const sym = CURRENCY_SYMBOL[currency ?? 'USD'] ?? '';
+  const decimals = price >= 1000 ? 0 : 2;
+  return `${sym}${price.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}`;
+}
+
+function SpotlightStocks({ onSelect, getIdToken }: {
+  onSelect: (s: SearchResult) => void;
+  getIdToken: () => Promise<string | null>;
+}) {
+  const [quotes, setQuotes] = useState<SpotlightQuote[] | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const token = await getIdToken();
+        if (!token) { if (!cancelled) setQuotes([]); return; }
+        const res = await fetch('/api/markets/spotlight', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) { if (!cancelled) setQuotes([]); return; }
+        const data = await res.json();
+        if (!cancelled) setQuotes(data.quotes ?? []);
+      } catch {
+        if (!cancelled) setQuotes([]);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [getIdToken]);
+
+  if (quotes !== null && quotes.length === 0) return null;
+
+  const header = (
+    <div className="flex items-center gap-2 mb-3">
+      <span className="relative flex h-2 w-2">
+        <span className="absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75 animate-ping" />
+        <span className="relative inline-flex h-2 w-2 rounded-full bg-green-400" />
+      </span>
+      <h2 className="text-sm font-semibold text-white">מניות במוקד</h2>
+      <span className="text-xs text-gray-500">· מזוהות ומתומחרות בזמן אמת</span>
+    </div>
+  );
+
+  return (
+    <div className="mb-8">
+      {header}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        {quotes === null
+          ? [...Array(6)].map((_, i) => (
+              <div key={i} className="h-[7.5rem] glass-card rounded-2xl animate-pulse" />
+            ))
+          : quotes.map((q) => {
+              const up = (q.changePercent ?? 0) >= 0;
+              return (
+                <button
+                  key={q.id}
+                  onClick={() => onSelect({ id: q.id, symbol: q.symbol, name: q.name, exchange: q.exchange })}
+                  className="group glass-card rounded-2xl p-4 text-right hover:-translate-y-1 transition-all duration-300"
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="w-9 h-9 rounded-xl bg-indigo-500/20 flex items-center justify-center text-xs font-bold text-indigo-300">
+                      {q.symbol.slice(0, 2)}
+                    </div>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${EXCHANGE_COLORS[q.exchange] ?? 'bg-white/5 text-gray-400'}`}>
+                      {q.exchange}
+                    </span>
+                  </div>
+                  <p className="text-white font-semibold text-sm truncate">{q.name}</p>
+                  <p className="text-gray-500 text-xs mb-2">{q.symbol}</p>
+                  <div className="flex items-end justify-between">
+                    <span className="text-white font-bold tabular-nums">{formatPrice(q.price, q.currency)}</span>
+                    {q.changePercent != null && (
+                      <span className={`text-xs font-semibold tabular-nums ${up ? 'text-green-400' : 'text-red-400'}`}>
+                        {up ? '▲' : '▼'} {Math.abs(q.changePercent).toFixed(2)}%
+                      </span>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+      </div>
+    </div>
+  );
+}
+
 function useElapsed(startedAt: string) {
   const [elapsed, setElapsed] = useState('');
   useEffect(() => {
@@ -727,9 +830,11 @@ function DashboardInner() {
           </Link>
           <div className="flex items-center gap-4">
             {/* Greeting */}
-            <span className="text-white font-medium hidden sm:block">
-              {firstName ? `ברוך הבא, ${firstName}` : 'ברוך הבא'}
-              {usage?.plan === 'pro' && <span className="mr-1.5 text-xs text-indigo-300">Pro ✦</span>}
+            <span className="text-white font-medium hidden sm:flex items-center gap-1.5">
+              {firstName || 'חשבון'}
+              {usage?.plan === 'pro' && (
+                <span className="text-xs text-indigo-300 glass rounded-full px-2 py-0.5">Pro ✦</span>
+              )}
             </span>
             <LanguageSwitcher />
             <Link href="/settings" className="text-sm text-gray-500 hover:text-gray-300 transition-colors">{t('nav.settings')}</Link>
@@ -740,6 +845,30 @@ function DashboardInner() {
 
       <div className="max-w-5xl mx-auto px-6 py-10">
 
+        {/* Welcome hero */}
+        <div className="mb-8">
+          <h1 className="text-3xl sm:text-4xl font-bold text-white text-balance">
+            {firstName ? `שלום ${firstName}, ` : 'ברוך הבא, '}
+            <span className="text-gradient">איזו מניה נחקור היום?</span>
+          </h1>
+          <p className="text-gray-400 mt-2 leading-relaxed">
+            ניתוח מעמיק מבוסס בינה מלאכותית לכל מניה — דוחות כספיים, סיכונים, תחרות ותובנות, תוך שניות.
+          </p>
+          {/* Trust strip */}
+          <div className="flex flex-wrap items-center gap-2 mt-4">
+            {[
+              { icon: '🌍', label: '8 בורסות גלובליות' },
+              { icon: '🤖', label: 'מנוע AI רב-שלבי' },
+              { icon: '📈', label: 'נתונים בזמן אמת' },
+              { icon: '🔒', label: 'מאובטח ופרטי' },
+            ].map((c) => (
+              <span key={c.label} className="text-xs text-gray-300 glass rounded-full px-3 py-1.5">
+                {c.icon} {c.label}
+              </span>
+            ))}
+          </div>
+        </div>
+
         {/* Pricing reminder — shown only to non-Pro users */}
         {usage?.plan !== 'pro' && (
           <div className="mb-6 glass rounded-2xl px-5 py-3">
@@ -747,6 +876,11 @@ function DashboardInner() {
               ⚡ מהיר = חינמי תמיד &nbsp;·&nbsp; 📊 מלא = $1.99/דוח &nbsp;·&nbsp; 🔬 עמוק = $3.99/דוח
             </p>
           </div>
+        )}
+
+        {/* Spotlight stocks — live market cards (hidden once an asset is selected) */}
+        {!selected && (
+          <SpotlightStocks onSelect={handleSelect} getIdToken={getIdToken} />
         )}
 
         {/* Active research section */}
