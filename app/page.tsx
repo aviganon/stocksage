@@ -78,6 +78,23 @@ function useCountUp(end: number, duration = 2000, startOnView = true) {
   return { count, ref };
 }
 
+// ============ CLIENT-ONLY PARTICLES HOOK ============
+type Particle = { top: number; left: number; duration: number; delay: number };
+function useParticles(count: number) {
+  const [particles, setParticles] = useState<Particle[]>([]);
+  useEffect(() => {
+    setParticles(
+      Array.from({ length: count }, () => ({
+        top: Math.random() * 100,
+        left: Math.random() * 100,
+        duration: 4 + Math.random() * 4,
+        delay: Math.random() * 2,
+      }))
+    );
+  }, [count]);
+  return particles;
+}
+
 // ============ INTERSECTION OBSERVER HOOK ============
 function useInView(threshold = 0.2) {
   const ref = useRef<HTMLDivElement>(null);
@@ -138,6 +155,7 @@ export default function LandingPage() {
   const reportsCount = useCountUp(18);
   const marketsCount = useCountUp(7);
   const languagesCount = useCountUp(5);
+  const particles = useParticles(20);
   
   const heroRef = useInView(0.3);
   const marketsRef = useInView(0.2);
@@ -270,17 +288,17 @@ export default function LandingPage() {
           backgroundSize: '60px 60px'
         }} />
 
-        {/* Floating particles */}
-        <div className="absolute inset-0">
-          {[...Array(20)].map((_, i) => (
+        {/* Floating particles (client-only to avoid hydration mismatch) */}
+        <div className="absolute inset-0" aria-hidden="true">
+          {particles.map((p, i) => (
             <div
               key={i}
               className="absolute w-1 h-1 rounded-full bg-indigo-400/40"
               style={{
-                top: `${Math.random() * 100}%`,
-                left: `${Math.random() * 100}%`,
-                animation: `float ${4 + Math.random() * 4}s ease-in-out infinite`,
-                animationDelay: `${Math.random() * 2}s`
+                top: `${p.top}%`,
+                left: `${p.left}%`,
+                animation: `float ${p.duration}s ease-in-out infinite`,
+                animationDelay: `${p.delay}s`
               }}
             />
           ))}
