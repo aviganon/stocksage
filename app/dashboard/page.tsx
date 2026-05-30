@@ -490,7 +490,7 @@ const EXCHANGE_COLORS: Record<string, string> = {
 };
 
 function DashboardInner() {
-  const { user, loading: authLoading, getIdToken, logout } = useAuth();
+  const { user, loading: authLoading, getIdToken, logout, signInAnon, isAnonymous } = useAuth();
   const { t, locale, dir } = useI18n();
   const { openCheckout } = usePaddleCheckout();
 
@@ -517,9 +517,20 @@ function DashboardInner() {
   const [loadingData, setLoadingData]   = useState(true);
   const [error, setError]               = useState('');
 
+  // No account? Sign in anonymously so the visitor can try 3 free quick scans
+  // (instead of forcing them to /login). They link to a real account on signup.
   useEffect(() => {
-    if (!authLoading && !user) router.push('/login');
-  }, [user, authLoading, router]);
+    if (!authLoading && !user) signInAnon().catch(() => router.push('/login'));
+  }, [user, authLoading, signInAnon, router]);
+
+  const ANON_FREE_SCANS = 3;
+  const anonScansUsed = isAnonymous ? reports.length : 0;
+  const anonScansLeft = Math.max(0, ANON_FREE_SCANS - anonScansUsed);
+
+  // Anonymous guests can only run quick scans — default the selector to quick
+  useEffect(() => {
+    if (isAnonymous) setDepth('quick');
+  }, [isAnonymous]);
 
   // Auto-fill search if coming from "שדרג דוח" button
   useEffect(() => {
@@ -609,13 +620,26 @@ function DashboardInner() {
 
   async function startReport() {
     if (!selected) return;
+
+    // Anonymous guests: only quick, only while scans remain → else send to signup
+    if (isAnonymous) {
+      if (depth !== 'quick') {
+        router.push('/signup?reason=depth');
+        return;
+      }
+      if (anonScansLeft <= 0) {
+        router.push('/signup?reason=limit');
+        return;
+      }
+    }
+
     setStarting(true);
     setError('');
     try {
       const token = await getIdToken();
 
       // Standard/Deep: owner is free; others need credit or payment
-      if (!isOwner && (depth === 'standard' || depth === 'deep')) {
+      if (!isOwner && !isAnonymous && (depth === 'standard' || depth === 'deep')) {
         const hasCredit = credits[depth] > 0;
         if (!hasCredit) {
           const res = await fetch('/api/billing/checkout', {
@@ -725,22 +749,48 @@ function DashboardInner() {
             Stock<span className="text-indigo-400">Sage</span>
           </Link>
           <div className="flex items-center gap-4">
-            {/* Greeting */}
-            <span className="text-white font-medium hidden sm:block">
-              {firstName ? `ברוך הבא, ${firstName}` : 'ברוך הבא'}
-              {usage?.plan === 'pro' && <span className="mr-1.5 text-xs text-indigo-300">Pro ✦</span>}
-            </span>
-            <LanguageSwitcher />
-            <Link href="/settings" className="text-sm text-gray-500 hover:text-gray-300 transition-colors">{t('nav.settings')}</Link>
-            <button onClick={logout} className="text-sm text-gray-500 hover:text-gray-300 transition-colors">{t('nav.logout')}</button>
+            {isAnonymous ? (
+              <>
+                <LanguageSwitcher />
+                <Link href="/login" className="text-sm text-gray-400 hover:text-white transition-colors">{t('nav.signin')}</Link>
+                <Link href="/signup" className="text-sm bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg transition-colors">{t('nav.getStarted')}</Link>
+              </>
+            ) : (
+              <>
+                <span className="text-white font-medium hidden sm:block">
+                  {firstName ? `ברוך הבא, ${firstName}` : 'ברוך הבא'}
+                  {usage?.plan === 'pro' && <span className="mr-1.5 text-xs text-indigo-300">Pro ✦</span>}
+                </span>
+                <LanguageSwitcher />
+                <Link href="/settings" className="text-sm text-gray-500 hover:text-gray-300 transition-colors">{t('nav.settings')}</Link>
+                <button onClick={logout} className="text-sm text-gray-500 hover:text-gray-300 transition-colors">{t('nav.logout')}</button>
+              </>
+            )}
           </div>
         </div>
       </nav>
 
       <div className="max-w-5xl mx-auto px-6 py-10">
 
-        {/* Pricing reminder — shown only to non-Pro users */}
-        {usage?.plan !== 'pro' && (
+        {/* Anonymous guest banner — free scans + signup CTA */}
+        {isAnonymous && (
+          <div className="mb-6 rounded-xl px-5 py-4 bg-indigo-500/10 border border-indigo-500/25 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium text-white">
+                👋 אתה במצב אורח — נותרו לך <span className="text-indigo-300 font-bold">{anonScansLeft}</span> סריקות מהירות חינמיות
+              </p>
+              <p className="text-xs text-gray-400 mt-0.5">
+                הירשם בחינם לשמירת הדוחות + גישה לניתוח מלא ועמוק
+              </p>
+            </div>
+            <Link href="/signup" className="text-sm bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2 rounded-lg transition-colors shrink-0">
+              הרשמה חינם
+            </Link>
+          </div>
+        )}
+
+        {/* Pricing reminder — shown only to logged-in non-Pro users */}
+        {!isAnonymous && usage?.plan !== 'pro' && (
           <div className="mb-6 rounded-xl px-5 py-3 bg-white/3 border border-white/8">
             <p className="text-xs text-gray-500">
               ⚡ מהיר = חינמי תמיד &nbsp;·&nbsp; 📊 מלא = $1.99/דוח &nbsp;·&nbsp; 🔬 עמוק = $3.99/דוח
@@ -861,8 +911,12 @@ function DashboardInner() {
                     </div>
                     <div className="text-xs text-gray-500 mb-1">{opt.steps}</div>
                     <div className="text-xs text-gray-600 mb-2">{opt.time}</div>
-                    {/* Price or free credits badge */}
-                    {(opt.value === 'standard' || opt.value === 'deep') && credits[opt.value] > 0 ? (
+                    {/* Badge: lock for anon standard/deep, free credits, or price */}
+                    {isAnonymous && (opt.value === 'standard' || opt.value === 'deep') ? (
+                      <div className="text-xs font-semibold px-2 py-0.5 rounded-full w-fit bg-white/8 text-gray-400">
+                        🔒 דרוש חשבון
+                      </div>
+                    ) : (opt.value === 'standard' || opt.value === 'deep') && credits[opt.value] > 0 ? (
                       <div className="text-xs font-semibold px-2 py-0.5 rounded-full w-fit bg-green-500/20 text-green-300">
                         {credits[opt.value]} חינמיות
                       </div>

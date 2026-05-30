@@ -18,7 +18,9 @@
     "featuresSub": "Chaque rapport passe par un processus automatisé de collecte de données et d'analyse IA",
     "pricingTitle": "Tarification transparente",
     "pricingSub": "Analyse rapide toujours gratuite — payez uniquement pour l'analyse approfondie",
-    "disclaimer": "À titre informatif uniquement — ne constitue pas un conseil en investissement"
+    "disclaimer": "À titre informatif uniquement — ne constitue pas un conseil en investissement",
+    "ctaTry": "Essayez — 3 analyses gratuites sans inscription",
+    "tryNote": "Sans carte · Sans inscription · Commencez tout de suite"
   },
   "pricing": {
     "free": "Gratuit",

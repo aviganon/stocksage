@@ -11,7 +11,7 @@ export class AuthError extends Error {
   }
 }
 
-export async function verifyAuth(): Promise<{ uid: string; email: string | null }> {
+export async function verifyAuth(): Promise<{ uid: string; email: string | null; isAnonymous: boolean }> {
   const h = await headers();
   const authHeader = h.get('Authorization') ?? h.get('authorization');
   let token: string | null = null;
@@ -27,7 +27,9 @@ export async function verifyAuth(): Promise<{ uid: string; email: string | null 
 
   try {
     const decoded = await verifyIdToken(token);
-    return { uid: decoded.uid, email: decoded.email ?? null };
+    const provider = (decoded.firebase as { sign_in_provider?: string } | undefined)?.sign_in_provider;
+    const isAnonymous = provider === 'anonymous' || (!decoded.email && provider !== 'custom');
+    return { uid: decoded.uid, email: decoded.email ?? null, isAnonymous };
   } catch {
     throw new AuthError('invalid_token', 'Invalid or expired token');
   }

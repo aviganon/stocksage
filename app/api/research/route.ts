@@ -26,11 +26,14 @@ const StartResearchSchema = z.object({
 
 const OWNER_EMAIL = process.env.ADMIN_EMAIL ?? 'ganonavi@gmail.com';
 
+const ANON_FREE_SCANS = 3;
+
 export async function POST(req: NextRequest) {
   let uid: string;
   let email: string | null;
+  let isAnonymous: boolean;
   try {
-    ({ uid, email } = await verifyAuth());
+    ({ uid, email, isAnonymous } = await verifyAuth());
   } catch (e) {
     if (e instanceof AuthError) return fail(e.code, e.message, 401);
     return fail('internal', 'Auth error', 500);
@@ -42,6 +45,18 @@ export async function POST(req: NextRequest) {
 
   const { assetId, depth, language } = parsed.data;
   const isOwner = email === OWNER_EMAIL;
+
+  // Anonymous (no-account) users: quick scans only, max 3 lifetime
+  if (isAnonymous) {
+    if (depth !== 'quick') {
+      return fail('signup_required', 'ניתוח מלא ועמוק דורש חשבון. הירשם בחינם כדי להמשיך.', 403);
+    }
+    const repo0 = new ResearchReportsRepository();
+    const existing = await repo0.listForUser(uid, { limit: ANON_FREE_SCANS + 1 });
+    if (existing.length >= ANON_FREE_SCANS) {
+      return fail('signup_required', `ניצלת את ${ANON_FREE_SCANS} הסריקות החינמיות. הירשם בחינם להמשך שימוש.`, 403);
+    }
+  }
 
   // Rate limit — abuse protection (owner exempt)
   if (!isOwner) {

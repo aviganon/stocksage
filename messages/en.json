@@ -18,7 +18,9 @@
     "featuresSub": "Every report goes through an automated process of data collection and AI analysis",
     "pricingTitle": "Transparent Pricing",
     "pricingSub": "Quick research is always free — pay only for deep analysis",
-    "disclaimer": "For informational purposes only — not investment advice"
+    "disclaimer": "For informational purposes only — not investment advice",
+    "ctaTry": "Try now — 3 free scans, no signup",
+    "tryNote": "No credit card · No signup · Start instantly"
   },
   "pricing": {
     "free": "Free",
