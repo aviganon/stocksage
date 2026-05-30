@@ -10,6 +10,7 @@ import { verifyAuth, AuthError } from '@/lib/auth/server';
 import { ResearchReportsRepository } from '@/lib/storage/research-reports';
 import { runResearchPipeline } from '@/lib/ai/orchestrator';
 import { canRunReport, consumeCredit, getCreditsRemaining, checkRateLimit } from '@/lib/usage/tracker';
+import { getAdminDb } from '@/lib/firebase/admin';
 
 function ok(data: unknown, status = 200) {
   return NextResponse.json({ ok: true, ...((data && typeof data === 'object') ? data : { data }) }, { status });
@@ -106,6 +107,16 @@ export async function POST(req: NextRequest) {
   runResearchPipeline(assetId, { uid, depth, language, reportId }).catch((e) => {
     console.error('[api/research] Background pipeline error', { assetId, reportId, error: String(e) });
   });
+
+  // Add to watchlist (fire-and-forget, non-blocking)
+  getAdminDb().collection('watchlists').doc(uid).get().then(async (doc) => {
+    const DEFAULT_ASSETS = ['TASE:TEVA','TASE:NICE','NASDAQ:NVDA','NASDAQ:AAPL','NASDAQ:MSFT','NYSE:TSLA'];
+    const current: string[] = doc.exists ? ((doc.data()?.['assets'] as string[]) ?? DEFAULT_ASSETS) : DEFAULT_ASSETS;
+    if (!current.includes(assetId)) {
+      const updated = [assetId, ...current].slice(0, 20);
+      await getAdminDb().collection('watchlists').doc(uid).set({ assets: updated, updatedAt: new Date().toISOString() }, { merge: true });
+    }
+  }).catch(() => {});
 
   return ok({ assetId, depth, language, status: 'started', reportId });
 }

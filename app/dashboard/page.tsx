@@ -8,6 +8,85 @@ import { LanguageSwitcher } from '@/components/ui/language-switcher';
 import { useI18n } from '@/lib/i18n/context';
 import { usePaddleCheckout } from '@/components/paddle/checkout-overlay';
 import type { SpotlightQuote } from '@/app/api/markets/spotlight/route';
+import type { WatchlistCard } from '@/app/api/watchlist/route';
+
+// ─── Sparkline SVG ────────────────────────────────────────────────────────────
+
+function Sparkline({ history, positive }: { history: { close: number }[]; positive: boolean }) {
+  if (history.length < 2) return <div className="h-12 w-full" />;
+  const closes = history.map((h) => h.close);
+  const min = Math.min(...closes);
+  const max = Math.max(...closes);
+  const range = max - min || 1;
+  const W = 120, H = 40, pad = 2;
+  const pts = closes.map((c, i) => {
+    const x = pad + (i / (closes.length - 1)) * (W - pad * 2);
+    const y = pad + ((max - c) / range) * (H - pad * 2);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(' ');
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-12" preserveAspectRatio="none">
+      <polyline points={pts} fill="none"
+        stroke={positive ? '#4ade80' : '#f87171'} strokeWidth="1.5"
+        strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+// ─── Watchlist card ───────────────────────────────────────────────────────────
+
+function WatchlistStockCard({ card, onSelect, onRemove, getIdToken }: {
+  card: WatchlistCard;
+  onSelect: (s: SearchResult) => void;
+  onRemove: (id: string) => void;
+  getIdToken: () => Promise<string | null>;
+}) {
+  const up = (card.changePercent ?? 0) >= 0;
+
+  async function handleRemove(e: React.MouseEvent) {
+    e.stopPropagation();
+    const token = await getIdToken();
+    await fetch(`/api/watchlist?assetId=${encodeURIComponent(card.id)}`, {
+      method: 'DELETE', headers: { Authorization: `Bearer ${token ?? ''}` },
+    });
+    onRemove(card.id);
+  }
+
+  return (
+    <div className="glass-card rounded-2xl p-4 group relative cursor-pointer"
+      onClick={() => onSelect({ id: card.id, symbol: card.symbol, name: card.name, exchange: card.exchange })}>
+
+      <button onClick={handleRemove}
+        className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 text-gray-600 hover:text-red-400 text-xs transition-all"
+        title="הסר">✕</button>
+
+      <div className="flex items-start justify-between mb-1">
+        <div>
+          <p className="text-white font-semibold text-sm">{card.symbol}</p>
+          <p className="text-gray-500 text-xs">{card.exchange}</p>
+        </div>
+        {card.changePercent != null && (
+          <span className={`text-xs font-semibold px-1.5 py-0.5 rounded-full ${up ? 'text-green-400 bg-green-400/10' : 'text-red-400 bg-red-400/10'}`}>
+            {up ? '+' : ''}{card.changePercent.toFixed(2)}%
+          </span>
+        )}
+      </div>
+
+      <Sparkline history={card.history} positive={up} />
+
+      {card.price != null && (
+        <p className="text-gray-300 text-sm font-mono mt-1">
+          {card.currency === 'ILS' ? '₪' : '$'}{card.price.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+          {card.change != null && (
+            <span className={`text-xs mr-1.5 ${up ? 'text-green-400' : 'text-red-400'}`}>
+              {up ? '+' : ''}{card.change.toFixed(2)}
+            </span>
+          )}
+        </p>
+      )}
+    </div>
+  );
+}
 
 // ─── Spotlight stock cards (live prices) ─────────────────────────────────────
 
@@ -561,6 +640,9 @@ function DashboardInner() {
   const [firstName, setFirstName]       = useState<string>('');
   const [credits, setCredits]           = useState<{ standard: number; deep: number }>({ standard: 0, deep: 0 });
   const [isOwner, setIsOwner]           = useState(false);
+  const [bottomTab, setBottomTab]       = useState<'reports' | 'watchlist'>('reports');
+  const [watchlist, setWatchlist]       = useState<WatchlistCard[]>([]);
+  const [watchlistLoading, setWatchlistLoading] = useState(false);
   const [query, setQuery]               = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searching, setSearching]       = useState(false);
@@ -621,6 +703,21 @@ function DashboardInner() {
   }, [getIdToken]);
 
   useEffect(() => { if (user) fetchData(); }, [user, fetchData]);
+
+  // Fetch watchlist when tab selected or on mount
+  const fetchWatchlist = useCallback(async () => {
+    const token = await getIdToken();
+    if (!token) return;
+    setWatchlistLoading(true);
+    const res = await fetch('/api/watchlist', { headers: { Authorization: `Bearer ${token}` } });
+    if (res.ok) setWatchlist((await res.json()).cards ?? []);
+    setWatchlistLoading(false);
+  }, [getIdToken]);
+
+  useEffect(() => {
+    if (user && (bottomTab === 'watchlist' || watchlist.length === 0)) fetchWatchlist();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, bottomTab]);
 
   // Refetch when user navigates back to this tab/page (handles Next.js router cache)
   useEffect(() => {
@@ -1014,24 +1111,74 @@ function DashboardInner() {
           )}
         </div>
 
-        {/* Completed reports list */}
+        {/* Bottom section with tabs */}
         <div>
-          <h2 className="text-lg font-semibold text-white mb-4">{t('dashboard.myReports')}</h2>
-          {loadingData ? (
-            <div className="space-y-3">
-              {[1, 2, 3].map((i) => <div key={i} className="h-20 bg-white/5 rounded-xl animate-pulse" />)}
-            </div>
-          ) : doneReports.length === 0 ? (
-            <div className="text-center py-16 text-gray-500">
-              <p className="text-4xl mb-4">📊</p>
-              <p>{activeReports.length > 0 ? t('dashboard.noReports') : t('dashboard.noReports')}</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {doneReports.map((r) => (
-                <DoneReportRow key={r.id} report={r} onDelete={handleDelete} getIdToken={getIdToken} />
-              ))}
-            </div>
+          {/* Tab switcher */}
+          <div className="flex items-center gap-1 mb-5">
+            <button onClick={() => setBottomTab('reports')}
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+                bottomTab === 'reports' ? 'bg-white/15 text-white' : 'text-gray-500 hover:text-gray-300'
+              }`}>
+              {t('dashboard.myReports')}
+            </button>
+            <button onClick={() => setBottomTab('watchlist')}
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors flex items-center gap-1.5 ${
+                bottomTab === 'watchlist' ? 'bg-white/15 text-white' : 'text-gray-500 hover:text-gray-300'
+              }`}>
+              📈 המניות שלי
+              {watchlist.length > 0 && (
+                <span className="text-xs bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded-full">{watchlist.length}</span>
+              )}
+            </button>
+          </div>
+
+          {/* Reports tab */}
+          {bottomTab === 'reports' && (
+            loadingData ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => <div key={i} className="h-20 bg-white/5 rounded-xl animate-pulse" />)}
+              </div>
+            ) : doneReports.length === 0 ? (
+              <div className="text-center py-16 text-gray-500">
+                <p className="text-4xl mb-4">📊</p>
+                <p>{t('dashboard.noReports')}</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {doneReports.map((r) => (
+                  <DoneReportRow key={r.id} report={r} onDelete={handleDelete} getIdToken={getIdToken} />
+                ))}
+              </div>
+            )
+          )}
+
+          {/* Watchlist tab */}
+          {bottomTab === 'watchlist' && (
+            watchlistLoading ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {[1,2,3,4,5,6].map((i) => (
+                  <div key={i} className="h-32 bg-white/5 rounded-2xl animate-pulse" />
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {watchlist.map((card) => (
+                  <WatchlistStockCard
+                    key={card.id}
+                    card={card}
+                    onSelect={handleSelect}
+                    onRemove={(id) => setWatchlist((prev) => prev.filter((c) => c.id !== id))}
+                    getIdToken={getIdToken}
+                  />
+                ))}
+                {watchlist.length === 0 && (
+                  <div className="col-span-3 text-center py-16 text-gray-500">
+                    <p className="text-4xl mb-3">📈</p>
+                    <p>בצע מחקר מניה — היא תופיע כאן אוטומטית</p>
+                  </div>
+                )}
+              </div>
+            )
           )}
         </div>
       </div>
