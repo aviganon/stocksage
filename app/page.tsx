@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useI18n } from '@/lib/i18n/context';
+import { LanguageSwitcher } from '@/components/ui/language-switcher';
 
 const FEATURES_HE = [
   { step: '01', title: 'פרופיל חברה',    desc: 'תיאור, מוצרים, מיילסטונים, הקשר ישראלי ורשימת דגלים' },
@@ -66,6 +67,7 @@ export default function LandingPage() {
             <span className="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Beta</span>
           </div>
           <div className="flex items-center gap-3">
+            <LanguageSwitcher />
             <Link href="/login" className="text-sm text-gray-400 hover:text-white transition-colors px-4 py-2">
               {t('nav.signin')}
             </Link>
