@@ -1,32 +1,227 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0a0a0f;
+  --background: #07070d;
   --foreground: #e8e8f0;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Brand */
+  --brand: #6366f1;
+  --brand-light: #818cf8;
+  --accent: #22d3ee;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  position: relative;
+  min-height: 100vh;
 }
 
 * { box-sizing: border-box; }
 
 ::selection { background: #6366f1; color: white; }
 
-/* Accessibility: visible keyboard focus indicator (WCAG 2.4.7).
-   Overrides any `outline-none` for keyboard users while keeping
-   mouse clicks clean via :focus-visible. */
+/* ───────────────────────────────────────────────────────────
+   AMBIENT BACKGROUND — premium animated gradient mesh
+   Applied globally behind all pages via .ambient-bg layer
+   ─────────────────────────────────────────────────────────── */
+.ambient-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(900px circle at 15% 5%, rgba(99, 102, 241, 0.18), transparent 45%),
+    radial-gradient(800px circle at 85% 15%, rgba(34, 211, 238, 0.12), transparent 45%),
+    radial-gradient(1000px circle at 50% 100%, rgba(99, 102, 241, 0.10), transparent 50%),
+    #07070d;
+}
+
+.ambient-bg::before,
+.ambient-bg::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.5;
+}
+
+.ambient-bg::before {
+  width: 480px; height: 480px;
+  top: -120px; inset-inline-start: -80px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.35), transparent 70%);
+  animation: drift1 22s ease-in-out infinite;
+}
+
+.ambient-bg::after {
+  width: 420px; height: 420px;
+  bottom: -100px; inset-inline-end: -60px;
+  background: radial-gradient(circle, rgba(34, 211, 238, 0.22), transparent 70%);
+  animation: drift2 26s ease-in-out infinite;
+}
+
+/* subtle grid overlay for depth */
+.ambient-grid {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.022) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
+}
+
+@keyframes drift1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(60px, 40px) scale(1.15); }
+}
+@keyframes drift2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-50px, -30px) scale(1.1); }
+}
+
+/* ───────────────────────────────────────────────────────────
+   GLASS SYSTEM — reusable frosted-glass surfaces
+   ─────────────────────────────────────────────────────────── */
+.glass {
+  background: linear-gradient(135deg, rgba(255,255,255,0.07), rgba(255,255,255,0.025));
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  border: 1px solid rgba(255,255,255,0.10);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* Card with hover lift + sheen */
+.glass-card {
+  position: relative;
+  background: linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+  backdrop-filter: blur(18px) saturate(135%);
+  -webkit-backdrop-filter: blur(18px) saturate(135%);
+  border: 1px solid rgba(255,255,255,0.09);
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, 0.30),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  transition: transform 0.35s cubic-bezier(0.22,1,0.36,1),
+              border-color 0.35s ease,
+              box-shadow 0.35s ease;
+}
+.glass-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(129, 140, 248, 0.35);
+  box-shadow:
+    0 16px 48px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(129, 140, 248, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.10);
+}
+
+/* Strong panel for modals / drawers */
+.glass-strong {
+  background: linear-gradient(150deg, rgba(20,20,34,0.92), rgba(12,12,22,0.92));
+  backdrop-filter: blur(28px) saturate(150%);
+  -webkit-backdrop-filter: blur(28px) saturate(150%);
+  border: 1px solid rgba(255,255,255,0.10);
+  box-shadow:
+    0 24px 70px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* Frosted nav bar */
+.glass-nav {
+  background: rgba(10, 10, 18, 0.55);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
+/* Glass inputs */
+.glass-input {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.10);
+  transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+}
+.glass-input:focus {
+  outline: none;
+  border-color: rgba(129, 140, 248, 0.6);
+  background: rgba(255,255,255,0.06);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+/* Primary gradient button */
+.btn-glow {
+  position: relative;
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  box-shadow: 0 8px 24px rgba(79, 70, 229, 0.35), inset 0 1px 0 rgba(255,255,255,0.2);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
+}
+.btn-glow:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 34px rgba(79, 70, 229, 0.5), inset 0 1px 0 rgba(255,255,255,0.25);
+  filter: brightness(1.08);
+}
+.btn-glow:active { transform: translateY(0); }
+
+/* Gradient text */
+.text-gradient {
+  background: linear-gradient(120deg, #fff 0%, #c7d2fe 45%, #67e8f9 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Soft glow ring utility */
+.glow-ring {
+  box-shadow: 0 0 0 1px rgba(129,140,248,0.2), 0 0 30px rgba(99,102,241,0.25);
+}
+
+/* ───────────────────────────────────────────────────────────
+   ANIMATIONS
+   ─────────────────────────────────────────────────────────── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up { animation: fadeInUp 0.7s cubic-bezier(0.22,1,0.36,1) both; }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+.animate-float { animation: float 6s ease-in-out infinite; }
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+.animate-pulse-glow { animation: pulseGlow 2.5s ease-in-out infinite; }
+
+/* ───────────────────────────────────────────────────────────
+   ACCESSIBILITY
+   ─────────────────────────────────────────────────────────── */
 :focus-visible {
   outline: 2px solid #818cf8 !important;
   outline-offset: 2px;
   border-radius: 4px;
 }
 
-/* Respect reduced-motion preference (WCAG 2.3.3) */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -35,7 +230,6 @@ body {
   }
 }
 
-/* Screen-reader-only utility */
 .sr-only {
   position: absolute;
   width: 1px; height: 1px;
@@ -46,6 +240,13 @@ body {
   border: 0;
 }
 
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #12121e; }
-::-webkit-scrollbar-thumb { background: #3d3d6b; border-radius: 3px; }
+/* ───────────────────────────────────────────────────────────
+   SCROLLBAR
+   ─────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #4f46e5, #3d3d6b);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover { background: #6366f1; }

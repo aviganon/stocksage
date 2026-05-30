@@ -7,8 +7,8 @@ export const metadata: Metadata = {
 
 export default function RefundPage() {
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-[#e8e8f0]">
-      <nav className="border-b border-white/5 px-6 py-4">
+    <div className="min-h-screen text-[#e8e8f0]">
+      <nav className="glass-nav sticky top-0 z-30 px-6 py-4">
         <div className="max-w-3xl mx-auto">
           <Link href="/" className="text-xl font-bold text-white">
             Stock<span className="text-indigo-400">Sage</span>
@@ -16,11 +16,11 @@ export default function RefundPage() {
         </div>
       </nav>
 
-      <div className="max-w-3xl mx-auto px-6 py-12">
-        <h1 className="text-3xl font-bold text-white mb-2">מדיניות החזרים</h1>
+      <div className="max-w-3xl mx-auto px-6 py-12 animate-fade-up">
+        <h1 className="text-3xl font-bold text-gradient mb-2">מדיניות החזרים</h1>
         <p className="text-gray-500 text-sm mb-10">עדכון אחרון: מאי 2026</p>
 
-        <div className="space-y-8 text-gray-300 leading-relaxed">
+        <div className="glass rounded-3xl p-8 space-y-8 text-gray-300 leading-relaxed">
 
           <section>
             <h2 className="text-lg font-semibold text-white mb-3">מדיניות כללית</h2>

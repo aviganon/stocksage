@@ -15,7 +15,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="he" dir="rtl" className={`${geist.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col bg-[#0a0a0f] text-[#e8e8f0]">
+      <body className="min-h-full flex flex-col bg-[#07070d] text-[#e8e8f0]">
+        <div className="ambient-bg" aria-hidden="true" />
+        <div className="ambient-grid" aria-hidden="true" />
         <I18nProvider>
           <AuthProvider>{children}</AuthProvider>
           <CookieConsent />

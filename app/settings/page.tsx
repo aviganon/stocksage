@@ -156,7 +156,7 @@ function EditUserDrawer({ uid, getIdToken, onClose, onSaved, onDeleted }: {
       <div className="fixed inset-0 bg-black/50 z-40" onClick={onClose} />
 
       {/* Drawer */}
-      <div className="fixed top-0 left-0 h-full w-full max-w-md bg-[#0f0f1a] border-r border-white/10 z-50 overflow-y-auto shadow-2xl">
+      <div className="fixed top-0 left-0 h-full w-full max-w-md glass-strong border-r border-white/10 z-50 overflow-y-auto">
         <div className="flex items-center justify-between px-6 py-5 border-b border-white/8">
           <h2 className="text-lg font-semibold text-white">עריכת משתמש</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-white text-2xl leading-none transition-colors">×</button>
@@ -365,7 +365,7 @@ function CreateUserModal({ getIdToken, onClose, onCreated }: {
     <>
       <div className="fixed inset-0 bg-black/60 z-40" onClick={onClose} />
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div className="bg-[#0f0f1a] border border-white/10 rounded-2xl w-full max-w-md shadow-2xl">
+        <div className="glass-strong rounded-3xl w-full max-w-md">
           <div className="flex items-center justify-between px-6 py-5 border-b border-white/8">
             <h2 className="text-lg font-semibold text-white">יצירת משתמש חדש</h2>
             <button onClick={onClose} className="text-gray-400 hover:text-white text-2xl leading-none transition-colors">×</button>
@@ -508,10 +508,13 @@ function OwnerSettings({ user, data, getIdToken, logout }: {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-[#e8e8f0]">
-      <nav className="border-b border-white/5 px-6 py-4">
+    <div className="min-h-screen text-[#e8e8f0]">
+      <nav className="glass-nav sticky top-0 z-40 px-6 py-4">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
-          <Link href="/" className="text-xl font-bold text-white">Stock<span className="text-indigo-400">Sage</span></Link>
+          <Link href="/" className="flex items-center gap-2 text-xl font-bold text-white">
+            <span className="w-8 h-8 rounded-lg btn-glow flex items-center justify-center text-base">S</span>
+            Stock<span className="text-gradient">Sage</span>
+          </Link>
           <Link href="/dashboard" className="text-sm text-gray-400 hover:text-white transition-colors">← לוח בקרה</Link>
         </div>
       </nav>
@@ -541,7 +544,7 @@ function OwnerSettings({ user, data, getIdToken, logout }: {
                 { label: 'דוחות החודש',  value: String(stats?.reports.thisMonth ?? '—'),   sub: `${stats?.reports.today ?? 0} היום` },
                 { label: 'עלות API',      value: stats ? `$${stats.costs.thisMonth.toFixed(2)}` : '—', sub: `ממוצע $${stats?.costs.avgPerReport.toFixed(3) ?? 0}/דוח` },
               ].map((s) => (
-                <div key={s.label} className="bg-white/5 border border-white/8 rounded-xl p-5">
+                <div key={s.label} className="glass-card rounded-2xl p-5">
                   <p className="text-xs text-gray-500 mb-1">{s.label}</p>
                   <p className="text-2xl font-bold text-white">{s.value}</p>
                   <p className="text-xs text-gray-600 mt-1">{s.sub}</p>
@@ -550,19 +553,19 @@ function OwnerSettings({ user, data, getIdToken, logout }: {
             </div>
             {stats && (
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="bg-white/5 border border-white/8 rounded-xl p-5">
+                <div className="glass-card rounded-2xl p-5">
                   <p className="text-xs text-gray-500 mb-1">רווחיות</p>
                   <p className={`text-xl font-bold ${stats.revenue.mrr - stats.costs.thisMonth >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                     ${(stats.revenue.mrr - stats.costs.thisMonth).toFixed(2)}
                   </p>
                   <p className="text-xs text-gray-600 mt-1">MRR פחות עלות API</p>
                 </div>
-                <div className="bg-white/5 border border-white/8 rounded-xl p-5">
+                <div className="glass-card rounded-2xl p-5">
                   <p className="text-xs text-gray-500 mb-1">משתמשי Free</p>
                   <p className="text-xl font-bold text-white">{stats.users.free}</p>
                   <p className="text-xs text-gray-600 mt-1">פוטנציאל להמרה</p>
                 </div>
-                <div className="bg-white/5 border border-white/8 rounded-xl p-5">
+                <div className="glass-card rounded-2xl p-5">
                   <p className="text-xs text-gray-500 mb-1">דוחות חודש שעבר</p>
                   <p className="text-xl font-bold text-white">{stats.reports.lastMonth}</p>
                   <p className="text-xs text-gray-600 mt-1">עלות: ${stats.costs.lastMonth.toFixed(2)}</p>
@@ -578,7 +581,7 @@ function OwnerSettings({ user, data, getIdToken, logout }: {
             {/* Toolbar */}
             <div className="flex gap-3 mb-5 flex-wrap items-center">
               <input type="text" placeholder="חיפוש לפי אימייל..." value={search} onChange={(e) => setSearch(e.target.value)}
-                className="bg-white/5 border border-white/10 focus:border-indigo-500 text-white rounded-lg px-4 py-2 text-sm outline-none w-56 transition-colors" />
+                className="glass-input text-white rounded-xl px-4 py-2 text-sm w-56" />
               {(['all', 'free', 'pro'] as const).map((p) => (
                 <button key={p} onClick={() => setPlanFilter(p)}
                   className={`text-sm px-3 py-1.5 rounded-lg transition-colors ${planFilter === p ? 'bg-white/15 text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
@@ -591,13 +594,13 @@ function OwnerSettings({ user, data, getIdToken, logout }: {
                 <span className="text-green-400">{users.filter(u => u.online).length} מחוברים</span>
               </span>
               <button onClick={() => setShowCreate(true)}
-                className="bg-indigo-600 hover:bg-indigo-500 text-white text-sm px-4 py-2 rounded-lg transition-colors font-medium">
+                className="btn-glow text-white text-sm px-4 py-2 rounded-xl font-medium">
                 + משתמש חדש
               </button>
             </div>
 
             {/* Table */}
-            <div className="bg-white/3 border border-white/8 rounded-2xl overflow-hidden">
+            <div className="glass-card rounded-2xl overflow-hidden">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-white/8 text-gray-500 text-xs uppercase tracking-wider">
@@ -822,7 +825,7 @@ function UserSettings({ user, data, getIdToken, logout }: {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-[#e8e8f0]">
+    <div className="min-h-screen text-[#e8e8f0]">
       <nav className="border-b border-white/5 px-6 py-4">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <Link href="/" className="text-xl font-bold text-white">Stock<span className="text-indigo-400">Sage</span></Link>
@@ -1059,7 +1062,7 @@ export default function SettingsPage() {
   }, [user, getIdToken]);
 
   if (authLoading || loading || !user || !data) return (
-    <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center">
       <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
     </div>
   );

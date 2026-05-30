@@ -11,12 +11,12 @@ const NAV = [
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-[#e8e8f0]">
-      <header className="border-b border-white/5 px-6 py-4">
+    <div className="min-h-screen text-[#e8e8f0]">
+      <header className="glass-nav sticky top-0 z-40 px-6 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-6">
             <Link href="/" className="text-xl font-bold text-white">
-              Stock<span className="text-indigo-400">Sage</span>
+              Stock<span className="text-gradient">Sage</span>
               <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-red-500/20 text-red-300 border border-red-500/30">Admin</span>
             </Link>
             <nav className="flex gap-1">

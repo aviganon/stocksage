@@ -94,7 +94,7 @@ function DoneReportRow({ report, onDelete, getIdToken }: {
   const nextUpgrade = report.status === 'completed' ? UPGRADE_NEXT[report.depth] : null;
 
   return (
-    <div className="flex items-center justify-between bg-white/5 border border-white/8 hover:bg-white/8 rounded-xl px-5 py-4 transition-colors group">
+    <div className="flex items-center justify-between glass-card rounded-2xl px-5 py-4 group">
       <Link href={`/report/${report.id}`} className="flex items-center gap-4 flex-1 min-w-0">
         <div className="w-10 h-10 rounded-lg bg-indigo-500/20 flex items-center justify-center text-sm font-bold text-indigo-300 shrink-0">
           {report.assetId.split(':')[1]?.slice(0, 2) ?? '??'}
@@ -263,7 +263,7 @@ function ActiveResearchCard({ report, getIdToken, onStop }: {
   }
 
   return (
-    <div className="bg-blue-500/8 border border-blue-500/25 rounded-2xl p-5">
+    <div className="glass rounded-2xl p-5 border-blue-500/30 bg-blue-500/[0.06]">
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <button
@@ -711,18 +711,19 @@ function DashboardInner() {
   }
 
   if (authLoading || !user) return (
-    <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center">
       <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-[#e8e8f0]" dir={dir}>
+    <div className="min-h-screen text-[#e8e8f0]" dir={dir}>
       {/* Nav */}
-      <nav className="border-b border-white/5 px-6 py-4">
+      <nav className="glass-nav sticky top-0 z-40 px-6 py-4">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
-          <Link href="/" className="text-xl font-bold text-white">
-            Stock<span className="text-indigo-400">Sage</span>
+          <Link href="/" className="flex items-center gap-2 text-xl font-bold text-white">
+            <span className="w-8 h-8 rounded-lg btn-glow flex items-center justify-center text-base">S</span>
+            Stock<span className="text-gradient">Sage</span>
           </Link>
           <div className="flex items-center gap-4">
             {/* Greeting */}
@@ -741,8 +742,8 @@ function DashboardInner() {
 
         {/* Pricing reminder — shown only to non-Pro users */}
         {usage?.plan !== 'pro' && (
-          <div className="mb-6 rounded-xl px-5 py-3 bg-white/3 border border-white/8">
-            <p className="text-xs text-gray-500">
+          <div className="mb-6 glass rounded-2xl px-5 py-3">
+            <p className="text-xs text-gray-400">
               ⚡ מהיר = חינמי תמיד &nbsp;·&nbsp; 📊 מלא = $1.99/דוח &nbsp;·&nbsp; 🔬 עמוק = $3.99/דוח
             </p>
           </div>
@@ -774,7 +775,7 @@ function DashboardInner() {
               value={query}
               onChange={(e) => handleSearch(e.target.value)}
               placeholder={t('dashboard.searchPlaceholder')}
-              className="w-full bg-white/5 border border-white/10 focus:border-indigo-500 text-white rounded-2xl px-5 py-4 text-base outline-none transition-colors"
+              className="w-full glass-input text-white rounded-2xl px-5 py-4 text-base"
               disabled={starting || isAtLimit}
             />
             {searching && (
@@ -792,7 +793,7 @@ function DashboardInner() {
             {/* Search results dropdown */}
             {searchResults.length > 0 && (
               <div
-                className="absolute top-full left-0 right-0 mt-2 bg-[#14141f] border border-white/10 rounded-2xl overflow-hidden z-50 shadow-2xl"
+                className="absolute top-full left-0 right-0 mt-2 glass-strong rounded-2xl overflow-hidden z-50"
                 onMouseDown={(e) => e.preventDefault()}
               >
                 {searchResults.map((r) => (
@@ -824,7 +825,7 @@ function DashboardInner() {
 
           {/* Depth selector (shown after selecting an asset) */}
           {selected && (
-            <div className="bg-white/3 border border-white/8 rounded-2xl p-6 mt-2">
+            <div className="glass-card rounded-3xl p-6 mt-2">
               {/* Selected asset header */}
               <div className="flex items-center gap-3 mb-5 pb-4 border-b border-white/8">
                 <div className="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center text-sm font-bold text-indigo-300 shrink-0">
@@ -846,10 +847,10 @@ function DashboardInner() {
                   <button
                     key={opt.value}
                     onClick={() => setDepth(opt.value)}
-                    className={`relative p-4 rounded-xl border text-right transition-all ${
+                    className={`relative p-4 rounded-2xl border text-right transition-all duration-300 ${
                       depth === opt.value
-                        ? 'border-indigo-500 bg-indigo-500/10'
-                        : 'border-white/8 bg-white/3 hover:border-white/20'
+                        ? 'border-indigo-500/60 bg-indigo-500/10 glow-ring'
+                        : 'border-white/8 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.06] hover:-translate-y-0.5'
                     }`}
                   >
                     {opt.recommended && (
@@ -889,7 +890,7 @@ function DashboardInner() {
               <button
                 onClick={startReport}
                 disabled={starting}
-                className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed text-white py-3 rounded-xl font-semibold text-sm transition-colors flex items-center justify-center gap-2"
+                className="w-full btn-glow disabled:opacity-60 disabled:cursor-not-allowed text-white py-3 rounded-2xl font-semibold text-sm flex items-center justify-center gap-2"
               >
                 {starting ? (
                   <>
@@ -932,7 +933,7 @@ function DashboardInner() {
 export default function DashboardPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
       </div>
     }>
