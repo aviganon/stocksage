@@ -1094,7 +1094,7 @@ function DashboardInner() {
                 {DEPTH_OPTIONS.map((v) => {
                   const m      = DEPTH_META[v];
                   const active = depth === v;
-                  const locked = isAnonymous && v !== 'quick';
+                  const locked = false; // anonymous can pay for any depth
                   const freeC  = !isAnonymous && v !== 'quick' && credits[v] > 0;
                   return (
                     <button
