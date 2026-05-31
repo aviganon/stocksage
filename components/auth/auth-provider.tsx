@@ -90,6 +90,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     const auth = getFirebaseAuth();
+    // Mark explicit logout so dashboard doesn't auto-sign-in anonymously
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('stocksage_explicit_logout', '1');
+    }
     await signOut(auth);
   };
 

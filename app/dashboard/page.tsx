@@ -698,10 +698,16 @@ function DashboardInner() {
   const [loadingData, setLoadingData]   = useState(true);
   const [error, setError]               = useState('');
 
-  // No account? Sign in anonymously so the visitor can try 3 free quick scans
-  // (instead of forcing them to /login). They link to a real account on signup.
+  // No account? Sign in anonymously — UNLESS user explicitly logged out
   useEffect(() => {
-    if (!authLoading && !user) signInAnon().catch(() => router.push('/login'));
+    if (authLoading || user) return;
+    const explicitLogout = localStorage.getItem('stocksage_explicit_logout');
+    if (explicitLogout) {
+      localStorage.removeItem('stocksage_explicit_logout');
+      router.push('/');  // send to landing page, not anonymous session
+      return;
+    }
+    signInAnon().catch(() => router.push('/login'));
   }, [user, authLoading, signInAnon, router]);
 
   const ANON_FREE_SCANS = 3;
