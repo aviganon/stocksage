@@ -47,11 +47,8 @@ export async function POST(req: NextRequest) {
   const { assetId, depth, language } = parsed.data;
   const isOwner = email === OWNER_EMAIL;
 
-  // Anonymous (no-account) users: quick scans only, max 3 lifetime
-  if (isAnonymous) {
-    if (depth !== 'quick') {
-      return fail('signup_required', 'ניתוח מלא ועמוק דורש חשבון. הירשם בחינם כדי להמשיך.', 403);
-    }
+  // Anonymous users: quick is free (max 3); standard/deep require payment (allowed below)
+  if (isAnonymous && depth === 'quick') {
     const repo0 = new ResearchReportsRepository();
     const existing = await repo0.listForUser(uid, { limit: ANON_FREE_SCANS + 1 });
     if (existing.length >= ANON_FREE_SCANS) {

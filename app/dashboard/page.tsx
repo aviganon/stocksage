@@ -817,16 +817,10 @@ function DashboardInner() {
   async function startReport() {
     if (!selected) return;
 
-    // Anonymous guests: only quick, only while scans remain → else send to signup
-    if (isAnonymous) {
-      if (depth !== 'quick') {
-        router.push('/signup?reason=depth');
-        return;
-      }
-      if (anonScansLeft <= 0) {
-        router.push('/signup?reason=limit');
-        return;
-      }
+    // Anonymous guests: quick is free (max 3); standard/deep go through payment
+    if (isAnonymous && depth === 'quick' && anonScansLeft <= 0) {
+      router.push('/signup?reason=limit');
+      return;
     }
 
     setStarting(true);
@@ -834,8 +828,8 @@ function DashboardInner() {
     try {
       const token = await getIdToken();
 
-      // Standard/Deep: owner is free; others need credit or payment
-      if (!isOwner && !isAnonymous && (depth === 'standard' || depth === 'deep')) {
+      // Standard/Deep: owner is free; others (including anonymous) need credit or payment
+      if (!isOwner && (depth === 'standard' || depth === 'deep')) {
         const hasCredit = credits[depth] > 0;
         if (!hasCredit) {
           const res = await fetch('/api/billing/checkout', {
@@ -976,7 +970,7 @@ function DashboardInner() {
                 👋 אתה במצב אורח — נותרו לך <span className="text-indigo-300 font-bold">{anonScansLeft}</span> סריקות מהירות חינמיות
               </p>
               <p className="text-xs text-gray-400 mt-0.5">
-                הירשם בחינם לשמירת הדוחות + גישה לניתוח מלא ועמוק
+                הירשם בחינם לשמירת הדוחות · ניתוח מלא ועמוק זמין בתשלום גם ללא חשבון
               </p>
             </div>
             <Link href="/signup" className="text-sm bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2 rounded-lg transition-colors shrink-0">
