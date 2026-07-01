@@ -247,7 +247,6 @@ async function runCompetitive(ctx: PipelineContext, profile: Profile | null, mod
     }),
     schema: CompetitiveSchema,
     maxTokens: 3500,
-    webSearch: true,
   });
 }
 
@@ -420,7 +419,6 @@ export async function runResearchPipeline(
       totalInputTokens += result.inputTokens;
       totalOutputTokens += result.outputTokens;
       await repo.updateStep(reportId, stepId, { status: 'completed', completedAt: new Date().toISOString(), costUSD: result.costUSD });
-      await repo.addCost(reportId, result.costUSD);
       await notify(stepId, 'completed', result.data);
       return result.data;
     } catch (e) {
