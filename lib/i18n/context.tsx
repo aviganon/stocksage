@@ -26,8 +26,17 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const stored = localStorage.getItem('stocksage_locale') as Locale | null;
-    const initial: Locale = stored && ['he','en','ru','fr','ar'].includes(stored) ? stored : DEFAULT_LOCALE;
-    applyLocale(initial);
+    if (stored && ['he','en','ru','fr','ar'].includes(stored)) {
+      applyLocale(stored);
+      return;
+    }
+    // First visit — detect browser language. Hebrew browsers get Hebrew,
+    // other supported languages get their own, everyone else gets English.
+    const browserLang = (navigator.language || '').slice(0, 2).toLowerCase();
+    const detected: Locale = (['he','en','ru','fr','ar'] as const).includes(browserLang as Locale)
+      ? (browserLang as Locale)
+      : 'en';
+    applyLocale(detected);
   }, []);
 
   function applyLocale(l: Locale) {

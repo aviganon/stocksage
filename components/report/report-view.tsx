@@ -71,7 +71,7 @@ export default function ReportView({ reportId }: { reportId: string }) {
     const token = await getIdToken();
     if (!token) return;
     const res = await fetch(`/api/research/${reportId}`, { headers: { Authorization: `Bearer ${token}` } });
-    if (!res.ok) { setError('דוח לא נמצא'); setLoading(false); return; }
+    if (!res.ok) { setError(t('rv.notFound')); setLoading(false); return; }
     const data = await res.json();
     setReport(data as ResearchReport);
     setLoading(false);
@@ -93,7 +93,7 @@ export default function ReportView({ reportId }: { reportId: string }) {
   );
 
   if (error || !report) return (
-    <div className="text-center py-32 text-red-400">{error || 'שגיאה בטעינת הדוח'}</div>
+    <div className="text-center py-32 text-red-400">{error || t('rv.loadError')}</div>
   );
 
   const isRunning = report.status === 'pending' || report.status === 'running';
@@ -116,17 +116,17 @@ export default function ReportView({ reportId }: { reportId: string }) {
           <span className="text-white/20 text-sm">|</span>
 
           <span className="text-gray-400 text-sm">{report.assetId}</span>
-          <Badge color="gray">{report.depth === 'quick' ? 'מהיר' : report.depth === 'standard' ? 'מלא' : 'עמוק'}</Badge>
+          <Badge color="gray">{t(`depth.${report.depth}`)}</Badge>
           <Badge color="gray">{report.language === 'he' ? 'עברית' : 'English'}</Badge>
-          {report.status === 'completed' && <Badge color="green">הושלם</Badge>}
-          {report.status === 'partial' && <Badge color="yellow">חלקי</Badge>}
-          {report.status === 'failed' && <Badge color="red">נכשל</Badge>}
-          {isRunning && <Badge color="indigo">בריצה...</Badge>}
+          {report.status === 'completed' && <Badge color="green">{t('status.completed')}</Badge>}
+          {report.status === 'partial' && <Badge color="yellow">{t('status.partial')}</Badge>}
+          {report.status === 'failed' && <Badge color="red">{t('status.failed')}</Badge>}
+          {isRunning && <Badge color="indigo">{t('status.running')}</Badge>}
           <AiGeneratedBadge />
         </div>
         {report.completedAt && (
           <p className="text-gray-600 text-xs mt-2">
-            {new Date(report.startedAt).toLocaleString('he-IL')} · {report.durationMs ? `${(report.durationMs / 1000).toFixed(0)}ש׳` : ''} · ${report.costUSD.toFixed(3)}
+            {new Date(report.startedAt).toLocaleString()} · {report.durationMs ? `${(report.durationMs / 1000).toFixed(0)}s` : ''} · ${report.costUSD.toFixed(3)}
           </p>
         )}
       </div>
@@ -153,7 +153,7 @@ export default function ReportView({ reportId }: { reportId: string }) {
       {/* Progress steps */}
       {isRunning && (
         <div className="bg-white/5 border border-white/8 rounded-2xl p-6">
-          <h3 className="text-white font-semibold mb-4">מנתח...</h3>
+          <h3 className="text-white font-semibold mb-4">{t('rv.analyzing')}</h3>
           <div className="space-y-2">
             {report.steps.map((step) => (
               <div key={step.stepId} className="flex items-center gap-3">
@@ -175,7 +175,7 @@ export default function ReportView({ reportId }: { reportId: string }) {
         <div className="bg-gradient-to-br from-indigo-600/15 to-indigo-900/5 border border-indigo-500/20 rounded-2xl p-6">
           <div className="flex items-center gap-2 mb-4">
             <span className="text-xl">✨</span>
-            <h2 className="text-white font-bold text-lg">תקציר מנהלים</h2>
+            <h2 className="text-white font-bold text-lg">{t('rv.execSummary')}</h2>
           </div>
           {data.synthesis.executiveSummary && (
             <p className="text-gray-200 leading-relaxed mb-4">{data.synthesis.executiveSummary}</p>
@@ -184,7 +184,7 @@ export default function ReportView({ reportId }: { reportId: string }) {
             {data.synthesis.scenarioAnalysis?.map((s) => (
               <div key={s.label} className="bg-white/5 rounded-xl px-4 py-3 min-w-[140px]">
                 <div className={`text-xs font-medium mb-1 ${s.label === 'bull' ? 'text-green-400' : s.label === 'bear' ? 'text-red-400' : 'text-yellow-400'}`}>
-                  {s.label === 'bull' ? 'תרחיש חיובי' : s.label === 'bear' ? 'תרחיש שלילי' : 'תרחיש בסיס'}
+                  {s.label === 'bull' ? t('rv.bullScenario') : s.label === 'bear' ? t('rv.bearScenario') : t('rv.baseScenario')}
                 </div>
                 <div className="text-white font-bold text-xl">{(s.probability * 100).toFixed(0)}%</div>
                 {s.description && <p className="text-gray-500 text-xs mt-1 line-clamp-2">{s.description}</p>}
@@ -196,7 +196,7 @@ export default function ReportView({ reportId }: { reportId: string }) {
 
       {/* Profile */}
       {data?.profile && (
-        <SectionCard title="פרופיל חברה" icon="🏢" defaultOpen>
+        <SectionCard title={t('steps.profile')} icon="🏢" defaultOpen>
           {data.profile.oneLineSummary && (
             <p className="text-gray-300 mt-4 mb-4 text-sm leading-relaxed italic">{data.profile.oneLineSummary}</p>
           )}
@@ -204,14 +204,14 @@ export default function ReportView({ reportId }: { reportId: string }) {
             <p className="text-gray-400 text-sm leading-relaxed mb-4">{data.profile.fullDescription}</p>
           )}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4">
-            {data.profile.foundedYear && <div><p className="text-xs text-gray-500">ייסוד</p><p className="text-white font-medium">{String(data.profile.foundedYear)}</p></div>}
-            {data.profile.employeeCount && <div><p className="text-xs text-gray-500">עובדים</p><p className="text-white font-medium">{Number(data.profile.employeeCount).toLocaleString()}</p></div>}
-            {data.profile.listingInfo?.exchange && <div><p className="text-xs text-gray-500">בורסה</p><p className="text-white font-medium">{data.profile.listingInfo.exchange}</p></div>}
-            {data.profile.headquarters && <div><p className="text-xs text-gray-500">מטה</p><p className="text-white font-medium">{data.profile.headquarters}</p></div>}
+            {data.profile.foundedYear && <div><p className="text-xs text-gray-500">{t('rv.founded')}</p><p className="text-white font-medium">{String(data.profile.foundedYear)}</p></div>}
+            {data.profile.employeeCount && <div><p className="text-xs text-gray-500">{t('rv.employees')}</p><p className="text-white font-medium">{Number(data.profile.employeeCount).toLocaleString()}</p></div>}
+            {data.profile.listingInfo?.exchange && <div><p className="text-xs text-gray-500">{t('rv.exchange')}</p><p className="text-white font-medium">{data.profile.listingInfo.exchange}</p></div>}
+            {data.profile.headquarters && <div><p className="text-xs text-gray-500">{t('rv.hq')}</p><p className="text-white font-medium">{data.profile.headquarters}</p></div>}
           </div>
           {data.profile.flags && data.profile.flags.length > 0 && (
             <div className="mt-4">
-              <p className="text-xs text-gray-500 mb-2">דגלים</p>
+              <p className="text-xs text-gray-500 mb-2">{t('rv.flags')}</p>
               <div className="flex flex-wrap gap-2">
                 {data.profile.flags.map((f, i) => <Badge key={i} color="yellow">{f}</Badge>)}
               </div>
@@ -219,7 +219,7 @@ export default function ReportView({ reportId }: { reportId: string }) {
           )}
           {data.profile.israeliContext?.localMarketContext && (
             <div className="mt-4 bg-blue-500/5 border border-blue-500/15 rounded-xl p-4">
-              <p className="text-xs text-blue-300 font-medium mb-1">הקשר ישראלי</p>
+              <p className="text-xs text-blue-300 font-medium mb-1">{t('rv.israeliContext')}</p>
               <p className="text-gray-300 text-sm">{data.profile.israeliContext.localMarketContext}</p>
             </div>
           )}
@@ -228,20 +228,20 @@ export default function ReportView({ reportId }: { reportId: string }) {
 
       {/* Financials */}
       {data?.financials && (
-        <SectionCard title="ניתוח פיננסי" icon="📊">
+        <SectionCard title={t('steps.financials')} icon="📊">
           <div className="grid grid-cols-2 gap-4 mt-4">
             {data.financials.valuationVerdict && (
               <div className="bg-white/5 rounded-xl p-4">
-                <p className="text-xs text-gray-500 mb-1">שווי</p>
+                <p className="text-xs text-gray-500 mb-1">{t('rv.valuation')}</p>
                 <p className={`font-bold text-lg ${data.financials.valuationVerdict === 'cheap' ? 'text-green-400' : data.financials.valuationVerdict === 'expensive' ? 'text-red-400' : 'text-yellow-400'}`}>
-                  {data.financials.valuationVerdict === 'cheap' ? 'זול' : data.financials.valuationVerdict === 'fair' ? 'הוגן' : data.financials.valuationVerdict === 'expensive' ? 'יקר' : data.financials.valuationVerdict}
+                  {data.financials.valuationVerdict === 'cheap' ? t('rv.cheap') : data.financials.valuationVerdict === 'fair' ? t('rv.fair') : data.financials.valuationVerdict === 'expensive' ? t('rv.expensive') : data.financials.valuationVerdict}
                 </p>
                 {data.financials.valuationReasoning && <p className="text-gray-500 text-xs mt-1">{data.financials.valuationReasoning}</p>}
               </div>
             )}
             {data.financials.healthVerdict && (
               <div className="bg-white/5 rounded-xl p-4">
-                <p className="text-xs text-gray-500 mb-1">בריאות פיננסית</p>
+                <p className="text-xs text-gray-500 mb-1">{t('rv.health')}</p>
                 <p className="font-bold text-lg text-white">{data.financials.healthVerdict}</p>
                 {data.financials.healthReasoning && <p className="text-gray-500 text-xs mt-1">{data.financials.healthReasoning}</p>}
               </div>
@@ -254,7 +254,7 @@ export default function ReportView({ reportId }: { reportId: string }) {
                 { label: 'P/B', val: data.financials.ratios.pbRatio },
                 { label: 'EV/EBITDA', val: data.financials.ratios.evToEbitda },
                 { label: 'ROE', val: data.financials.ratios.roe != null ? `${(Number(data.financials.ratios.roe) * 100).toFixed(1)}%` : null },
-                { label: 'תשואת דיב׳', val: data.financials.ratios.dividendYield != null ? `${(Number(data.financials.ratios.dividendYield) * 100).toFixed(1)}%` : null },
+                { label: t('rv.divYield'), val: data.financials.ratios.dividendYield != null ? `${(Number(data.financials.ratios.dividendYield) * 100).toFixed(1)}%` : null },
               ].filter((r) => r.val != null).map((r) => (
                 <div key={r.label} className="bg-white/5 rounded-lg p-3 text-center">
                   <p className="text-gray-500 text-xs mb-1">{r.label}</p>
@@ -266,7 +266,7 @@ export default function ReportView({ reportId }: { reportId: string }) {
           <div className="grid sm:grid-cols-2 gap-4 mt-4">
             {data.financials.redFlags && data.financials.redFlags.length > 0 && (
               <div>
-                <p className="text-xs text-red-400 font-medium mb-2">🚩 דגלים אדומים</p>
+                <p className="text-xs text-red-400 font-medium mb-2">{t('rv.redFlags')}</p>
                 <ul className="space-y-1">
                   {data.financials.redFlags.map((f, i) => <li key={i} className="text-gray-400 text-xs">• {f}</li>)}
                 </ul>
@@ -274,7 +274,7 @@ export default function ReportView({ reportId }: { reportId: string }) {
             )}
             {data.financials.greenFlags && data.financials.greenFlags.length > 0 && (
               <div>
-                <p className="text-xs text-green-400 font-medium mb-2">✅ נקודות חוזק</p>
+                <p className="text-xs text-green-400 font-medium mb-2">{t('rv.greenFlags')}</p>
                 <ul className="space-y-1">
                   {data.financials.greenFlags.map((f, i) => <li key={i} className="text-gray-400 text-xs">• {f}</li>)}
                 </ul>
@@ -286,12 +286,12 @@ export default function ReportView({ reportId }: { reportId: string }) {
 
       {/* Events */}
       {data?.events && (
-        <SectionCard title="אירועים ורגשות שוק" icon="📰">
+        <SectionCard title={t('rv.eventsTitle')} icon="📰">
           {data.events.overallSentiment && (
             <div className="mt-4 mb-4">
-              <span className="text-xs text-gray-500">סנטימנט כללי: </span>
+              <span className="text-xs text-gray-500">{t('rv.sentiment')}</span>
               <span className={`text-sm font-medium ${data.events.overallSentiment === 'positive' ? 'text-green-400' : data.events.overallSentiment === 'negative' ? 'text-red-400' : 'text-yellow-400'}`}>
-                {data.events.overallSentiment === 'positive' ? 'חיובי' : data.events.overallSentiment === 'negative' ? 'שלילי' : data.events.overallSentiment === 'mixed' ? 'מעורב' : 'ניטרלי'}
+                {data.events.overallSentiment === 'positive' ? t('rv.positive') : data.events.overallSentiment === 'negative' ? t('rv.negative') : data.events.overallSentiment === 'mixed' ? t('rv.mixed') : t('rv.neutral')}
               </span>
             </div>
           )}
@@ -304,7 +304,7 @@ export default function ReportView({ reportId }: { reportId: string }) {
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-gray-500 text-xs">{e.date}</span>
-                    {e.importance === 'high' && <Badge color="red">חשוב</Badge>}
+                    {e.importance === 'high' && <Badge color="red">{t('rv.important')}</Badge>}
                     <Badge color="gray">{e.category}</Badge>
                   </div>
                   <p className="text-gray-300 mt-0.5">{e.title}</p>
@@ -315,7 +315,7 @@ export default function ReportView({ reportId }: { reportId: string }) {
           </div>
           {data.events.upcomingEvents && data.events.upcomingEvents.length > 0 && (
             <div className="mt-6">
-              <p className="text-xs text-gray-500 font-medium mb-3">אירועים קרובים</p>
+              <p className="text-xs text-gray-500 font-medium mb-3">{t('rv.upcoming')}</p>
               <div className="space-y-2">
                 {data.events.upcomingEvents.map((e, i) => (
                   <div key={i} className="flex items-center gap-3 text-sm">
@@ -331,10 +331,10 @@ export default function ReportView({ reportId }: { reportId: string }) {
 
       {/* Competitive */}
       {data?.competitive && (
-        <SectionCard title="ניתוח תחרותי" icon="⚔️">
+        <SectionCard title={t('steps.competitive')} icon="⚔️">
           {data.competitive.marketPosition && (
             <p className="text-gray-300 mt-4 mb-2">
-              <span className="text-xs text-gray-500">מיקום בשוק: </span>
+              <span className="text-xs text-gray-500">{t('rv.marketPos')}</span>
               <span className="font-medium">{data.competitive.marketPosition}</span>
             </p>
           )}
@@ -344,7 +344,7 @@ export default function ReportView({ reportId }: { reportId: string }) {
           <div className="grid sm:grid-cols-2 gap-4 mt-4">
             {data.competitive.ourMoats && data.competitive.ourMoats.length > 0 && (
               <div>
-                <p className="text-xs text-green-400 font-medium mb-2">💪 יתרונות תחרותיים</p>
+                <p className="text-xs text-green-400 font-medium mb-2">{t('rv.moats')}</p>
                 <ul className="space-y-1">
                   {data.competitive.ourMoats.map((m, i) => <li key={i} className="text-gray-400 text-xs">• {m}</li>)}
                 </ul>
@@ -352,7 +352,7 @@ export default function ReportView({ reportId }: { reportId: string }) {
             )}
             {data.competitive.ourWeaknesses && data.competitive.ourWeaknesses.length > 0 && (
               <div>
-                <p className="text-xs text-red-400 font-medium mb-2">⚠️ חולשות</p>
+                <p className="text-xs text-red-400 font-medium mb-2">{t('rv.weaknesses')}</p>
                 <ul className="space-y-1">
                   {data.competitive.ourWeaknesses.map((w, i) => <li key={i} className="text-gray-400 text-xs">• {w}</li>)}
                 </ul>
@@ -361,7 +361,7 @@ export default function ReportView({ reportId }: { reportId: string }) {
           </div>
           {data.competitive.competitors && data.competitive.competitors.length > 0 && (
             <div className="mt-4">
-              <p className="text-xs text-gray-500 font-medium mb-3">מתחרים</p>
+              <p className="text-xs text-gray-500 font-medium mb-3">{t('rv.competitors')}</p>
               <div className="space-y-2">
                 {data.competitive.competitors.slice(0, 6).map((c, i) => (
                   <div key={i} className="flex items-center justify-between text-sm">
@@ -370,7 +370,7 @@ export default function ReportView({ reportId }: { reportId: string }) {
                       {c.ticker && <span className="text-gray-600 text-xs ml-2">{c.ticker}</span>}
                     </div>
                     <Badge color={c.threat === 'high' ? 'red' : c.threat === 'low' ? 'green' : 'yellow'}>
-                      {c.threat === 'high' ? 'איום גבוה' : c.threat === 'low' ? 'איום נמוך' : 'איום בינוני'}
+                      {c.threat === 'high' ? t('rv.threatHigh') : c.threat === 'low' ? t('rv.threatLow') : t('rv.threatMed')}
                     </Badge>
                   </div>
                 ))}
@@ -382,18 +382,18 @@ export default function ReportView({ reportId }: { reportId: string }) {
 
       {/* Risks */}
       {data?.risks && (
-        <SectionCard title="הערכת סיכונים" icon="⚠️">
+        <SectionCard title={t('rv.riskTitle')} icon="⚠️">
           <div className="mt-4 mb-4 flex items-center gap-3">
-            <span className="text-gray-400 text-sm">דירוג סיכון כולל:</span>
+            <span className="text-gray-400 text-sm">{t('rv.overallRisk')}</span>
             <span className={`font-bold ${RISK_COLORS[data.risks.overallRiskRating ?? ''] ?? 'text-gray-400'}`}>
-              {data.risks.overallRiskRating === 'low' ? 'נמוך' : data.risks.overallRiskRating === 'moderate' ? 'מתון' : data.risks.overallRiskRating === 'elevated' ? 'מוגבר' : data.risks.overallRiskRating === 'high' ? 'גבוה' : data.risks.overallRiskRating === 'very_high' ? 'גבוה מאוד' : data.risks.overallRiskRating}
+              {data.risks.overallRiskRating === 'low' ? t('rv.riskLow') : data.risks.overallRiskRating === 'moderate' ? t('rv.riskModerate') : data.risks.overallRiskRating === 'elevated' ? t('rv.riskElevated') : data.risks.overallRiskRating === 'high' ? t('rv.riskHigh') : data.risks.overallRiskRating === 'very_high' ? t('rv.riskVeryHigh') : data.risks.overallRiskRating}
             </span>
           </div>
           {data.risks.riskSummary && <p className="text-gray-400 text-sm mb-4">{data.risks.riskSummary}</p>}
           {[
-            { label: 'סיכוני חברה', items: data.risks.companySpecific },
-            { label: 'סיכוני ענף', items: data.risks.industryRisks },
-            { label: 'סיכוני מאקרו', items: data.risks.macroRisks },
+            { label: t('rv.companyRisks'), items: data.risks.companySpecific },
+            { label: t('rv.industryRisks'), items: data.risks.industryRisks },
+            { label: t('rv.macroRisks'), items: data.risks.macroRisks },
           ].filter((g) => g.items && g.items.length > 0).map((group) => (
             <div key={group.label} className="mt-4">
               <p className="text-xs text-gray-500 font-medium mb-2">{group.label}</p>
@@ -417,17 +417,17 @@ export default function ReportView({ reportId }: { reportId: string }) {
 
       {/* Synthesis detail */}
       {data?.synthesis && (
-        <SectionCard title="סינתזה מלאה" icon="🧠">
+        <SectionCard title={t('rv.fullSynthesis')} icon="🧠">
           <div className="mt-4 space-y-5">
             {data.synthesis.whatTheNumbersSay && (
               <div>
-                <p className="text-xs text-gray-500 font-medium mb-2">מה המספרים אומרים</p>
+                <p className="text-xs text-gray-500 font-medium mb-2">{t('rv.numbersSay')}</p>
                 <p className="text-gray-300 text-sm leading-relaxed">{data.synthesis.whatTheNumbersSay}</p>
               </div>
             )}
             {data.synthesis.whatTheNarrativeSays && (
               <div>
-                <p className="text-xs text-gray-500 font-medium mb-2">מה הנרטיב אומר</p>
+                <p className="text-xs text-gray-500 font-medium mb-2">{t('rv.narrativeSays')}</p>
                 <p className="text-gray-300 text-sm leading-relaxed">{data.synthesis.whatTheNarrativeSays}</p>
               </div>
             )}
@@ -435,7 +435,7 @@ export default function ReportView({ reportId }: { reportId: string }) {
               <div className="grid sm:grid-cols-2 gap-4">
                 {data.synthesis.bullCase && (
                   <div className="bg-green-500/5 border border-green-500/15 rounded-xl p-4">
-                    <p className="text-xs text-green-400 font-medium mb-2">תרחיש חיובי</p>
+                    <p className="text-xs text-green-400 font-medium mb-2">{t('rv.bullScenario')}</p>
                     <ul className="space-y-1">
                       {(data.synthesis.bullCase as { points?: string[] }).points?.map((p, i) => (
                         <li key={i} className="text-gray-400 text-xs">• {p}</li>
@@ -445,7 +445,7 @@ export default function ReportView({ reportId }: { reportId: string }) {
                 )}
                 {data.synthesis.bearCase && (
                   <div className="bg-red-500/5 border border-red-500/15 rounded-xl p-4">
-                    <p className="text-xs text-red-400 font-medium mb-2">תרחיש שלילי</p>
+                    <p className="text-xs text-red-400 font-medium mb-2">{t('rv.bearScenario')}</p>
                     <ul className="space-y-1">
                       {(data.synthesis.bearCase as { points?: string[] }).points?.map((p, i) => (
                         <li key={i} className="text-gray-400 text-xs">• {p}</li>
@@ -457,7 +457,7 @@ export default function ReportView({ reportId }: { reportId: string }) {
             )}
             {data.synthesis.ifIWereAnInvestor && (
               <div className="bg-white/5 rounded-xl p-4">
-                <p className="text-xs text-indigo-300 font-medium mb-3">שאלות מפתח למשקיע</p>
+                <p className="text-xs text-indigo-300 font-medium mb-3">{t('rv.investorQs')}</p>
                 {data.synthesis.ifIWereAnInvestor.questionsToAnswer && (
                   <ul className="space-y-1">
                     {data.synthesis.ifIWereAnInvestor.questionsToAnswer.map((q, i) => (
@@ -478,7 +478,7 @@ export default function ReportView({ reportId }: { reportId: string }) {
 
       {/* Disclaimer */}
       <p className="text-xs text-gray-600 text-center py-4">
-        לצרכי מידע בלבד — אינו ייעוץ השקעות. הניתוח מבוסס על נתונים ציבוריים ו-AI.
+        {t('rv.disclaimerFooter')}
       </p>
     </div>
   );

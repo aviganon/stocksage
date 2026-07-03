@@ -27,7 +27,7 @@ export default function LoginPage() {
     e.preventDefault();
     setError(''); setLoading(true);
     try { await signIn(email, password); router.push('/dashboard'); }
-    catch (err: unknown) { setError(err instanceof Error ? err.message : 'אימייל או סיסמה שגויים'); }
+    catch (err: unknown) { setError(err instanceof Error ? err.message : t('common.error')); }
     finally { setLoading(false); }
   }
 
@@ -62,13 +62,13 @@ export default function LoginPage() {
           {!showEmail ? (
             <button onClick={() => setShowEmail(true)}
               className="w-full text-xs text-gray-600 hover:text-gray-400 transition-colors py-1">
-              כניסה עם אימייל וסיסמה (למשתמשים שנוצרו ידנית) ▾
+              {t('auth.emailToggle')}
             </button>
           ) : (
             <form onSubmit={handleEmail} className="space-y-3 pt-1 border-t border-white/8">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-xs text-gray-500">כניסה עם אימייל וסיסמה</span>
-                <button type="button" onClick={() => setShowEmail(false)} className="text-xs text-gray-600 hover:text-gray-400">✕ סגור</button>
+                <span className="text-xs text-gray-500">{t('auth.emailTitle')}</span>
+                <button type="button" onClick={() => setShowEmail(false)} className="text-xs text-gray-600 hover:text-gray-400">{t('auth.close')}</button>
               </div>
               <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
                 className="w-full glass-input text-white rounded-xl px-4 py-2.5 text-sm"

@@ -46,13 +46,16 @@ export async function POST(req: NextRequest) {
 
   const { assetId, depth, language } = parsed.data;
   const isOwner = email === OWNER_EMAIL;
+  const he = language === 'he';
 
   // Anonymous users: quick is free (max 3); standard/deep require payment (allowed below)
   if (isAnonymous && depth === 'quick') {
     const repo0 = new ResearchReportsRepository();
     const existing = await repo0.listForUser(uid, { limit: ANON_FREE_SCANS + 1 });
     if (existing.length >= ANON_FREE_SCANS) {
-      return fail('signup_required', `ניצלת את ${ANON_FREE_SCANS} הסריקות החינמיות. הירשם בחינם להמשך שימוש.`, 403);
+      return fail('signup_required', he
+        ? `ניצלת את ${ANON_FREE_SCANS} הסריקות החינמיות. הירשם בחינם להמשך שימוש.`
+        : `You've used your ${ANON_FREE_SCANS} free scans. Sign up free to continue.`, 403);
     }
   }
 
@@ -60,14 +63,16 @@ export async function POST(req: NextRequest) {
   if (!isOwner) {
     const rl = await checkRateLimit(uid);
     if (!rl.allowed) {
-      return fail('rate_limited', `הגעת למגבלת ${rl.limit} דוחות בשעה. נסה שוב בעוד זמן מה.`, 429);
+      return fail('rate_limited', he
+        ? `הגעת למגבלת ${rl.limit} דוחות בשעה. נסה שוב בעוד זמן מה.`
+        : `You've reached the limit of ${rl.limit} reports per hour. Please try again later.`, 429);
     }
   }
 
   // Check depth permissions
   const usage = await canRunReport(uid, depth);
   if (!usage.allowed) {
-    return fail('usage_limit', 'מגבלת שימוש הגיעה.', 402);
+    return fail('usage_limit', he ? 'מגבלת שימוש הגיעה.' : 'Usage limit reached.', 402);
   }
 
   // Standard/Deep: owner gets free access; others need credit or payment
@@ -78,7 +83,7 @@ export async function POST(req: NextRequest) {
     } else {
       const paidHeader = req.headers.get('x-paid-research');
       if (paidHeader !== 'true') {
-        return fail('payment_required', 'תשלום נדרש לסריקה זו.', 402);
+        return fail('payment_required', he ? 'תשלום נדרש לסריקה זו.' : 'Payment is required for this scan.', 402);
       }
     }
   }

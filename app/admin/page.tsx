@@ -106,8 +106,9 @@ export default function AdminPage() {
           />
           <StatCard label="עלות חודש שעבר" value={`$${stats.costs.lastMonth.toFixed(2)}`} />
           <StatCard
-            label="רווחיות (MRR - עלות)"
+            label="רווח נקי (MRR − עלות AI)"
             value={`$${(stats.revenue.mrr - stats.costs.thisMonth).toFixed(2)}`}
+            sub={`$${stats.revenue.mrr} − $${stats.costs.thisMonth.toFixed(2)}`}
             color="green"
           />
         </div>

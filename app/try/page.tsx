@@ -12,7 +12,7 @@ export default function TryPage() {
   const [agreeAge,      setAgreeAge]      = useState(false);
   const [loading, setLoading] = useState(false);
   const { signInAnon, getIdToken } = useAuth();
-  const { dir } = useI18n();
+  const { t, dir } = useI18n();
   const router = useRouter();
 
   const canContinue = agreeTerms && agreeDisclaim && agreeAge;
@@ -52,23 +52,23 @@ export default function TryPage() {
             <span className="w-9 h-9 rounded-xl btn-glow flex items-center justify-center text-lg font-bold">S</span>
             Stock<span className="text-gradient">Sage</span>
           </Link>
-          <p className="text-gray-400 mt-3 text-sm">3 סריקות מהירות חינמיות — ללא הרשמה</p>
+          <p className="text-gray-400 mt-3 text-sm">{t('try.subtitle')}</p>
         </div>
 
         {/* Consent card */}
         <div className="glass-card rounded-3xl p-8 space-y-5">
 
-          <p className="text-white text-sm font-medium">לפני שמתחילים — אישור קצר:</p>
+          <p className="text-white text-sm font-medium">{t('try.intro')}</p>
 
           <div className="space-y-3.5">
             <label className="flex items-start gap-3 cursor-pointer group">
               <input type="checkbox" checked={agreeTerms} onChange={(e) => setAgreeTerms(e.target.checked)}
                 className="mt-0.5 w-4 h-4 accent-indigo-500 shrink-0" />
               <span className="text-xs text-gray-400 leading-relaxed group-hover:text-gray-300 transition-colors">
-                קראתי ומסכים/ה ל
-                <Link href="/terms" target="_blank" className="text-indigo-400 hover:underline mx-1">תנאי השימוש</Link>
-                ול
-                <Link href="/privacy" target="_blank" className="text-indigo-400 hover:underline mx-1">מדיניות הפרטיות</Link>
+                {t('try.agreeTermsPre')}
+                <Link href="/terms" target="_blank" className="text-indigo-400 hover:underline mx-1">{t('try.termsLink')}</Link>
+                {t('try.and')}
+                <Link href="/privacy" target="_blank" className="text-indigo-400 hover:underline mx-1">{t('try.privacyLink')}</Link>
               </span>
             </label>
 
@@ -76,7 +76,7 @@ export default function TryPage() {
               <input type="checkbox" checked={agreeDisclaim} onChange={(e) => setAgreeDisclaim(e.target.checked)}
                 className="mt-0.5 w-4 h-4 accent-indigo-500 shrink-0" />
               <span className="text-xs text-gray-400 leading-relaxed group-hover:text-gray-300 transition-colors">
-                <strong className="text-gray-300">מאשר/ת</strong> ש-StockSage אינה ייעוץ השקעות מורשה לפי חוק תשנ"ה-1995. כל החלטה — באחריותי.
+                {t('try.agreeDisclaimer')}
               </span>
             </label>
 
@@ -84,7 +84,7 @@ export default function TryPage() {
               <input type="checkbox" checked={agreeAge} onChange={(e) => setAgreeAge(e.target.checked)}
                 className="mt-0.5 w-4 h-4 accent-indigo-500 shrink-0" />
               <span className="text-xs text-gray-400 group-hover:text-gray-300 transition-colors">
-                גילי <strong className="text-gray-300">18 ומעלה</strong>
+                {t('try.agreeAge')}
               </span>
             </label>
           </div>
@@ -96,26 +96,26 @@ export default function TryPage() {
             disabled={loading || !canContinue}
             className="w-full btn-glow disabled:opacity-40 disabled:cursor-not-allowed text-white py-3.5 rounded-2xl text-sm font-semibold transition-all"
           >
-            {loading ? 'מתחיל...' : 'התחל 3 סריקות חינמיות ←'}
+            {loading ? t('try.starting') : t('try.startBtn')}
           </button>
 
           <p className="text-center text-xs text-gray-600">
-            ללא כרטיס אשראי · ללא הרשמה · הדוחות לא נשמרים
+            {t('try.note')}
           </p>
         </div>
 
         <div className="flex items-center gap-3 mt-6">
           <div className="flex-1 h-px bg-white/8" />
-          <span className="text-xs text-gray-600">או</span>
+          <span className="text-xs text-gray-600">{t('try.or')}</span>
           <div className="flex-1 h-px bg-white/8" />
         </div>
 
         <div className="flex gap-3 mt-4">
           <Link href="/signup" className="flex-1 text-center glass text-gray-300 hover:text-white text-sm py-2.5 rounded-xl border border-white/10 hover:border-white/20 transition-all">
-            הרשמה חינמית
+            {t('try.signupFree')}
           </Link>
           <Link href="/login" className="flex-1 text-center glass text-gray-300 hover:text-white text-sm py-2.5 rounded-xl border border-white/10 hover:border-white/20 transition-all">
-            כניסה
+            {t('try.login')}
           </Link>
         </div>
       </div>

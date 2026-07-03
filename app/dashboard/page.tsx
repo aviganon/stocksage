@@ -41,6 +41,7 @@ function WatchlistStockCard({ card, onSelect, onRemove, getIdToken }: {
   onRemove: (id: string) => void;
   getIdToken: () => Promise<string | null>;
 }) {
+  const { t } = useI18n();
   const up = (card.changePercent ?? 0) >= 0;
 
   async function handleRemove(e: React.MouseEvent) {
@@ -58,7 +59,7 @@ function WatchlistStockCard({ card, onSelect, onRemove, getIdToken }: {
 
       <button onClick={handleRemove}
         className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 text-gray-600 hover:text-red-400 text-xs transition-all"
-        title="הסר">✕</button>
+        title={t('common.delete')}>✕</button>
 
       <div className="flex items-start justify-between mb-1">
         <div>
@@ -94,6 +95,7 @@ function SpotlightStocks({ onSelect, getIdToken }: {
   onSelect: (s: SearchResult) => void;
   getIdToken: () => Promise<string | null>;
 }) {
+  const { t } = useI18n();
   const [quotes, setQuotes] = useState<SpotlightQuote[]>([]);
 
   useEffect(() => {
@@ -109,7 +111,7 @@ function SpotlightStocks({ onSelect, getIdToken }: {
 
   return (
     <div className="mb-8">
-      <p className="text-xs text-gray-600 mb-3 uppercase tracking-wider">שוק עכשיו</p>
+      <p className="text-xs text-gray-600 mb-3 uppercase tracking-wider">{t('dashboard.marketNow')}</p>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
         {quotes.map((q) => {
           const up = (q.changePercent ?? 0) >= 0;
@@ -158,19 +160,9 @@ interface Report {
   steps?: ReportStep[];
 }
 
-const STEP_LABELS: Record<string, string> = {
-  data_collection: 'איסוף נתונים',
-  profile:         'פרופיל חברה',
-  financials:      'ניתוח פיננסי',
-  events:          'אירועים',
-  competitive:     'תחרות',
-  risks:           'סיכונים',
-  synthesis:       'סינתזה',
-};
-
-const UPGRADE_NEXT: Record<string, { depth: 'standard' | 'deep'; label: string }> = {
-  quick:    { depth: 'standard', label: 'שדרג למלא' },
-  standard: { depth: 'deep',     label: 'שדרג לעמוק' },
+const UPGRADE_NEXT: Record<string, { depth: 'standard' | 'deep' }> = {
+  quick:    { depth: 'standard' },
+  standard: { depth: 'deep' },
 };
 
 function DoneReportRow({ report, onDelete, getIdToken }: {
@@ -216,7 +208,7 @@ function DoneReportRow({ report, onDelete, getIdToken }: {
     }
   }
 
-  const depthLabel  = report.depth === 'quick' ? 'מהיר' : report.depth === 'standard' ? 'מלא' : 'עמוק';
+  const depthLabel  = t(`depth.${report.depth}`);
   const depthStyle  = report.depth === 'quick'
     ? 'bg-green-500/15 text-green-300 border-green-500/20'
     : report.depth === 'standard'
@@ -224,6 +216,7 @@ function DoneReportRow({ report, onDelete, getIdToken }: {
     : 'bg-purple-500/15 text-purple-300 border-purple-500/20';
 
   const nextUpgrade = report.status === 'completed' ? UPGRADE_NEXT[report.depth] : null;
+  const upgradeLabel = nextUpgrade ? t(nextUpgrade.depth === 'standard' ? 'dashboard.upgradeToStandard' : 'dashboard.upgradeToDeep') : '';
 
   return (
     <div className="flex items-center justify-between bg-white/5 border border-white/8 hover:bg-white/8 rounded-xl px-5 py-4 transition-colors group">
@@ -256,28 +249,28 @@ function DoneReportRow({ report, onDelete, getIdToken }: {
             onClick={handleUpgrade}
             disabled={upgrading}
             className="text-xs bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/30 px-2.5 py-1 rounded-lg transition-all disabled:opacity-40"
-            title={nextUpgrade.label}
+            title={upgradeLabel}
           >
-            {upgrading ? '...' : `↑ ${nextUpgrade.label}`}
+            {upgrading ? '...' : `↑ ${upgradeLabel}`}
           </button>
         )}
 
         {confirmDelete ? (
           <>
-            <span className="text-xs text-red-300">למחוק?</span>
+            <span className="text-xs text-red-300">{t('dashboard.deleteQ')}</span>
             <button onClick={handleConfirmDelete} disabled={deleting}
               className="text-xs bg-red-600/80 hover:bg-red-600 text-white px-2.5 py-1 rounded-lg transition-colors">
-              {deleting ? '...' : 'כן'}
+              {deleting ? '...' : t('common.yes')}
             </button>
             <button onClick={() => setConfirmDelete(false)}
               className="text-xs bg-white/8 hover:bg-white/15 text-gray-300 px-2.5 py-1 rounded-lg transition-colors">
-              לא
+              {t('common.no')}
             </button>
           </>
         ) : (
           <button onClick={() => setConfirmDelete(true)}
             className="opacity-0 group-hover:opacity-100 text-xs text-gray-600 hover:text-red-400 hover:bg-red-500/10 p-1.5 rounded-lg transition-all"
-            title="מחק דוח">
+            title={t('common.delete')}>
             ✕
           </button>
         )}
@@ -351,7 +344,7 @@ function useElapsed(startedAt: string) {
       const secs = Math.floor((Date.now() - new Date(startedAt).getTime()) / 1000);
       const m = Math.floor(secs / 60);
       const s = secs % 60;
-      setElapsed(m > 0 ? `${m}:${String(s).padStart(2, '0')} דק׳` : `${s} שנ׳`);
+      setElapsed(m > 0 ? `${m}:${String(s).padStart(2, '0')}` : `${s}s`);
     }
     update();
     const id = setInterval(update, 1000);
@@ -366,6 +359,7 @@ function ActiveResearchCard({ report, getIdToken, onStop }: {
   onStop: (id: string) => void;
 }) {
   const router = useRouter();
+  const { t } = useI18n();
   const elapsed = useElapsed(report.startedAt);
   const [confirming, setConfirming] = useState(false);
   const [stopping, setStopping]     = useState(false);
@@ -373,7 +367,7 @@ function ActiveResearchCard({ report, getIdToken, onStop }: {
   const steps = (report.steps ?? []).filter((s) => s.stepId !== 'data_collection');
   const completed = steps.filter((s) => s.status === 'completed' || s.status === 'failed').length;
   const pct = steps.length > 0 ? Math.round((completed / steps.length) * 100) : 0;
-  const depthLabel = report.depth === 'quick' ? 'מהיר' : report.depth === 'standard' ? 'מלא' : 'עמוק';
+  const depthLabel = t(`depth.${report.depth}`);
 
   const stepIcon = (status: string) => {
     if (status === 'completed') return <span className="text-green-400">✓</span>;
@@ -418,19 +412,19 @@ function ActiveResearchCard({ report, getIdToken, onStop }: {
         <div className="flex items-center gap-2 shrink-0">
           {confirming ? (
             <>
-              <span className="text-xs text-red-300">לעצור?</span>
+              <span className="text-xs text-red-300">{t('dashboard.stopQ')}</span>
               <button
                 onClick={handleStop}
                 disabled={stopping}
                 className="text-xs bg-red-600/80 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg transition-colors"
               >
-                {stopping ? '...' : 'כן'}
+                {stopping ? '...' : t('common.yes')}
               </button>
               <button
                 onClick={(e) => { e.stopPropagation(); setConfirming(false); }}
                 className="text-xs bg-white/8 hover:bg-white/15 text-gray-300 px-3 py-1.5 rounded-lg transition-colors"
               >
-                ביטול
+                {t('common.cancel')}
               </button>
             </>
           ) : (
@@ -439,13 +433,13 @@ function ActiveResearchCard({ report, getIdToken, onStop }: {
                 onClick={handleStop}
                 className="text-xs bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 px-3 py-1.5 rounded-lg transition-colors"
               >
-                ⏹ עצור
+                {t('dashboard.stop')}
               </button>
               <button
                 onClick={() => router.push(`/report/${report.id}`)}
                 className="text-xs text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 px-3 py-1.5 rounded-lg transition-colors"
               >
-                פתח →
+                {t('dashboard.open')}
               </button>
             </>
           )}
@@ -463,7 +457,7 @@ function ActiveResearchCard({ report, getIdToken, onStop }: {
                 s.status === 'completed' ? 'text-gray-400' :
                 s.status === 'failed'    ? 'text-red-400' : 'text-white/30'
               }>
-                {STEP_LABELS[s.stepId] ?? s.stepId}
+                {t(`steps.${s.stepId}`)}
               </span>
             </div>
           ))}
@@ -473,7 +467,7 @@ function ActiveResearchCard({ report, getIdToken, onStop }: {
       {/* Progress bar */}
       <div>
         <div className="flex justify-between text-xs text-gray-600 mb-1">
-          <span>{completed}/{steps.length} שלבים</span>
+          <span>{completed}/{steps.length} {t('dashboard.stepsWord')}</span>
           <span>{pct}%</span>
         </div>
         <div className="h-1.5 bg-white/8 rounded-full overflow-hidden">
@@ -485,6 +479,7 @@ function ActiveResearchCard({ report, getIdToken, onStop }: {
 }
 
 function ReportProgress({ steps }: { steps: ReportStep[] }) {
+  const { t } = useI18n();
   const analysis = steps.filter((s) => s.stepId !== 'data_collection');
   const completed = analysis.filter((s) => s.status === 'completed' || s.status === 'failed').length;
   const running   = analysis.find((s) => s.status === 'running');
@@ -495,8 +490,8 @@ function ReportProgress({ steps }: { steps: ReportStep[] }) {
       <div className="flex items-center justify-between mb-1.5">
         <span className="text-xs text-gray-500">
           {running
-            ? <span className="text-blue-400">⬤ {STEP_LABELS[running.stepId] ?? running.stepId}</span>
-            : <span>{completed}/{analysis.length} שלבים</span>}
+            ? <span className="text-blue-400">⬤ {t(`steps.${running.stepId}`)}</span>
+            : <span>{completed}/{analysis.length} {t('dashboard.stepsWord')}</span>}
         </span>
         <span className="text-xs text-gray-600">{pct}%</span>
       </div>
@@ -844,7 +839,7 @@ function DashboardInner() {
             body: JSON.stringify({ depth, assetId: selected.id }),
           });
           const data = await res.json();
-          if (!res.ok) { setError(data.error ?? 'שגיאה'); return; }
+          if (!res.ok) { setError(data.error ?? t('common.error')); return; }
 
           const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://stocksage.io';
           const successUrl = `${appUrl}/dashboard?paid=1&assetId=${encodeURIComponent(selected.id)}&depth=${depth}`;
@@ -866,7 +861,7 @@ function DashboardInner() {
         body: JSON.stringify({ assetId: selected.id, depth, language: ['he','ar'].includes(locale) ? 'he' : 'en' }),
       });
       const data = await res.json();
-      if (!res.ok) { setError(data.error?.message ?? 'שגיאה'); return; }
+      if (!res.ok) { setError(data.error?.message ?? t('common.error')); return; }
       router.push(`/report/${data.reportId}`);
     } finally {
       setStarting(false);
@@ -894,7 +889,7 @@ function DashboardInner() {
           Authorization: `Bearer ${token ?? ''}`,
           'x-paid-research': 'true',
         },
-        body: JSON.stringify({ assetId: paidAsset, depth: paidDepth, language: 'he' }),
+        body: JSON.stringify({ assetId: paidAsset, depth: paidDepth, language: ['he','ar'].includes(locale) ? 'he' : 'en' }),
       });
       const data = await res.json();
       setStarting(false);
@@ -954,7 +949,7 @@ function DashboardInner() {
             ) : (
               <>
                 <span className="text-white font-medium hidden sm:block">
-                  {firstName ? `ברוך הבא, ${firstName}` : 'ברוך הבא'}
+                  {firstName ? `${t('dashboard.welcome')}, ${firstName}` : t('dashboard.welcome')}
                   {usage?.plan === 'pro' && <span className="mr-1.5 text-xs text-indigo-300">Pro ✦</span>}
                 </span>
                 <LanguageSwitcher />
@@ -973,14 +968,14 @@ function DashboardInner() {
           <div className="mb-6 rounded-xl px-5 py-4 bg-indigo-500/10 border border-indigo-500/25 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div>
               <p className="text-sm font-medium text-white">
-                👋 אתה במצב אורח — נותרו לך <span className="text-indigo-300 font-bold">{anonScansLeft}</span> סריקות מהירות חינמיות
+                {t('dashboard.guestMode1')}<span className="text-indigo-300 font-bold">{anonScansLeft}</span>{t('dashboard.guestMode2')}
               </p>
               <p className="text-xs text-gray-400 mt-0.5">
-                הירשם בחינם לשמירת הדוחות · ניתוח מלא ועמוק זמין בתשלום גם ללא חשבון
+                {t('dashboard.guestSub')}
               </p>
             </div>
             <Link href="/signup" className="text-sm bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2 rounded-lg transition-colors shrink-0">
-              הרשמה חינם
+              {t('try.signupFree')}
             </Link>
           </div>
         )}
@@ -989,7 +984,7 @@ function DashboardInner() {
         {!isAnonymous && usage?.plan !== 'pro' && (
           <div className="mb-6 rounded-xl px-5 py-3 bg-white/3 border border-white/8">
             <p className="text-xs text-gray-500">
-              ⚡ מהיר = חינמי תמיד &nbsp;·&nbsp; 📊 מלא = $1.99/דוח &nbsp;·&nbsp; 🔬 עמוק = $3.99/דוח
+              ⚡ {t('depth.quick')} = {t('pricing.free')} &nbsp;·&nbsp; 📊 {t('depth.standard')} = $1.99 &nbsp;·&nbsp; 🔬 {t('depth.deep')} = $3.99
             </p>
           </div>
         )}
@@ -1089,7 +1084,7 @@ function DashboardInner() {
               </div>
 
               {/* Depth cards — redesigned */}
-              <p className="text-sm text-gray-400 mb-4">בחר עומק מחקר</p>
+              <p className="text-sm text-gray-400 mb-4">{t('dashboard.depthLabel')}</p>
               <div className="grid grid-cols-3 gap-3 mb-5">
                 {DEPTH_OPTIONS.map((v) => {
                   const m      = DEPTH_META[v];
@@ -1120,12 +1115,12 @@ function DashboardInner() {
 
                       {/* Label */}
                       <div className={`font-bold text-sm mb-0.5 transition-colors ${active ? m.color : 'text-white'}`}>
-                        {m.label}
+                        {t(`depth.${v}`)}
                       </div>
 
                       {/* Steps + time */}
-                      <div className="text-xs text-gray-500">{m.steps}</div>
-                      <div className="text-xs text-gray-700 mb-3">{m.time}</div>
+                      <div className="text-xs text-gray-500">{t(`depth.${v}Steps`)}</div>
+                      <div className="text-xs text-gray-700 mb-3">{t(`depth.${v}Time`)}</div>
 
                       {/* Badge */}
                       {locked ? (
@@ -1135,7 +1130,7 @@ function DashboardInner() {
                         </div>
                       ) : freeC ? (
                         <div className="text-xs font-semibold px-2 py-0.5 rounded-lg w-fit bg-emerald-500/20 text-emerald-300 border border-emerald-500/20">
-                          {credits[v]} חינמיות
+                          {credits[v]} {t('dashboard.freeCount')}
                         </div>
                       ) : (
                         <div className={`text-xs font-semibold px-2 py-0.5 rounded-lg w-fit border ${
@@ -1145,7 +1140,7 @@ function DashboardInner() {
                             ? 'bg-indigo-500/15 text-indigo-300 border-indigo-500/20'
                             : 'bg-violet-500/15 text-violet-300 border-violet-500/20'
                         }`}>
-                          {m.price}
+                          {v === 'quick' ? t('pricing.free') : m.price}
                         </div>
                       )}
                     </button>
@@ -1155,7 +1150,7 @@ function DashboardInner() {
 
               {/* Description of selected depth */}
               <p className={`text-xs mb-5 transition-colors ${DEPTH_META[depth].color} opacity-80`}>
-                {DEPTH_META[depth].desc}
+                {t(`depth.${depth}Desc`)}
               </p>
 
               {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
@@ -1168,7 +1163,7 @@ function DashboardInner() {
                 {starting ? (
                   <>
                     <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                    מתחיל מחקר...
+                    {t('dashboard.startingResearch')}
                   </>
                 ) : (
                   <>{t('dashboard.startResearch')} ←</>
@@ -1192,7 +1187,7 @@ function DashboardInner() {
               className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors flex items-center gap-1.5 ${
                 bottomTab === 'watchlist' ? 'bg-white/15 text-white' : 'text-gray-500 hover:text-gray-300'
               }`}>
-              📈 המניות שלי
+              {t('dashboard.myStocks')}
               {watchlist.length > 0 && (
                 <span className="text-xs bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded-full">{watchlist.length}</span>
               )}
@@ -1241,7 +1236,7 @@ function DashboardInner() {
                 {watchlist.length === 0 && (
                   <div className="col-span-3 text-center py-16 text-gray-500">
                     <p className="text-4xl mb-3">📈</p>
-                    <p>בצע מחקר מניה — היא תופיע כאן אוטומטית</p>
+                    <p>{t('dashboard.watchlistEmpty')}</p>
                   </div>
                 )}
               </div>
