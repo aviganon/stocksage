@@ -8,9 +8,17 @@ import { AccessibilityButton } from '@/components/legal/accessibility-button';
 
 const geist = Geist({ variable: '--font-geist-sans', subsets: ['latin', 'latin-ext'] });
 
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://stocksage.io';
+
 export const metadata: Metadata = {
-  title: 'StockSage — AI Stock Research',
-  description: 'Deep AI-powered research reports on Israeli and global stocks in seconds.',
+  metadataBase: new URL(BASE_URL),
+  title: {
+    default: 'StockSage — AI Stock Research',
+    template: '%s | StockSage',
+  },
+  description: 'Deep AI-powered research reports on US, European and Israeli stocks in seconds.',
+  applicationName: 'StockSage',
+  keywords: ['stock analysis', 'AI stock research', 'stock research', 'equity research', 'AAPL analysis', 'NVDA analysis'],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
