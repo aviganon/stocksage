@@ -5,7 +5,8 @@
     "dashboard": "Tableau de bord",
     "settings": "Paramètres",
     "logout": "Déconnexion",
-    "admin": "Admin"
+    "admin": "Admin",
+    "screener": "Découvrir"
   },
   "landing": {
     "badge": "Recherche d'actions par IA",
@@ -31,6 +32,31 @@
     "forever": "Toujours, sans limite",
     "getStarted": "Commencer gratuitement",
     "tryIt": "S'inscrire et essayer"
+  },
+  "compare": {
+    "title": "Pourquoi payer 200 $/an pour analyser quelques actions ?",
+    "sub": "Tous les autres outils verrouillent l'analyse derrière un abonnement. Pas StockSage.",
+    "themLabel": "Concurrent typique",
+    "themPrice": "99–600 $ / an",
+    "themNote": "Abonnement requis — même pour une seule action",
+    "usLabel": "StockSage",
+    "usPrice": "1,99 $ / rapport",
+    "usNote": "Payez seulement ce que vous analysez. Sans abonnement, sans inscription."
+  },
+  "screener": {
+    "title": "Découvrez des actions",
+    "sub": "Explorez le marché par stratégie, puis analysez n'importe quelle action en un clic.",
+    "note": "Marché américain · en direct",
+    "research": "Analyser →",
+    "mostActive": "Les plus actives",
+    "gainers": "Meilleures hausses",
+    "losers": "Plus fortes baisses",
+    "undervaluedLarge": "Grandes cap. sous-évaluées",
+    "undervaluedGrowth": "Croissance sous-évaluée",
+    "growthTech": "Tech de croissance",
+    "smallCaps": "Petites cap. agressives",
+    "mostShorted": "Vendues à découvert",
+    "empty": "Aucun résultat pour l'instant — essayez un autre écran."
   },
   "dashboard": {
     "newResearch": "Nouvelle analyse d'action",

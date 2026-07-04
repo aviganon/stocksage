@@ -5,7 +5,8 @@
     "dashboard": "לוח בקרה",
     "settings": "הגדרות",
     "logout": "יציאה",
-    "admin": "Admin"
+    "admin": "Admin",
+    "screener": "גלה"
   },
   "landing": {
     "badge": "מחקר AI לשוק ישראלי",
@@ -31,6 +32,31 @@
     "forever": "תמיד, ללא הגבלה",
     "getStarted": "התחל חינם",
     "tryIt": "הרשם ונסה"
+  },
+  "compare": {
+    "title": "למה לשלם $200 בשנה כדי לחקור כמה מניות?",
+    "sub": "כל כלי אחר נועל מחקר מאחורי מנוי. StockSage לא.",
+    "themLabel": "מתחרה טיפוסי",
+    "themPrice": "$99–$600 / שנה",
+    "themNote": "מנוי חובה — אפילו לבדיקת מניה אחת",
+    "usLabel": "StockSage",
+    "usPrice": "$1.99 / דוח",
+    "usNote": "משלמים רק על מה שחוקרים. ללא מנוי, ללא הרשמה."
+  },
+  "screener": {
+    "title": "גלה מניות",
+    "sub": "חקור את השוק לפי אסטרטגיה, ואז נתח כל מניה בלחיצה אחת.",
+    "note": "שוק אמריקאי · מתעדכן חי",
+    "research": "נתח →",
+    "mostActive": "הכי פעילות",
+    "gainers": "עולות מובילות",
+    "losers": "יורדות מובילות",
+    "undervaluedLarge": "Large Cap מתומחרות בחסר",
+    "undervaluedGrowth": "צמיחה מתומחרת בחסר",
+    "growthTech": "טכנולוגיית צמיחה",
+    "smallCaps": "Small Cap אגרסיביות",
+    "mostShorted": "הכי בשורט",
+    "empty": "אין תוצאות כרגע — נסה מסך אחר."
   },
   "dashboard": {
     "newResearch": "מחקר מניה חדש",

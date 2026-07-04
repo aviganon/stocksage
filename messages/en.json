@@ -5,7 +5,8 @@
     "dashboard": "Dashboard",
     "settings": "Settings",
     "logout": "Sign out",
-    "admin": "Admin"
+    "admin": "Admin",
+    "screener": "Discover"
   },
   "landing": {
     "badge": "AI-Powered Equity Research",
@@ -31,6 +32,31 @@
     "forever": "Always, unlimited",
     "getStarted": "Get Started Free",
     "tryIt": "Sign up & try"
+  },
+  "compare": {
+    "title": "Why pay $200 a year to research a handful of stocks?",
+    "sub": "Every other tool locks research behind a subscription. StockSage doesn't.",
+    "themLabel": "Typical competitor",
+    "themPrice": "$99–$600 / year",
+    "themNote": "Subscription required — even to check one stock",
+    "usLabel": "StockSage",
+    "usPrice": "$1.99 / report",
+    "usNote": "Pay only for what you research. No subscription, no signup."
+  },
+  "screener": {
+    "title": "Discover stocks",
+    "sub": "Explore the market by strategy, then research any stock in one click.",
+    "note": "US market · updated live",
+    "research": "Analyze →",
+    "mostActive": "Most Active",
+    "gainers": "Top Gainers",
+    "losers": "Top Losers",
+    "undervaluedLarge": "Undervalued Large Caps",
+    "undervaluedGrowth": "Undervalued Growth",
+    "growthTech": "Growth Tech",
+    "smallCaps": "Aggressive Small Caps",
+    "mostShorted": "Most Shorted",
+    "empty": "No results right now — try another screen."
   },
   "dashboard": {
     "newResearch": "New Stock Research",

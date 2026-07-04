@@ -940,6 +940,7 @@ function DashboardInner() {
             Stock<span className="text-gradient">Sage</span>
           </Link>
           <div className="flex items-center gap-4">
+            <Link href="/screener" className="text-sm text-gray-400 hover:text-white transition-colors hidden sm:block">{t('nav.screener')}</Link>
             {isAnonymous ? (
               <>
                 <LanguageSwitcher />

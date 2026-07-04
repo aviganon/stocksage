@@ -67,6 +67,9 @@ export default function LandingPage() {
             <span className="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Beta</span>
           </div>
           <div className="flex items-center gap-3">
+            <Link href="/screener" className="text-sm text-gray-400 hover:text-white transition-colors px-3 py-2 hidden sm:block">
+              {t('nav.screener')}
+            </Link>
             <LanguageSwitcher />
             <Link href="/login" className="text-sm text-gray-400 hover:text-white transition-colors px-4 py-2">
               {t('nav.signin')}
@@ -194,6 +197,26 @@ export default function LandingPage() {
             <Link href="/signup" className="block text-center bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 py-3 rounded-xl transition-colors text-sm font-medium">
               {t('pricing.tryIt')}
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Per-report vs subscription — the core differentiator */}
+      <section className="max-w-4xl mx-auto px-6 py-16">
+        <h2 className="text-3xl font-bold text-white text-center mb-3">{t('compare.title')}</h2>
+        <p className="text-gray-400 text-center mb-10">{t('compare.sub')}</p>
+        <div className="grid sm:grid-cols-2 gap-4">
+          {/* Them */}
+          <div className="rounded-2xl p-8 border border-white/8 bg-white/3 opacity-80">
+            <div className="text-gray-500 text-sm font-medium mb-2">{t('compare.themLabel')}</div>
+            <div className="text-3xl font-bold text-gray-300 mb-1">{t('compare.themPrice')}</div>
+            <p className="text-gray-500 text-sm mt-3 flex items-start gap-2"><span className="text-red-400/70 shrink-0">✕</span>{t('compare.themNote')}</p>
+          </div>
+          {/* Us */}
+          <div className="rounded-2xl p-8 border border-indigo-500/40 bg-indigo-500/8 shadow-lg shadow-indigo-500/10">
+            <div className="text-indigo-300 text-sm font-medium mb-2">{t('compare.usLabel')}</div>
+            <div className="text-3xl font-bold text-white mb-1">{t('compare.usPrice')}</div>
+            <p className="text-gray-300 text-sm mt-3 flex items-start gap-2"><span className="text-green-400 shrink-0">✓</span>{t('compare.usNote')}</p>
           </div>
         </div>
       </section>
