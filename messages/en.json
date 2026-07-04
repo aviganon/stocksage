@@ -58,6 +58,15 @@
     "mostShorted": "Most Shorted",
     "empty": "No results right now — try another screen."
   },
+  "wl": {
+    "edit": "Edit",
+    "alert": "Price alert",
+    "above": "Above",
+    "below": "Below",
+    "shares": "Shares",
+    "avgCost": "Avg cost",
+    "alertHit": "🔔 Alert"
+  },
   "dashboard": {
     "newResearch": "New Stock Research",
     "searchPlaceholder": "Search stocks — AAPL, NVDA, HSBC, SAP...",

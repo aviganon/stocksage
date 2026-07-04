@@ -58,6 +58,15 @@
     "mostShorted": "Vendues à découvert",
     "empty": "Aucun résultat pour l'instant — essayez un autre écran."
   },
+  "wl": {
+    "edit": "Modifier",
+    "alert": "Alerte de prix",
+    "above": "Au-dessus",
+    "below": "En dessous",
+    "shares": "Actions",
+    "avgCost": "Coût moyen",
+    "alertHit": "🔔 Alerte"
+  },
   "dashboard": {
     "newResearch": "Nouvelle analyse d'action",
     "searchPlaceholder": "Rechercher des actions — AAPL, NVDA, LVMH, BNP...",

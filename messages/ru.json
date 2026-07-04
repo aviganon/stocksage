@@ -58,6 +58,15 @@
     "mostShorted": "Самые шортированные",
     "empty": "Сейчас нет результатов — попробуйте другой экран."
   },
+  "wl": {
+    "edit": "Изменить",
+    "alert": "Ценовой алерт",
+    "above": "Выше",
+    "below": "Ниже",
+    "shares": "Акции",
+    "avgCost": "Ср. цена",
+    "alertHit": "🔔 Алерт"
+  },
   "dashboard": {
     "newResearch": "Новый анализ акции",
     "searchPlaceholder": "Поиск акций — AAPL, NVDA, HSBC, SAP...",

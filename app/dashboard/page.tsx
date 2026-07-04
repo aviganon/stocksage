@@ -43,6 +43,14 @@ function WatchlistStockCard({ card, onSelect, onRemove, getIdToken }: {
 }) {
   const { t } = useI18n();
   const up = (card.changePercent ?? 0) >= 0;
+  const cur = card.currency === 'ILS' ? '₪' : '$';
+
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving]   = useState(false);
+  const [alertDir, setAlertDir]   = useState<'above' | 'below'>(card.alertDir ?? 'above');
+  const [alertPrice, setAlertPrice] = useState(card.alertPrice != null ? String(card.alertPrice) : '');
+  const [shares, setShares]       = useState(card.shares != null ? String(card.shares) : '');
+  const [costBasis, setCostBasis] = useState(card.costBasis != null ? String(card.costBasis) : '');
 
   async function handleRemove(e: React.MouseEvent) {
     e.stopPropagation();
@@ -53,37 +61,98 @@ function WatchlistStockCard({ card, onSelect, onRemove, getIdToken }: {
     onRemove(card.id);
   }
 
+  async function handleSave(e: React.MouseEvent) {
+    e.stopPropagation();
+    setSaving(true);
+    const token = await getIdToken();
+    const num = (s: string) => { const n = parseFloat(s); return Number.isFinite(n) && n > 0 ? n : null; };
+    await fetch('/api/watchlist', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token ?? ''}` },
+      body: JSON.stringify({
+        assetId: card.id,
+        alertPrice: num(alertPrice),
+        alertDir: num(alertPrice) ? alertDir : null,
+        shares: shares.trim() === '' ? null : Math.max(0, parseFloat(shares) || 0),
+        costBasis: num(costBasis),
+      }),
+    });
+    setSaving(false);
+    setEditing(false);
+  }
+
   return (
     <div className="glass-card rounded-2xl p-4 group relative cursor-pointer"
-      onClick={() => onSelect({ id: card.id, symbol: card.symbol, name: card.name, exchange: card.exchange })}>
+      onClick={() => !editing && onSelect({ id: card.id, symbol: card.symbol, name: card.name, exchange: card.exchange })}>
 
-      <button onClick={handleRemove}
-        className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 text-gray-600 hover:text-red-400 text-xs transition-all"
-        title={t('common.delete')}>✕</button>
+      <div className="absolute top-2 left-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all">
+        <button onClick={(e) => { e.stopPropagation(); setEditing((v) => !v); }}
+          className="text-gray-600 hover:text-indigo-400 text-xs" title={t('wl.edit')}>⚙</button>
+        <button onClick={handleRemove} className="text-gray-600 hover:text-red-400 text-xs" title={t('common.delete')}>✕</button>
+      </div>
 
       <div className="flex items-start justify-between mb-1">
         <div>
           <p className="text-white font-semibold text-sm">{card.symbol}</p>
           <p className="text-gray-500 text-xs">{card.exchange}</p>
         </div>
-        {card.changePercent != null && (
-          <span className={`text-xs font-semibold px-1.5 py-0.5 rounded-full ${up ? 'text-green-400 bg-green-400/10' : 'text-red-400 bg-red-400/10'}`}>
-            {up ? '+' : ''}{card.changePercent.toFixed(2)}%
-          </span>
-        )}
+        <div className="flex flex-col items-end gap-1">
+          {card.changePercent != null && (
+            <span className={`text-xs font-semibold px-1.5 py-0.5 rounded-full ${up ? 'text-green-400 bg-green-400/10' : 'text-red-400 bg-red-400/10'}`}>
+              {up ? '+' : ''}{card.changePercent.toFixed(2)}%
+            </span>
+          )}
+          {card.alertTriggered && (
+            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">{t('wl.alertHit')}</span>
+          )}
+        </div>
       </div>
 
       <Sparkline history={card.history} positive={up} />
 
       {card.price != null && (
         <p className="text-gray-300 text-sm font-mono mt-1">
-          {card.currency === 'ILS' ? '₪' : '$'}{card.price.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+          {cur}{card.price.toLocaleString(undefined, { maximumFractionDigits: 2 })}
           {card.change != null && (
             <span className={`text-xs mr-1.5 ${up ? 'text-green-400' : 'text-red-400'}`}>
               {up ? '+' : ''}{card.change.toFixed(2)}
             </span>
           )}
         </p>
+      )}
+
+      {/* P&L (when holdings are set) */}
+      {card.plPct != null && (
+        <p className={`text-xs font-medium mt-1 ${card.plPct >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+          {card.plPct >= 0 ? '▲' : '▼'} {Math.abs(card.plPct).toFixed(1)}%
+          {card.plAbs != null && <span className="text-gray-500 font-normal"> · {card.plAbs >= 0 ? '+' : ''}{cur}{card.plAbs.toFixed(0)}</span>}
+        </p>
+      )}
+
+      {/* Editor */}
+      {editing && (
+        <div className="mt-3 pt-3 border-t border-white/8 space-y-2" onClick={(e) => e.stopPropagation()}>
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs text-gray-500 w-12 shrink-0">{t('wl.alert')}</span>
+            <select value={alertDir} onChange={(e) => setAlertDir(e.target.value as 'above' | 'below')}
+              className="bg-white/5 border border-white/10 text-gray-300 rounded-lg px-1.5 py-1 text-xs outline-none">
+              <option value="above">{t('wl.above')}</option>
+              <option value="below">{t('wl.below')}</option>
+            </select>
+            <input type="number" value={alertPrice} onChange={(e) => setAlertPrice(e.target.value)} placeholder={cur}
+              className="flex-1 min-w-0 bg-white/5 border border-white/10 text-white rounded-lg px-2 py-1 text-xs outline-none" dir="ltr" />
+          </div>
+          <div className="flex items-center gap-1.5">
+            <input type="number" value={shares} onChange={(e) => setShares(e.target.value)} placeholder={t('wl.shares')}
+              className="flex-1 min-w-0 bg-white/5 border border-white/10 text-white rounded-lg px-2 py-1 text-xs outline-none" dir="ltr" />
+            <input type="number" value={costBasis} onChange={(e) => setCostBasis(e.target.value)} placeholder={t('wl.avgCost')}
+              className="flex-1 min-w-0 bg-white/5 border border-white/10 text-white rounded-lg px-2 py-1 text-xs outline-none" dir="ltr" />
+          </div>
+          <button onClick={handleSave} disabled={saving}
+            className="w-full btn-glow text-white py-1.5 rounded-lg text-xs font-medium disabled:opacity-50">
+            {saving ? '...' : t('common.save')}
+          </button>
+        </div>
       )}
     </div>
   );

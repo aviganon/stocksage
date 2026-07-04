@@ -58,6 +58,15 @@
     "mostShorted": "הכי בשורט",
     "empty": "אין תוצאות כרגע — נסה מסך אחר."
   },
+  "wl": {
+    "edit": "עריכה",
+    "alert": "התראת מחיר",
+    "above": "מעל",
+    "below": "מתחת",
+    "shares": "מניות",
+    "avgCost": "עלות ממוצעת",
+    "alertHit": "🔔 התראה"
+  },
   "dashboard": {
     "newResearch": "מחקר מניה חדש",
     "searchPlaceholder": "חפש מניה — TEVA, Check Point, Apple, בנק לאומי...",

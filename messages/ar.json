@@ -58,6 +58,15 @@
     "mostShorted": "الأكثر بيعاً على المكشوف",
     "empty": "لا نتائج الآن — جرّب شاشة أخرى."
   },
+  "wl": {
+    "edit": "تعديل",
+    "alert": "تنبيه سعر",
+    "above": "فوق",
+    "below": "تحت",
+    "shares": "أسهم",
+    "avgCost": "متوسط التكلفة",
+    "alertHit": "🔔 تنبيه"
+  },
   "dashboard": {
     "newResearch": "بحث جديد عن سهم",
     "searchPlaceholder": "ابحث عن أسهم — AAPL، NVDA، HSBC...",
