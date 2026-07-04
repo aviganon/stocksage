@@ -19,7 +19,7 @@ export default function SignupPage() {
   const canContinue = agreeTerms && agreeDisclaim && agreeAge;
 
   async function handleGoogle() {
-    if (!canContinue) { setError('יש לסמן את כל תיבות האישור'); return; }
+    if (!canContinue) { setError(t('auth.mustAgree')); return; }
     setError(''); setLoading(true);
     try {
       await signInWithGoogle();
@@ -55,7 +55,7 @@ export default function SignupPage() {
             <span className="w-9 h-9 rounded-xl btn-glow flex items-center justify-center text-lg font-bold">S</span>
             Stock<span className="text-gradient">Sage</span>
           </Link>
-          <p className="text-gray-400 mt-3 text-sm">יצירת חשבון בחינם</p>
+          <p className="text-gray-400 mt-3 text-sm">{t('auth.signupSubtitle')}</p>
         </div>
 
         {/* Card */}
@@ -67,10 +67,10 @@ export default function SignupPage() {
               <input type="checkbox" checked={agreeTerms} onChange={(e) => setAgreeTerms(e.target.checked)}
                 className="mt-0.5 w-4 h-4 accent-indigo-500 shrink-0" />
               <span className="text-xs text-gray-400 leading-relaxed group-hover:text-gray-300 transition-colors">
-                קראתי ומסכים/ה ל
-                <Link href="/terms" target="_blank" className="text-indigo-400 hover:underline mx-1">תנאי השימוש</Link>
-                ול
-                <Link href="/privacy" target="_blank" className="text-indigo-400 hover:underline mx-1">מדיניות הפרטיות</Link>
+                {t('try.agreeTermsPre')}
+                <Link href="/terms" target="_blank" className="text-indigo-400 hover:underline mx-1">{t('try.termsLink')}</Link>
+                {t('try.and')}
+                <Link href="/privacy" target="_blank" className="text-indigo-400 hover:underline mx-1">{t('try.privacyLink')}</Link>
               </span>
             </label>
 
@@ -78,8 +78,7 @@ export default function SignupPage() {
               <input type="checkbox" checked={agreeDisclaim} onChange={(e) => setAgreeDisclaim(e.target.checked)}
                 className="mt-0.5 w-4 h-4 accent-indigo-500 shrink-0" />
               <span className="text-xs text-gray-400 leading-relaxed group-hover:text-gray-300 transition-colors">
-                <strong className="text-gray-300">מאשר/ת</strong> ש-StockSage אינה מספקת ייעוץ השקעות מורשה לפי חוק תשנ"ה-1995.
-                כל החלטה — באחריותי.
+                {t('try.agreeDisclaimer')}
               </span>
             </label>
 
@@ -87,7 +86,7 @@ export default function SignupPage() {
               <input type="checkbox" checked={agreeAge} onChange={(e) => setAgreeAge(e.target.checked)}
                 className="mt-0.5 w-4 h-4 accent-indigo-500 shrink-0" />
               <span className="text-xs text-gray-400 leading-relaxed group-hover:text-gray-300 transition-colors">
-                גילי <strong className="text-gray-300">18 ומעלה</strong>
+                {t('try.agreeAge')}
               </span>
             </label>
           </div>
@@ -107,7 +106,7 @@ export default function SignupPage() {
               <path fill="white" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
               <path fill="white" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
             </svg>
-            {loading ? 'נכנס...' : 'המשך עם Google'}
+            {loading ? t('auth.signingIn') : t('auth.googleBtn')}
           </button>
 
           {error && (
@@ -116,8 +115,8 @@ export default function SignupPage() {
         </div>
 
         <p className="text-center text-sm text-gray-500 mt-6">
-          כבר יש חשבון?{' '}
-          <Link href="/login" className="text-indigo-300 hover:text-indigo-200 font-medium transition-colors">כניסה</Link>
+          {t('auth.hasAccount')}{' '}
+          <Link href="/login" className="text-indigo-300 hover:text-indigo-200 font-medium transition-colors">{t('auth.loginBtn')}</Link>
         </p>
       </div>
     </div>

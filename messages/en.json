@@ -20,7 +20,10 @@
     "pricingSub": "Quick research is always free — pay only for deep analysis",
     "disclaimer": "For informational purposes only — not investment advice",
     "ctaTry": "Try now — 3 free scans, no signup",
-    "tryNote": "No credit card · No signup · Start instantly"
+    "tryNote": "No credit card · No signup · Start instantly",
+    "sampleTitle": "See a real analysis",
+    "sampleSub": "This is what every report looks like. Explore live examples — no signup:",
+    "sampleView": "View all analyses →"
   },
   "pricing": {
     "free": "Free",
@@ -176,7 +179,10 @@
     "orContinueWith": "or continue with",
     "emailToggle": "Sign in with email & password (manually created users) ▾",
     "emailTitle": "Sign in with email & password",
-    "close": "✕ Close"
+    "close": "✕ Close",
+    "signupSubtitle": "Create a free account",
+    "signingIn": "Signing in...",
+    "mustAgree": "Please check all consent boxes"
   },
   "settings": {
     "title": "Account Settings",

@@ -20,7 +20,10 @@
     "pricingSub": "Analyse rapide toujours gratuite — payez uniquement pour l'analyse approfondie",
     "disclaimer": "À titre informatif uniquement — ne constitue pas un conseil en investissement",
     "ctaTry": "Essayez — 3 analyses gratuites sans inscription",
-    "tryNote": "Sans carte · Sans inscription · Commencez tout de suite"
+    "tryNote": "Sans carte · Sans inscription · Commencez tout de suite",
+    "sampleTitle": "Voir une analyse réelle",
+    "sampleSub": "Voici à quoi ressemble chaque rapport. Explorez des exemples en direct — sans inscription :",
+    "sampleView": "Toutes les analyses →"
   },
   "pricing": {
     "free": "Gratuit",
@@ -176,7 +179,10 @@
     "orContinueWith": "ou continuer avec",
     "emailToggle": "Connexion avec e-mail et mot de passe (comptes créés manuellement) ▾",
     "emailTitle": "Connexion avec e-mail et mot de passe",
-    "close": "✕ Fermer"
+    "close": "✕ Fermer",
+    "signupSubtitle": "Créez un compte gratuit",
+    "signingIn": "Connexion...",
+    "mustAgree": "Veuillez cocher toutes les cases de consentement"
   },
   "settings": {
     "title": "Paramètres du compte",

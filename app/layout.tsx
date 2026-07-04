@@ -21,10 +21,17 @@ export const metadata: Metadata = {
   keywords: ['stock analysis', 'AI stock research', 'stock research', 'equity research', 'AAPL analysis', 'NVDA analysis'],
 };
 
+// Runs synchronously before paint: applies the visitor's saved locale to
+// <html lang/dir> so returning Hebrew/Arabic users don't see an LTR→RTL flash.
+// Default (below) is en/ltr — correct for the international audience and for
+// crawlers, which is what the SEO analysis pages need.
+const LOCALE_BOOTSTRAP = `(function(){try{var l=localStorage.getItem('stocksage_locale');if(l){var rtl=(l==='he'||l==='ar');document.documentElement.lang=l;document.documentElement.dir=rtl?'rtl':'ltr';}}catch(e){}})();`;
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="he" dir="rtl" className={`${geist.variable} h-full antialiased`}>
+    <html lang="en" dir="ltr" className={`${geist.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-[#0a0a0f] text-[#e8e8f0]">
+        <script dangerouslySetInnerHTML={{ __html: LOCALE_BOOTSTRAP }} />
         <I18nProvider>
           {/* Ambient background — fixed, renders behind all pages */}
           <div className="ambient-bg" aria-hidden="true" />

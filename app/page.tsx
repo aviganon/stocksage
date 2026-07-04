@@ -102,6 +102,33 @@ export default function LandingPage() {
         <p className="text-xs text-gray-600 mt-4">{t('landing.tryNote')}</p>
       </section>
 
+      {/* Sample analyses — social proof via the public SEO pages */}
+      <section className="max-w-6xl mx-auto px-6 pb-8">
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-bold text-white mb-2">{t('landing.sampleTitle')}</h2>
+          <p className="text-gray-400 text-sm">{t('landing.sampleSub')}</p>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 max-w-4xl mx-auto">
+          {[
+            { ex: 'nasdaq', sym: 'AAPL', name: 'Apple' },
+            { ex: 'nasdaq', sym: 'NVDA', name: 'Nvidia' },
+            { ex: 'nasdaq', sym: 'TSLA', name: 'Tesla' },
+            { ex: 'nasdaq', sym: 'MSFT', name: 'Microsoft' },
+            { ex: 'lse',    sym: 'SHEL', name: 'Shell' },
+            { ex: 'tase',   sym: 'TEVA', name: 'Teva' },
+          ].map((s) => (
+            <Link key={s.sym} href={`/analysis/${s.ex}/${s.sym.toLowerCase()}`}
+              className="glass-card rounded-xl p-3 text-center hover:border-indigo-500/40 transition-colors group">
+              <div className="text-white font-bold text-sm group-hover:text-indigo-300 transition-colors">{s.sym}</div>
+              <div className="text-gray-500 text-xs truncate">{s.name}</div>
+            </Link>
+          ))}
+        </div>
+        <div className="text-center mt-5">
+          <Link href="/analysis" className="text-sm text-indigo-300 hover:text-indigo-200 transition-colors">{t('landing.sampleView')}</Link>
+        </div>
+      </section>
+
       {/* Features */}
       <section className="max-w-6xl mx-auto px-6 py-20">
         <h2 className="text-3xl font-bold text-white text-center mb-4">{t('landing.featuresTitle')}</h2>
