@@ -48,8 +48,10 @@ export interface SeoAnalysis extends SeoAnalysisContent {
   generatedAt: string;
 }
 
-function docId(assetId: string): string {
-  return assetId.replace(':', '_');
+export type SeoLang = 'en' | 'he';
+
+function docId(assetId: string, lang: SeoLang): string {
+  return `${assetId.replace(':', '_')}${lang === 'he' ? '__he' : ''}`;
 }
 
 function isStale(generatedAt?: string): boolean {
@@ -69,7 +71,15 @@ function buildPrompt(params: {
   sector: string;
   priceLine: string;
   ratiosJson: string;
+  lang: SeoLang;
 }): string {
+  const langNote = params.lang === 'he'
+    ? `\n\nCRITICAL — LANGUAGE: Write ALL text VALUES in Hebrew (עברית), including metaTitle and metaDescription and every FAQ question and answer. Keep JSON field NAMES in English. metaTitle should include the ticker and the words "ניתוח מניית" (e.g. "ניתוח מניית ${params.symbol}: תרחיש שורי ודובי 2026"). Write for Hebrew-speaking Israeli retail investors.`
+    : '';
+  const titleExample = params.lang === 'he'
+    ? `"ניתוח מניית ${params.symbol}" style, under 60 chars`
+    : `under 60 chars, include the ticker and the word "Analysis" (e.g. "AAPL Stock Analysis 2026: Bull & Bear Case")`;
+
   return `Write an SEO stock-analysis page for ${params.name} (${params.symbol}, ${params.exchange}).
 
 GROUNDING DATA:
@@ -79,7 +89,7 @@ GROUNDING DATA:
 - Key ratios: ${params.ratiosJson}
 
 Return a JSON object with EXACTLY these fields:
-- "metaTitle": SEO page title, under 60 chars, include the ticker and the word "Analysis" (e.g. "AAPL Stock Analysis 2026: Bull & Bear Case").
+- "metaTitle": SEO page title, ${titleExample}.
 - "metaDescription": meta description, 140-160 chars, compelling, includes the company name and ticker.
 - "intro": 2-3 sentence opening paragraph answering "what is this company and why do people research it".
 - "businessSummary": one paragraph (3-4 sentences) on the business model and how it makes money.
@@ -89,11 +99,11 @@ Return a JSON object with EXACTLY these fields:
 - "verdict": one balanced paragraph (3-4 sentences) framing the core tension. NOT a recommendation — use "considerations", "factors to weigh", "what to monitor".
 - "faq": array of 4-6 {"q","a"} pairs answering the questions people actually Google (e.g. "Is ${params.symbol} a good stock to research?", "What does ${params.name} do?", "Is ${params.symbol} overvalued?"). Answers 1-3 sentences, neutral, no buy/sell advice.
 
-Write in clear English. Never use the words "buy", "sell", "should invest", "recommend". Return ONLY the JSON object.`;
+Never use the words "buy", "sell", "should invest", "recommend" (or their Hebrew equivalents). Return ONLY the JSON object.${langNote}`;
 }
 
 /** Generate a fresh analysis (grounded in live data) and cache it. */
-export async function generateSeoAnalysis(assetId: AssetId): Promise<SeoAnalysis | null> {
+export async function generateSeoAnalysis(assetId: AssetId, lang: SeoLang = 'en'): Promise<SeoAnalysis | null> {
   let name = assetId, symbol = assetId, exchange = '';
   try {
     const parsed = parseAssetId(assetId);
@@ -135,6 +145,7 @@ export async function generateSeoAnalysis(assetId: AssetId): Promise<SeoAnalysis
         sector: asset?.sector ?? 'unknown',
         priceLine,
         ratiosJson: JSON.stringify(ratios),
+        lang,
       }),
       schema: SeoAnalysisSchema,
       maxTokens: 3000,
@@ -156,7 +167,7 @@ export async function generateSeoAnalysis(assetId: AssetId): Promise<SeoAnalysis
   };
 
   try {
-    await getAdminDb().collection(COLLECTION).doc(docId(assetId)).set(analysis);
+    await getAdminDb().collection(COLLECTION).doc(docId(assetId, lang)).set(analysis);
   } catch (e) {
     console.error('[seo/analysis] cache write failed', assetId, String(e));
   }
@@ -165,9 +176,9 @@ export async function generateSeoAnalysis(assetId: AssetId): Promise<SeoAnalysis
 }
 
 /** Read cached analysis; regenerate if missing or stale. */
-export async function getSeoAnalysis(assetId: AssetId): Promise<SeoAnalysis | null> {
+export async function getSeoAnalysis(assetId: AssetId, lang: SeoLang = 'en'): Promise<SeoAnalysis | null> {
   try {
-    const snap = await getAdminDb().collection(COLLECTION).doc(docId(assetId)).get();
+    const snap = await getAdminDb().collection(COLLECTION).doc(docId(assetId, lang)).get();
     if (snap.exists) {
       const data = snap.data() as SeoAnalysis;
       if (!isStale(data.generatedAt)) return data;
@@ -175,13 +186,13 @@ export async function getSeoAnalysis(assetId: AssetId): Promise<SeoAnalysis | nu
   } catch (e) {
     console.error('[seo/analysis] cache read failed', assetId, String(e));
   }
-  return generateSeoAnalysis(assetId);
+  return generateSeoAnalysis(assetId, lang);
 }
 
 /** Read cache only — no generation. Returns null on miss. Used by cron to skip fresh ones. */
-export async function peekSeoAnalysis(assetId: AssetId): Promise<SeoAnalysis | null> {
+export async function peekSeoAnalysis(assetId: AssetId, lang: SeoLang = 'en'): Promise<SeoAnalysis | null> {
   try {
-    const snap = await getAdminDb().collection(COLLECTION).doc(docId(assetId)).get();
+    const snap = await getAdminDb().collection(COLLECTION).doc(docId(assetId, lang)).get();
     if (snap.exists) return snap.data() as SeoAnalysis;
   } catch { /* ignore */ }
   return null;

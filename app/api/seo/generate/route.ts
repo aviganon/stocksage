@@ -38,19 +38,25 @@ export async function POST(req: NextRequest) {
   const limit = Math.min(parseInt(req.nextUrl.searchParams.get('limit') ?? '12', 10) || 12, 30);
 
   try {
-    // Find stocks that need (re)generation — missing or stale.
+    // Work items: English for the whole universe + Hebrew for TASE (the niche).
+    const items: Array<{ id: typeof SEO_UNIVERSE[number]['id']; lang: 'en' | 'he' }> = [
+      ...SEO_UNIVERSE.map((s) => ({ id: s.id, lang: 'en' as const })),
+      ...SEO_UNIVERSE.filter((s) => s.exchange === 'TASE').map((s) => ({ id: s.id, lang: 'he' as const })),
+    ];
+
+    // Find items that need (re)generation — missing or stale.
     const staleChecks = await Promise.all(
-      SEO_UNIVERSE.map(async (s) => {
-        const cached = await peekSeoAnalysis(s.id);
-        return { stock: s, needs: !cached || isSeoAnalysisStale(cached.generatedAt) };
+      items.map(async (it) => {
+        const cached = await peekSeoAnalysis(it.id, it.lang);
+        return { item: it, needs: !cached || isSeoAnalysisStale(cached.generatedAt) };
       }),
     );
     const staleCount = staleChecks.filter((c) => c.needs).length;
-    const toGenerate = staleChecks.filter((c) => c.needs).map((c) => c.stock).slice(0, limit);
+    const toGenerate = staleChecks.filter((c) => c.needs).map((c) => c.item).slice(0, limit);
 
-    const generated = await mapWithConcurrency(toGenerate, 3, async (s) => {
-      const result = await generateSeoAnalysis(s.id);
-      return { assetId: s.id, ok: !!result };
+    const generated = await mapWithConcurrency(toGenerate, 3, async (it) => {
+      const result = await generateSeoAnalysis(it.id, it.lang);
+      return { assetId: it.id, lang: it.lang, ok: !!result };
     });
 
     const okCount = generated.filter((g) => g.ok).length;
@@ -58,7 +64,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       ok: true,
-      universeSize: SEO_UNIVERSE.length,
+      workItems: items.length,
       staleFound: staleCount,
       generatedThisRun: generated.length,
       succeeded: okCount,

@@ -6,6 +6,8 @@ import { findSeoStock } from '@/lib/seo/universe';
 import { AnalysisArticle } from '@/components/analysis/analysis-article';
 import type { AssetId } from '@/lib/data/types';
 
+// Hebrew analysis pages — the uncontested niche (no competitor offers Hebrew
+// TASE coverage). Same ISR strategy; a separate Hebrew analysis is cached.
 export const revalidate = 86400;
 export const dynamicParams = true;
 
@@ -20,38 +22,37 @@ function toAssetId(exchange: string, symbol: string): AssetId {
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const { exchange, symbol } = await params;
   const assetId = toAssetId(exchange, symbol);
-  const analysis = await getSeoAnalysis(assetId, 'en').catch(() => null);
+  const analysis = await getSeoAnalysis(assetId, 'he').catch(() => null);
   const known = findSeoStock(exchange, symbol);
   const name = analysis?.name ?? known?.name ?? symbol.toUpperCase();
 
-  const title = analysis?.metaTitle ?? `${symbol.toUpperCase()} Stock Analysis — ${name}`;
+  const title = analysis?.metaTitle ?? `ניתוח מניית ${symbol.toUpperCase()} — ${name}`;
   const description =
     analysis?.metaDescription ??
-    `AI-powered analysis of ${name} (${symbol.toUpperCase()}): business overview, bull and bear case, valuation and key questions for investors.`;
+    `ניתוח AI של ${name} (${symbol.toUpperCase()}): סקירת עסק, תרחיש שורי ודובי, הערכת שווי ושאלות מפתח למשקיע.`;
   const path = `/analysis/${exchange.toLowerCase()}/${symbol.toLowerCase()}`;
 
   return {
     title,
     description,
     alternates: {
-      canonical: `${BASE_URL}${path}`,
+      canonical: `${BASE_URL}/he${path}`,
       languages: { en: `${BASE_URL}${path}`, he: `${BASE_URL}/he${path}` },
     },
-    openGraph: { title, description, url: `${BASE_URL}${path}`, siteName: 'StockSage', type: 'article' },
-    twitter: { card: 'summary_large_image', title, description },
+    openGraph: { title, description, url: `${BASE_URL}/he${path}`, siteName: 'StockSage', type: 'article', locale: 'he_IL' },
   };
 }
 
-export default async function AnalysisPage({ params }: { params: Promise<Params> }) {
+export default async function HebrewAnalysisPage({ params }: { params: Promise<Params> }) {
   const { exchange, symbol } = await params;
   const assetId = toAssetId(exchange, symbol);
 
   const [analysis, quote] = await Promise.all([
-    getSeoAnalysis(assetId, 'en').catch(() => null),
+    getSeoAnalysis(assetId, 'he').catch(() => null),
     getQuote(assetId).catch(() => null),
   ]);
 
   if (!analysis) notFound();
 
-  return <AnalysisArticle analysis={analysis} quote={quote} lang="en" />;
+  return <AnalysisArticle analysis={analysis} quote={quote} lang="he" />;
 }
