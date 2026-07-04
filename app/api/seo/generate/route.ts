@@ -38,11 +38,10 @@ export async function POST(req: NextRequest) {
   const limit = Math.min(parseInt(req.nextUrl.searchParams.get('limit') ?? '12', 10) || 12, 30);
 
   try {
-    // Work items: English for the whole universe + Hebrew for TASE (the niche).
-    const items: Array<{ id: typeof SEO_UNIVERSE[number]['id']; lang: 'en' | 'he' }> = [
-      ...SEO_UNIVERSE.map((s) => ({ id: s.id, lang: 'en' as const })),
-      ...SEO_UNIVERSE.filter((s) => s.exchange === 'TASE').map((s) => ({ id: s.id, lang: 'he' as const })),
-    ];
+    // English only for now. Hebrew analysis pages are intentionally not warmed
+    // or marketed (Israeli regulation) — re-add a he pass here to re-enable.
+    const items: Array<{ id: typeof SEO_UNIVERSE[number]['id']; lang: 'en' | 'he' }> =
+      SEO_UNIVERSE.map((s) => ({ id: s.id, lang: 'en' as const }));
 
     // Find items that need (re)generation — missing or stale.
     const staleChecks = await Promise.all(

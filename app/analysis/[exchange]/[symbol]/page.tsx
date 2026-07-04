@@ -33,10 +33,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   return {
     title,
     description,
-    alternates: {
-      canonical: `${BASE_URL}${path}`,
-      languages: { en: `${BASE_URL}${path}`, he: `${BASE_URL}/he${path}` },
-    },
+    alternates: { canonical: `${BASE_URL}${path}` },
     openGraph: { title, description, url: `${BASE_URL}${path}`, siteName: 'StockSage', type: 'article' },
     twitter: { card: 'summary_large_image', title, description },
   };

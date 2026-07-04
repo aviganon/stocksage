@@ -35,10 +35,10 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   return {
     title,
     description,
-    alternates: {
-      canonical: `${BASE_URL}/he${path}`,
-      languages: { en: `${BASE_URL}${path}`, he: `${BASE_URL}/he${path}` },
-    },
+    // Hebrew analysis is dormant (not marketed for now) — keep it out of the
+    // index so it draws no Hebrew/Israeli organic traffic. Remove to re-enable.
+    robots: { index: false, follow: false },
+    alternates: { canonical: `${BASE_URL}/he${path}` },
     openGraph: { title, description, url: `${BASE_URL}/he${path}`, siteName: 'StockSage', type: 'article', locale: 'he_IL' },
   };
 }

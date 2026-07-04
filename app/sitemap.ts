@@ -18,27 +18,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/accessibility`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
   ];
 
-  const analysisPages: MetadataRoute.Sitemap = SEO_UNIVERSE.map((s) => {
-    const path = `/analysis/${s.exchange.toLowerCase()}/${s.symbol.toLowerCase()}`;
-    return {
-      url: `${BASE_URL}${path}`,
-      lastModified: now,
-      changeFrequency: 'weekly',
-      priority: 0.7,
-      alternates: { languages: { en: `${BASE_URL}${path}`, he: `${BASE_URL}/he${path}` } },
-    };
-  });
+  // English analysis pages only. Hebrew analysis pages exist in code but are
+  // intentionally NOT marketed for now (Israeli regulation) — kept out of the
+  // sitemap and set noindex. Re-enable by restoring he alternates + entries.
+  const analysisPages: MetadataRoute.Sitemap = SEO_UNIVERSE.map((s) => ({
+    url: `${BASE_URL}/analysis/${s.exchange.toLowerCase()}/${s.symbol.toLowerCase()}`,
+    lastModified: now,
+    changeFrequency: 'weekly',
+    priority: 0.7,
+  }));
 
-  // Explicit Hebrew entries for the TASE niche (no competitor offers Hebrew
-  // TASE coverage) so Google indexes them fast.
-  const hebrewTasePages: MetadataRoute.Sitemap = SEO_UNIVERSE
-    .filter((s) => s.exchange === 'TASE')
-    .map((s) => ({
-      url: `${BASE_URL}/he/analysis/${s.exchange.toLowerCase()}/${s.symbol.toLowerCase()}`,
-      lastModified: now,
-      changeFrequency: 'weekly',
-      priority: 0.75,
-    }));
-
-  return [...staticPages, ...analysisPages, ...hebrewTasePages];
+  return [...staticPages, ...analysisPages];
 }
