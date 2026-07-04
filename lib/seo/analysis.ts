@@ -48,10 +48,10 @@ export interface SeoAnalysis extends SeoAnalysisContent {
   generatedAt: string;
 }
 
-export type SeoLang = 'en' | 'he';
+export type SeoLang = 'en' | 'he' | 'fr' | 'ar';
 
 function docId(assetId: string, lang: SeoLang): string {
-  return `${assetId.replace(':', '_')}${lang === 'he' ? '__he' : ''}`;
+  return `${assetId.replace(':', '_')}${lang === 'en' ? '' : `__${lang}`}`;
 }
 
 function isStale(generatedAt?: string): boolean {
@@ -73,12 +73,16 @@ function buildPrompt(params: {
   ratiosJson: string;
   lang: SeoLang;
 }): string {
-  const langNote = params.lang === 'he'
-    ? `\n\nCRITICAL — LANGUAGE: Write ALL text VALUES in Hebrew (עברית), including metaTitle and metaDescription and every FAQ question and answer. Keep JSON field NAMES in English. metaTitle should include the ticker and the words "ניתוח מניית" (e.g. "ניתוח מניית ${params.symbol}: תרחיש שורי ודובי 2026"). Write for Hebrew-speaking Israeli retail investors.`
-    : '';
-  const titleExample = params.lang === 'he'
-    ? `"ניתוח מניית ${params.symbol}" style, under 60 chars`
-    : `under 60 chars, include the ticker and the word "Analysis" (e.g. "AAPL Stock Analysis 2026: Bull & Bear Case")`;
+  const LANG_NOTES: Record<SeoLang, string> = {
+    en: '',
+    he: `\n\nCRITICAL — LANGUAGE: Write ALL text VALUES in Hebrew (עברית), including metaTitle, metaDescription and every FAQ. Keep JSON field NAMES in English. metaTitle should include the ticker and the words "ניתוח מניית" (e.g. "ניתוח מניית ${params.symbol}: תרחיש שורי ודובי 2026"). Write for Hebrew-speaking Israeli retail investors.`,
+    fr: `\n\nCRITICAL — LANGUAGE: Write ALL text VALUES in French (français), including metaTitle, metaDescription and every FAQ. Keep JSON field NAMES in English. metaTitle should include the ticker and the word "Analyse" (e.g. "Analyse de l'action ${params.symbol} : scénarios haussier et baissier 2026"). Write for French-speaking retail investors (France, Belgium, Canada).`,
+    ar: `\n\nCRITICAL — LANGUAGE: Write ALL text VALUES in Arabic (العربية), including metaTitle, metaDescription and every FAQ. Keep JSON field NAMES in English. metaTitle should include the ticker and the words "تحليل سهم" (e.g. "تحليل سهم ${params.symbol}: السيناريو الصاعد والهابط 2026"). Write for Arabic-speaking retail investors (Gulf/MENA).`,
+  };
+  const langNote = LANG_NOTES[params.lang];
+  const titleExample = params.lang === 'en'
+    ? `under 60 chars, include the ticker and the word "Analysis" (e.g. "AAPL Stock Analysis 2026: Bull & Bear Case")`
+    : `under 60 chars, include the ticker (localized per the LANGUAGE note below)`;
 
   return `Write an SEO stock-analysis page for ${params.name} (${params.symbol}, ${params.exchange}).
 
@@ -99,7 +103,7 @@ Return a JSON object with EXACTLY these fields:
 - "verdict": one balanced paragraph (3-4 sentences) framing the core tension. NOT a recommendation — use "considerations", "factors to weigh", "what to monitor".
 - "faq": array of 4-6 {"q","a"} pairs answering the questions people actually Google (e.g. "Is ${params.symbol} a good stock to research?", "What does ${params.name} do?", "Is ${params.symbol} overvalued?"). Answers 1-3 sentences, neutral, no buy/sell advice.
 
-Never use the words "buy", "sell", "should invest", "recommend" (or their Hebrew equivalents). Return ONLY the JSON object.${langNote}`;
+Never use the words "buy", "sell", "should invest", "recommend" (or their equivalents in the target language). Return ONLY the JSON object.${langNote}`;
 }
 
 /** Generate a fresh analysis (grounded in live data) and cache it. */

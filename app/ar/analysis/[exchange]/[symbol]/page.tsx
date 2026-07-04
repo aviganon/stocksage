@@ -20,38 +20,37 @@ function toAssetId(exchange: string, symbol: string): AssetId {
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const { exchange, symbol } = await params;
   const assetId = toAssetId(exchange, symbol);
-  const analysis = await getSeoAnalysis(assetId, 'en').catch(() => null);
+  const analysis = await getSeoAnalysis(assetId, 'ar').catch(() => null);
   const known = findSeoStock(exchange, symbol);
   const name = analysis?.name ?? known?.name ?? symbol.toUpperCase();
 
-  const title = analysis?.metaTitle ?? `${symbol.toUpperCase()} Stock Analysis — ${name}`;
+  const title = analysis?.metaTitle ?? `تحليل سهم ${symbol.toUpperCase()} — ${name}`;
   const description =
     analysis?.metaDescription ??
-    `AI-powered analysis of ${name} (${symbol.toUpperCase()}): business overview, bull and bear case, valuation and key questions for investors.`;
+    `تحليل بالذكاء الاصطناعي لـ ${name} (${symbol.toUpperCase()}): نظرة عامة، السيناريو الصاعد والهابط، التقييم وأسئلة رئيسية للمستثمر.`;
   const path = `/analysis/${exchange.toLowerCase()}/${symbol.toLowerCase()}`;
 
   return {
     title,
     description,
     alternates: {
-      canonical: `${BASE_URL}${path}`,
+      canonical: `${BASE_URL}/ar${path}`,
       languages: { en: `${BASE_URL}${path}`, fr: `${BASE_URL}/fr${path}`, ar: `${BASE_URL}/ar${path}` },
     },
-    openGraph: { title, description, url: `${BASE_URL}${path}`, siteName: 'StockSage', type: 'article' },
-    twitter: { card: 'summary_large_image', title, description },
+    openGraph: { title, description, url: `${BASE_URL}/ar${path}`, siteName: 'StockSage', type: 'article', locale: 'ar_AR' },
   };
 }
 
-export default async function AnalysisPage({ params }: { params: Promise<Params> }) {
+export default async function ArabicAnalysisPage({ params }: { params: Promise<Params> }) {
   const { exchange, symbol } = await params;
   const assetId = toAssetId(exchange, symbol);
 
   const [analysis, quote] = await Promise.all([
-    getSeoAnalysis(assetId, 'en').catch(() => null),
+    getSeoAnalysis(assetId, 'ar').catch(() => null),
     getQuote(assetId).catch(() => null),
   ]);
 
   if (!analysis) notFound();
 
-  return <AnalysisArticle analysis={analysis} quote={quote} lang="en" />;
+  return <AnalysisArticle analysis={analysis} quote={quote} lang="ar" />;
 }

@@ -38,10 +38,13 @@ export async function POST(req: NextRequest) {
   const limit = Math.min(parseInt(req.nextUrl.searchParams.get('limit') ?? '12', 10) || 12, 30);
 
   try {
-    // English only for now. Hebrew analysis pages are intentionally not warmed
-    // or marketed (Israeli regulation) — re-add a he pass here to re-enable.
-    const items: Array<{ id: typeof SEO_UNIVERSE[number]['id']; lang: 'en' | 'he' }> =
-      SEO_UNIVERSE.map((s) => ({ id: s.id, lang: 'en' as const }));
+    // English + French + Arabic (marketed). Hebrew is intentionally NOT warmed
+    // (Israeli regulation) — add a he pass here to re-enable it.
+    const items: Array<{ id: typeof SEO_UNIVERSE[number]['id']; lang: 'en' | 'fr' | 'ar' }> = [
+      ...SEO_UNIVERSE.map((s) => ({ id: s.id, lang: 'en' as const })),
+      ...SEO_UNIVERSE.map((s) => ({ id: s.id, lang: 'fr' as const })),
+      ...SEO_UNIVERSE.map((s) => ({ id: s.id, lang: 'ar' as const })),
+    ];
 
     // Find items that need (re)generation — missing or stale.
     const staleChecks = await Promise.all(

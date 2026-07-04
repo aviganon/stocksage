@@ -18,15 +18,27 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/accessibility`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
   ];
 
-  // English analysis pages only. Hebrew analysis pages exist in code but are
-  // intentionally NOT marketed for now (Israeli regulation) — kept out of the
-  // sitemap and set noindex. Re-enable by restoring he alternates + entries.
-  const analysisPages: MetadataRoute.Sitemap = SEO_UNIVERSE.map((s) => ({
-    url: `${BASE_URL}/analysis/${s.exchange.toLowerCase()}/${s.symbol.toLowerCase()}`,
-    lastModified: now,
-    changeFrequency: 'weekly',
-    priority: 0.7,
-  }));
+  // Analysis pages in English, French and Arabic (marketed). Hebrew pages
+  // exist in code but are intentionally NOT marketed (Israeli regulation) —
+  // kept out of the sitemap and set noindex.
+  const langPath = (s: (typeof SEO_UNIVERSE)[number]) =>
+    `/analysis/${s.exchange.toLowerCase()}/${s.symbol.toLowerCase()}`;
+  const alt = (path: string) => ({
+    languages: { en: `${BASE_URL}${path}`, fr: `${BASE_URL}/fr${path}`, ar: `${BASE_URL}/ar${path}` },
+  });
 
-  return [...staticPages, ...analysisPages];
+  const analysisPages: MetadataRoute.Sitemap = SEO_UNIVERSE.map((s) => {
+    const path = langPath(s);
+    return { url: `${BASE_URL}${path}`, lastModified: now, changeFrequency: 'weekly', priority: 0.7, alternates: alt(path) };
+  });
+  const frenchPages: MetadataRoute.Sitemap = SEO_UNIVERSE.map((s) => {
+    const path = langPath(s);
+    return { url: `${BASE_URL}/fr${path}`, lastModified: now, changeFrequency: 'weekly', priority: 0.65, alternates: alt(path) };
+  });
+  const arabicPages: MetadataRoute.Sitemap = SEO_UNIVERSE.map((s) => {
+    const path = langPath(s);
+    return { url: `${BASE_URL}/ar${path}`, lastModified: now, changeFrequency: 'weekly', priority: 0.65, alternates: alt(path) };
+  });
+
+  return [...staticPages, ...analysisPages, ...frenchPages, ...arabicPages];
 }

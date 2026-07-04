@@ -20,38 +20,37 @@ function toAssetId(exchange: string, symbol: string): AssetId {
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const { exchange, symbol } = await params;
   const assetId = toAssetId(exchange, symbol);
-  const analysis = await getSeoAnalysis(assetId, 'en').catch(() => null);
+  const analysis = await getSeoAnalysis(assetId, 'fr').catch(() => null);
   const known = findSeoStock(exchange, symbol);
   const name = analysis?.name ?? known?.name ?? symbol.toUpperCase();
 
-  const title = analysis?.metaTitle ?? `${symbol.toUpperCase()} Stock Analysis — ${name}`;
+  const title = analysis?.metaTitle ?? `Analyse de l'action ${symbol.toUpperCase()} — ${name}`;
   const description =
     analysis?.metaDescription ??
-    `AI-powered analysis of ${name} (${symbol.toUpperCase()}): business overview, bull and bear case, valuation and key questions for investors.`;
+    `Analyse IA de ${name} (${symbol.toUpperCase()}) : présentation, scénarios haussier et baissier, valorisation et questions clés pour l'investisseur.`;
   const path = `/analysis/${exchange.toLowerCase()}/${symbol.toLowerCase()}`;
 
   return {
     title,
     description,
     alternates: {
-      canonical: `${BASE_URL}${path}`,
+      canonical: `${BASE_URL}/fr${path}`,
       languages: { en: `${BASE_URL}${path}`, fr: `${BASE_URL}/fr${path}`, ar: `${BASE_URL}/ar${path}` },
     },
-    openGraph: { title, description, url: `${BASE_URL}${path}`, siteName: 'StockSage', type: 'article' },
-    twitter: { card: 'summary_large_image', title, description },
+    openGraph: { title, description, url: `${BASE_URL}/fr${path}`, siteName: 'StockSage', type: 'article', locale: 'fr_FR' },
   };
 }
 
-export default async function AnalysisPage({ params }: { params: Promise<Params> }) {
+export default async function FrenchAnalysisPage({ params }: { params: Promise<Params> }) {
   const { exchange, symbol } = await params;
   const assetId = toAssetId(exchange, symbol);
 
   const [analysis, quote] = await Promise.all([
-    getSeoAnalysis(assetId, 'en').catch(() => null),
+    getSeoAnalysis(assetId, 'fr').catch(() => null),
     getQuote(assetId).catch(() => null),
   ]);
 
   if (!analysis) notFound();
 
-  return <AnalysisArticle analysis={analysis} quote={quote} lang="en" />;
+  return <AnalysisArticle analysis={analysis} quote={quote} lang="fr" />;
 }
