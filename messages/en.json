@@ -174,7 +174,15 @@
     "numbersSay": "What the Numbers Say",
     "narrativeSays": "What the Narrative Says",
     "investorQs": "Key Questions for Investors",
-    "disclaimerFooter": "For informational purposes only — not investment advice. Analysis is based on public data and AI."
+    "disclaimerFooter": "For informational purposes only — not investment advice. Analysis is based on public data and AI.",
+    "askTitle": "Ask about this report",
+    "askPlaceholder": "Ask a follow-up question…",
+    "askSend": "Ask",
+    "askThinking": "Thinking…",
+    "askDisclaimer": "AI answers grounded in this report — not investment advice.",
+    "askQ1": "What are the biggest risks?",
+    "askQ2": "Summarize the bull vs bear case",
+    "askQ3": "How does the valuation look?"
   },
   "try": {
     "subtitle": "3 free quick scans — no signup",

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@/components/auth/auth-provider';
 import { useI18n } from '@/lib/i18n/context';
 import { InvestmentDisclaimer, AiGeneratedBadge } from '@/components/legal/investment-disclaimer';
+import { ReportChat } from '@/components/report/report-chat';
 import type { ResearchReport } from '@/lib/storage/research-reports';
 
 const RISK_COLORS: Record<string, string> = {
@@ -474,6 +475,11 @@ export default function ReportView({ reportId }: { reportId: string }) {
             )}
           </div>
         </SectionCard>
+      )}
+
+      {/* Conversational follow-up — only when there's a report to ground on */}
+      {(report.status === 'completed' || report.status === 'partial') && data?.synthesis && (
+        <ReportChat reportId={reportId} />
       )}
 
       {/* Disclaimer */}

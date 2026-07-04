@@ -174,7 +174,15 @@
     "numbersSay": "Ce que disent les chiffres",
     "narrativeSays": "Ce que dit le narratif",
     "investorQs": "Questions clés pour l'investisseur",
-    "disclaimerFooter": "À titre informatif uniquement — pas un conseil en investissement. Analyse basée sur des données publiques et l'IA."
+    "disclaimerFooter": "À titre informatif uniquement — pas un conseil en investissement. Analyse basée sur des données publiques et l'IA.",
+    "askTitle": "Posez une question sur ce rapport",
+    "askPlaceholder": "Posez une question de suivi…",
+    "askSend": "Demander",
+    "askThinking": "Réflexion…",
+    "askDisclaimer": "Réponses IA basées sur ce rapport — pas un conseil en investissement.",
+    "askQ1": "Quels sont les principaux risques ?",
+    "askQ2": "Résumez le scénario haussier vs baissier",
+    "askQ3": "Que vaut la valorisation ?"
   },
   "try": {
     "subtitle": "3 analyses rapides gratuites — sans inscription",
