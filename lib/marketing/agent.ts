@@ -1,222 +1,184 @@
 /**
  * StockSage Marketing Agent
  *
- * Runs daily to:
- * 1. Find the most-researched stocks from yesterday
- * 2. Generate multilingual social content with Claude
- * 3. Save posts to Firestore (ready to publish when accounts are set up)
- * 4. Post to connected channels (Telegram, LinkedIn, Facebook)
+ * Runs daily (via Cloud Scheduler → POST /api/marketing/run):
+ *  1. Pick a stock — the most-researched one if there's traffic, otherwise
+ *     rotate through the SEO universe (so it works from day one).
+ *  2. Generate a short English channel post with Claude (neutral, no advice),
+ *     linking to that stock's public /analysis page (drives SEO traffic).
+ *  3. Publish to connected channels (Telegram now; LinkedIn/Facebook later).
+ *  4. Record the post in Firestore.
  */
 
 import Anthropic from '@anthropic-ai/sdk';
 import { getAdminDb } from '@/lib/firebase/admin';
 import { FieldValue } from 'firebase-admin/firestore';
+import { SEO_UNIVERSE } from '@/lib/seo/universe';
 
-const SUPPORTED_LANGUAGES = ['he', 'en', 'ru', 'fr', 'ar'] as const;
-type Lang = (typeof SUPPORTED_LANGUAGES)[number];
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://stocksage.io';
 
-interface TrendingStock {
+interface PickedStock {
   assetId: string;
-  assetName: string;
-  count: number;
+  name: string;
+  symbol: string;
+  exchange: string;
+  reason: 'trending' | 'rotation';
+  count?: number;
 }
 
-interface GeneratedPost {
-  lang: Lang;
-  platform: 'telegram' | 'linkedin' | 'facebook' | 'twitter';
-  content: string;
+interface ChannelPost {
+  insight: string;
   hashtags: string[];
+  text: string;
+  link: string;
 }
 
-// ─── Step 1: Get trending stocks from yesterday ───────────────────────────────
+// ─── Step 1: pick a stock ─────────────────────────────────────────────────────
 
-export async function getTrendingStocks(limit = 5): Promise<TrendingStock[]> {
-  const db = getAdminDb();
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  yesterday.setHours(0, 0, 0, 0);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+async function getTopTrending(): Promise<{ assetId: string; name: string; count: number } | null> {
+  try {
+    const db = getAdminDb();
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    yesterday.setHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-  const snap = await db.collection('reports')
-    .where('startedAt', '>=', yesterday.toISOString())
-    .where('startedAt', '<', today.toISOString())
-    .where('status', '==', 'completed')
-    .get();
+    const snap = await db.collection('reports')
+      .where('startedAt', '>=', yesterday.toISOString())
+      .where('startedAt', '<', today.toISOString())
+      .where('status', '==', 'completed')
+      .get();
 
-  const counts: Record<string, { name: string; count: number }> = {};
-  for (const doc of snap.docs) {
-    const d = doc.data();
-    const id   = d['assetId'] as string;
-    const name = d['assetName'] as string;
-    if (!id) continue;
-    if (!counts[id]) counts[id] = { name, count: 0 };
-    counts[id]!.count++;
-  }
-
-  return Object.entries(counts)
-    .map(([assetId, { name, count }]) => ({ assetId, assetName: name, count }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, limit);
-}
-
-// ─── Step 2: Generate content with Claude ────────────────────────────────────
-
-const LANG_INSTRUCTIONS: Record<Lang, string> = {
-  he: 'כתוב בעברית. טון מקצועי אך נגיש. קהל: משקיעים ישראלים.',
-  en: 'Write in English. Professional yet accessible tone. Audience: international investors.',
-  ru: 'Пиши на русском. Профессиональный, но доступный тон. Аудитория: русскоязычные инвесторы.',
-  fr: 'Écris en français. Ton professionnel mais accessible. Audience: investisseurs francophones.',
-  ar: 'اكتب بالعربية. أسلوب مهني لكن سهل. الجمهور: المستثمرون الناطقون بالعربية.',
-};
-
-export async function generatePosts(stock: TrendingStock): Promise<GeneratedPost[]> {
-  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-  const posts: GeneratedPost[] = [];
-
-  for (const lang of SUPPORTED_LANGUAGES) {
-    const prompt = `
-${LANG_INSTRUCTIONS[lang]}
-
-המניה המחקרת ביותר היום ב-StockSage: ${stock.assetName} (${stock.assetId})
-כמות מחקרים: ${stock.count} חקירות
-
-צור פוסט לרשת חברתית (2-3 משפטים קצרים):
-- אזכר את שם המניה
-- הוסף נקודה מעניינת כללית על חברה/ענף (ללא המלצת קנייה/מכירה)
-- קריאה לפעולה: "נסה ניתוח AI חינמי ב-StockSage.io"
-- 3-5 hashtags רלוונטיים
-
-החזר JSON בלבד:
-{
-  "content": "תוכן הפוסט",
-  "hashtags": ["#tag1", "#tag2"]
-}
-`;
-
-    try {
-      const response = await client.messages.create({
-        model: 'claude-haiku-4-5',
-        max_tokens: 500,
-        messages: [{ role: 'user', content: prompt }],
-      });
-
-      const text = response.content.find(b => b.type === 'text')?.text ?? '';
-      const json = JSON.parse(text.replace(/```json?\s*/gi, '').replace(/```/g, '').trim());
-
-      // Create versions for each platform
-      for (const platform of ['telegram', 'linkedin', 'facebook'] as const) {
-        posts.push({
-          lang,
-          platform,
-          content: json.content,
-          hashtags: json.hashtags ?? [],
-        });
-      }
-    } catch (e) {
-      console.error(`[marketing] Failed to generate ${lang} content`, String(e));
+    const counts: Record<string, { name: string; count: number }> = {};
+    for (const doc of snap.docs) {
+      const d = doc.data();
+      const id = d['assetId'] as string;
+      if (!id) continue;
+      counts[id] ??= { name: (d['assetName'] as string) ?? id, count: 0 };
+      counts[id]!.count++;
     }
+    const top = Object.entries(counts).sort((a, b) => b[1].count - a[1].count)[0];
+    return top ? { assetId: top[0], name: top[1].name, count: top[1].count } : null;
+  } catch {
+    return null;
+  }
+}
+
+function pickFromUniverse(): PickedStock {
+  // Deterministic daily rotation so a different stock features each day.
+  const dayIndex = Math.floor(Date.now() / 86_400_000);
+  const s = SEO_UNIVERSE[dayIndex % SEO_UNIVERSE.length]!;
+  return { assetId: s.id, name: s.name, symbol: s.symbol, exchange: s.exchange, reason: 'rotation' };
+}
+
+export async function pickStock(): Promise<PickedStock> {
+  const trending = await getTopTrending();
+  if (trending) {
+    const [exchange, symbol] = trending.assetId.split(':');
+    return {
+      assetId: trending.assetId,
+      name: trending.name,
+      symbol: symbol ?? trending.assetId,
+      exchange: exchange ?? '',
+      reason: 'trending',
+      count: trending.count,
+    };
+  }
+  return pickFromUniverse();
+}
+
+// ─── Step 2: generate the post ────────────────────────────────────────────────
+
+export async function generateChannelPost(stock: PickedStock): Promise<ChannelPost> {
+  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  const link = `${APP_URL}/analysis/${stock.exchange.toLowerCase()}/${stock.symbol.toLowerCase()}`;
+
+  const prompt = `Write a short social post for a stock-research Telegram channel about ${stock.name} (${stock.symbol}, ${stock.exchange}).
+
+Rules:
+- 2 sentences max. Professional but engaging.
+- Mention one genuinely interesting, factual angle about the company or its sector (NOT a buy/sell recommendation, NOT a price prediction).
+- Neutral framing only. Never say "buy", "sell", "should invest".
+- Do NOT include a link or hashtags (added separately).
+
+Return ONLY JSON: {"insight": "the 2-sentence post", "hashtags": ["#Ticker", "#Sector", "#Investing"]}`;
+
+  let insight = `${stock.name} (${stock.symbol}) — get a full AI research report in seconds.`;
+  let hashtags = [`#${stock.symbol}`, '#Stocks', '#Investing'];
+  try {
+    const resp = await client.messages.create({
+      model: 'claude-haiku-4-5',
+      max_tokens: 400,
+      messages: [{ role: 'user', content: prompt }],
+    });
+    const text = resp.content.find((b) => b.type === 'text');
+    if (text && text.type === 'text') {
+      const json = JSON.parse(text.text.replace(/```json?\s*/gi, '').replace(/```/g, '').trim());
+      if (typeof json.insight === 'string') insight = json.insight;
+      if (Array.isArray(json.hashtags)) hashtags = json.hashtags.slice(0, 5).map(String);
+    }
+  } catch (e) {
+    console.error('[marketing] post generation failed', String(e));
   }
 
-  return posts;
+  const text = `📊 ${stock.name} (${stock.symbol})\n\n${insight}\n\n🔍 Full AI analysis → ${link}\n\n${hashtags.join(' ')}`;
+  return { insight, hashtags, text, link };
 }
 
-// ─── Step 3: Save to Firestore ────────────────────────────────────────────────
+// ─── Step 3: publish ──────────────────────────────────────────────────────────
 
-export async function savePostsToFirestore(
-  stock: TrendingStock,
-  posts: GeneratedPost[],
-): Promise<string> {
-  const db  = getAdminDb();
-  const ref = db.collection('marketing_posts').doc();
-
-  await ref.set({
-    id:        ref.id,
-    stock:     stock,
-    posts:     posts,
-    status:    'ready',       // ready | published | skipped
-    createdAt: FieldValue.serverTimestamp(),
-    publishedAt: null,
-    stats: { views: 0, clicks: 0 },
-  });
-
-  return ref.id;
-}
-
-// ─── Step 4: Post to channels (when connected) ───────────────────────────────
-
-export async function publishToChannels(
-  postId: string,
-  posts: GeneratedPost[],
-): Promise<{ channel: string; success: boolean; error?: string }[]> {
+export async function publishToChannels(post: ChannelPost): Promise<{ channel: string; success: boolean; error?: string }[]> {
   const results: { channel: string; success: boolean; error?: string }[] = [];
 
-  // Telegram
   const telegramToken = process.env.TELEGRAM_BOT_TOKEN;
-  const telegramChat  = process.env.TELEGRAM_CHANNEL_ID;
+  const telegramChat = process.env.TELEGRAM_CHANNEL_ID;
   if (telegramToken && telegramChat) {
-    const hePost = posts.find(p => p.lang === 'he' && p.platform === 'telegram');
-    if (hePost) {
-      try {
-        const text = `${hePost.content}\n\n${hePost.hashtags.join(' ')}`;
-        const res  = await fetch(
-          `https://api.telegram.org/bot${telegramToken}/sendMessage`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chat_id: telegramChat, text, parse_mode: 'HTML' }),
-          },
-        );
-        results.push({ channel: 'telegram', success: res.ok });
-      } catch (e) {
-        results.push({ channel: 'telegram', success: false, error: String(e) });
-      }
+    try {
+      const res = await fetch(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: telegramChat, text: post.text, disable_web_page_preview: false }),
+      });
+      const body = await res.json().catch(() => ({}));
+      results.push({ channel: 'telegram', success: res.ok && body?.ok === true, error: res.ok ? undefined : JSON.stringify(body).slice(0, 200) });
+    } catch (e) {
+      results.push({ channel: 'telegram', success: false, error: String(e) });
     }
   } else {
     results.push({ channel: 'telegram', success: false, error: 'not configured' });
   }
 
-  // LinkedIn & Facebook — placeholders until API keys are set up
-  results.push({ channel: 'linkedin', success: false, error: 'not configured yet' });
-  results.push({ channel: 'facebook', success: false, error: 'not configured yet' });
-
-  // Update Firestore with results
-  const db = getAdminDb();
-  await db.collection('marketing_posts').doc(postId).update({
-    status: results.some(r => r.success) ? 'published' : 'ready',
-    publishResults: results,
-    publishedAt: FieldValue.serverTimestamp(),
-  });
-
   return results;
 }
 
-// ─── Main run function ────────────────────────────────────────────────────────
+// ─── Main run ─────────────────────────────────────────────────────────────────
 
 export async function runMarketingAgent(): Promise<{
-  stocksFound: number;
-  postsGenerated: number;
-  publishResults: unknown[];
+  stock: string;
+  reason: string;
+  posted: boolean;
+  results: { channel: string; success: boolean; error?: string }[];
 }> {
-  console.log('[marketing-agent] Starting daily run...');
+  const stock = await pickStock();
+  console.log(`[marketing-agent] Featuring ${stock.name} (${stock.assetId}) — ${stock.reason}`);
 
-  const trending = await getTrendingStocks(3);
-  if (trending.length === 0) {
-    console.log('[marketing-agent] No trending stocks today, skipping.');
-    return { stocksFound: 0, postsGenerated: 0, publishResults: [] };
+  const post = await generateChannelPost(stock);
+  const results = await publishToChannels(post);
+  const posted = results.some((r) => r.success);
+
+  // Record it (best-effort)
+  try {
+    const db = getAdminDb();
+    await db.collection('marketing_posts').add({
+      stock, post: { text: post.text, link: post.link, hashtags: post.hashtags },
+      results, status: posted ? 'published' : 'failed',
+      createdAt: FieldValue.serverTimestamp(),
+    });
+  } catch (e) {
+    console.error('[marketing-agent] firestore write failed', String(e));
   }
 
-  // Pick the top stock
-  const topStock = trending[0]!;
-  console.log(`[marketing-agent] Top stock: ${topStock.assetName} (${topStock.count} reports)`);
-
-  // Generate content in all 5 languages
-  const posts   = await generatePosts(topStock);
-  const postId  = await savePostsToFirestore(topStock, posts);
-
-  // Publish to connected channels
-  const results = await publishToChannels(postId, posts);
-
-  console.log(`[marketing-agent] Done. ${posts.length} posts generated, results:`, results);
-  return { stocksFound: trending.length, postsGenerated: posts.length, publishResults: results };
+  console.log(`[marketing-agent] Done. posted=${posted}`, results);
+  return { stock: stock.assetId, reason: stock.reason, posted, results };
 }
