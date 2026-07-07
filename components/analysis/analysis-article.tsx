@@ -5,6 +5,7 @@ import type { getQuote } from '@/lib/data/orchestrator';
 type Quote = Awaited<ReturnType<typeof getQuote>> | null;
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://stocksage.io';
+const TELEGRAM_URL = 'https://t.me/StockSageAI';
 
 const L = {
   en: {
@@ -26,6 +27,7 @@ const L = {
     cta2Sub: 'Company profile, financials, events, competition, risks and synthesis — automated.',
     cta2Btn: 'Start free — no signup',
     disclaimer: 'For informational purposes only — not investment advice. Analysis is AI-generated from public data and may contain errors. Always do your own research.',
+    telegramCta: '📣 Join our Telegram for a daily AI stock pick',
   },
   he: {
     dir: 'rtl' as const,
@@ -46,6 +48,7 @@ const L = {
     cta2Sub: 'פרופיל חברה, פיננסים, אירועים, תחרות, סיכונים וסינתזה — אוטומטי.',
     cta2Btn: 'התחל בחינם — ללא הרשמה',
     disclaimer: 'לצרכי מידע בלבד — אינו ייעוץ השקעות. הניתוח נוצר על ידי AI מנתונים ציבוריים ועלול להכיל שגיאות. תמיד בצע מחקר עצמאי.',
+    telegramCta: '📣 הצטרף לטלגרם לניתוח מניה יומי',
   },
   fr: {
     dir: 'ltr' as const,
@@ -66,6 +69,7 @@ const L = {
     cta2Sub: 'Profil, finances, événements, concurrence, risques et synthèse — automatisé.',
     cta2Btn: 'Commencer gratuitement — sans inscription',
     disclaimer: "À titre informatif uniquement — pas un conseil en investissement. Analyse générée par IA à partir de données publiques, pouvant contenir des erreurs. Faites toujours vos propres recherches.",
+    telegramCta: '📣 Rejoignez notre Telegram pour une action analysée chaque jour',
   },
   ar: {
     dir: 'rtl' as const,
@@ -86,6 +90,7 @@ const L = {
     cta2Sub: 'ملف الشركة، المالية، الأحداث، المنافسة، المخاطر والتوليف — تلقائياً.',
     cta2Btn: 'ابدأ مجاناً — بدون تسجيل',
     disclaimer: 'لأغراض المعلومات فقط — ليس نصيحة استثمارية. تحليل مُنشأ بالذكاء الاصطناعي من بيانات عامة وقد يحتوي أخطاء. قم دائماً بأبحاثك الخاصة.',
+    telegramCta: '📣 انضم إلى قناتنا على تيليجرام لتحليل سهم يومي',
   },
 };
 
@@ -221,6 +226,14 @@ export function AnalysisArticle({ analysis, quote, lang }: { analysis: SeoAnalys
           <h2 className="text-2xl font-bold text-white mb-2">{t.cta2Title(analysis.symbol)}</h2>
           <p className="text-gray-400 mb-6">{t.cta2Sub}</p>
           <Link href="/try" className="inline-block btn-glow text-white font-semibold px-8 py-4 rounded-xl text-lg">{t.cta2Btn}</Link>
+        </div>
+
+        {/* Telegram — funnel SEO visitors into the channel */}
+        <div className="text-center mb-8">
+          <a href={TELEGRAM_URL} target="_blank" rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-sm font-medium text-indigo-300 hover:text-indigo-200 bg-indigo-500/10 hover:bg-indigo-500/15 border border-indigo-500/25 px-5 py-2.5 rounded-xl transition-colors">
+            {t.telegramCta}
+          </a>
         </div>
 
         <p className="text-xs text-gray-600 text-center border-t border-white/5 pt-6">{t.disclaimer}</p>
