@@ -225,7 +225,9 @@
     "close": "✕ Fermer",
     "signupSubtitle": "Créez un compte gratuit",
     "signingIn": "Connexion...",
-    "mustAgree": "Veuillez cocher toutes les cases de consentement"
+    "mustAgree": "Veuillez cocher toutes les cases de consentement",
+    "welcomeBack": "Bon retour",
+    "newHere": "Nouveau sur StockSage ?"
   },
   "settings": {
     "title": "Paramètres du compte",

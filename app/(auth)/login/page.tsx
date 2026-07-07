@@ -35,13 +35,16 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center px-4 py-12" dir={dir}>
       <div className="w-full max-w-sm animate-fade-up">
 
-        {/* Logo */}
-        <div className="text-center mb-10">
+        {/* Logo + warm welcome */}
+        <div className="text-center mb-8">
           <Link href="/" dir="ltr" className="inline-flex items-center gap-2 text-2xl font-bold text-white">
             <span className="w-9 h-9 rounded-xl btn-glow flex items-center justify-center text-lg font-bold">S</span>
             Stock<span className="text-gradient">Sage</span>
           </Link>
-          <p className="text-gray-400 mt-3 text-sm">{t('auth.loginTitle')}</p>
+          <h1 className="text-2xl font-bold text-white mt-6">{t('auth.welcomeBack')} 👋</h1>
+          <p className="text-gray-400 mt-2 text-sm">
+            {t('landing.headline')} <span className="text-indigo-300">{t('landing.headlineSub')}</span>
+          </p>
         </div>
 
         <div className="glass-card rounded-3xl p-8 space-y-4">
@@ -88,12 +91,20 @@ export default function LoginPage() {
           )}
         </div>
 
+        {/* New here? — prominent free entry point */}
+        <div className="mt-6 rounded-2xl border border-indigo-500/25 bg-indigo-500/8 p-5 text-center">
+          <p className="text-sm text-gray-300 mb-3">{t('auth.newHere')}</p>
+          <Link href="/try"
+            className="block w-full btn-glow text-white font-semibold py-3 rounded-xl text-sm">
+            {t('try.startBtn')}
+          </Link>
+          <p className="text-xs text-gray-500 mt-3">{t('landing.tryNote')}</p>
+        </div>
+
+        {/* Secondary: full sign up */}
         <p className="text-center text-sm text-gray-500 mt-6">
           {t('auth.noAccount')}{' '}
           <Link href="/signup" className="text-indigo-300 hover:text-indigo-200 font-medium transition-colors">{t('nav.getStarted')}</Link>
-        </p>
-        <p className="text-center mt-2">
-          <Link href="/try" className="text-xs text-gray-600 hover:text-gray-400 transition-colors">{t('landing.ctaTry')}</Link>
         </p>
       </div>
     </div>

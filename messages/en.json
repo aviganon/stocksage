@@ -225,7 +225,9 @@
     "close": "✕ Close",
     "signupSubtitle": "Create a free account",
     "signingIn": "Signing in...",
-    "mustAgree": "Please check all consent boxes"
+    "mustAgree": "Please check all consent boxes",
+    "welcomeBack": "Welcome back",
+    "newHere": "New to StockSage?"
   },
   "settings": {
     "title": "Account Settings",

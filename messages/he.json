@@ -225,7 +225,9 @@
     "close": "✕ סגור",
     "signupSubtitle": "יצירת חשבון בחינם",
     "signingIn": "נכנס...",
-    "mustAgree": "יש לסמן את כל תיבות האישור"
+    "mustAgree": "יש לסמן את כל תיבות האישור",
+    "welcomeBack": "ברוך שובך",
+    "newHere": "חדש ב-StockSage?"
   },
   "settings": {
     "title": "הגדרות חשבון",

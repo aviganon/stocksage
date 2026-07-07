@@ -225,7 +225,9 @@
     "close": "✕ إغلاق",
     "signupSubtitle": "أنشئ حساباً مجانياً",
     "signingIn": "جارٍ الدخول...",
-    "mustAgree": "يرجى تحديد جميع مربعات الموافقة"
+    "mustAgree": "يرجى تحديد جميع مربعات الموافقة",
+    "welcomeBack": "مرحباً بعودتك",
+    "newHere": "جديد على StockSage؟"
   },
   "settings": {
     "title": "إعدادات الحساب",

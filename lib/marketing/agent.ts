@@ -141,7 +141,11 @@ export async function publishToChannels(post: ChannelPost): Promise<{ channel: s
         body: JSON.stringify({ chat_id: telegramChat, text: post.text, disable_web_page_preview: false }),
       });
       const body = await res.json().catch(() => ({}));
-      results.push({ channel: 'telegram', success: res.ok && body?.ok === true, error: res.ok ? undefined : JSON.stringify(body).slice(0, 200) });
+      const success = res.ok && body?.ok === true;
+      // Avoid `error: undefined` — Firestore rejects undefined values on write.
+      results.push(success
+        ? { channel: 'telegram', success: true }
+        : { channel: 'telegram', success: false, error: JSON.stringify(body).slice(0, 200) });
     } catch (e) {
       results.push({ channel: 'telegram', success: false, error: String(e) });
     }
