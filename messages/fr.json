@@ -24,7 +24,9 @@
     "tryNote": "Sans carte · Sans inscription · Commencez tout de suite",
     "sampleTitle": "Voir une analyse réelle",
     "sampleSub": "Voici à quoi ressemble chaque rapport. Explorez des exemples en direct — sans inscription :",
-    "sampleView": "Toutes les analyses →"
+    "sampleView": "Toutes les analyses →",
+    "previewTitle": "Voyez exactement ce que vous obtenez",
+    "previewSub": "Chaque rapport est une analyse claire et structurée. Voici un exemple réel."
   },
   "pricing": {
     "free": "Gratuit",

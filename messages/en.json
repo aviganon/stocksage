@@ -24,7 +24,9 @@
     "tryNote": "No credit card · No signup · Start instantly",
     "sampleTitle": "See a real analysis",
     "sampleSub": "This is what every report looks like. Explore live examples — no signup:",
-    "sampleView": "View all analyses →"
+    "sampleView": "View all analyses →",
+    "previewTitle": "See exactly what you get",
+    "previewSub": "Every report is a clear, structured breakdown. Here's a real example."
   },
   "pricing": {
     "free": "Free",

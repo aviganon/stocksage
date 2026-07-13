@@ -87,6 +87,60 @@ export const SEO_UNIVERSE: SeoStock[] = [
   { id: 'TASE:CHKP', symbol: 'CHKP', name: 'Check Point Software',exchange: 'TASE', group: 'Israel (TASE)' },
   { id: 'TASE:ESLT', symbol: 'ESLT', name: 'Elbit Systems',       exchange: 'TASE', group: 'Israel (TASE)' },
   { id: 'TASE:ICL',  symbol: 'ICL',  name: 'ICL Group',           exchange: 'TASE', group: 'Israel (TASE)' },
+
+  // ── More US tech / growth (high search volume) ──
+  { id: 'NYSE:ORCL',   symbol: 'ORCL',  name: 'Oracle',            exchange: 'NYSE',   group: 'US Growth' },
+  { id: 'NASDAQ:CSCO', symbol: 'CSCO',  name: 'Cisco',             exchange: 'NASDAQ', group: 'US Growth' },
+  { id: 'NASDAQ:ADBE', symbol: 'ADBE',  name: 'Adobe',             exchange: 'NASDAQ', group: 'US Growth' },
+  { id: 'NYSE:IBM',    symbol: 'IBM',   name: 'IBM',               exchange: 'NYSE',   group: 'US Growth' },
+  { id: 'NASDAQ:TXN',  symbol: 'TXN',   name: 'Texas Instruments', exchange: 'NASDAQ', group: 'US Growth' },
+  { id: 'NYSE:NOW',    symbol: 'NOW',   name: 'ServiceNow',        exchange: 'NYSE',   group: 'US Growth' },
+  { id: 'NYSE:UBER',   symbol: 'UBER',  name: 'Uber',              exchange: 'NYSE',   group: 'US Growth' },
+  { id: 'NASDAQ:PYPL', symbol: 'PYPL',  name: 'PayPal',            exchange: 'NASDAQ', group: 'US Growth' },
+  { id: 'NASDAQ:SNOW', symbol: 'SNOW',  name: 'Snowflake',         exchange: 'NYSE',   group: 'US Growth' },
+  { id: 'NASDAQ:COIN', symbol: 'COIN',  name: 'Coinbase',          exchange: 'NASDAQ', group: 'US Growth' },
+  { id: 'NASDAQ:ABNB', symbol: 'ABNB',  name: 'Airbnb',            exchange: 'NASDAQ', group: 'US Growth' },
+  { id: 'NYSE:SPOT',   symbol: 'SPOT',  name: 'Spotify',           exchange: 'NYSE',   group: 'US Growth' },
+  { id: 'NASDAQ:MRVL', symbol: 'MRVL',  name: 'Marvell',           exchange: 'NASDAQ', group: 'US Growth' },
+  { id: 'NASDAQ:SMCI', symbol: 'SMCI',  name: 'Super Micro',       exchange: 'NASDAQ', group: 'US Growth' },
+  { id: 'NASDAQ:ARM',  symbol: 'ARM',   name: 'Arm Holdings',      exchange: 'NASDAQ', group: 'US Growth' },
+
+  // ── US healthcare ──
+  { id: 'NYSE:UNH', symbol: 'UNH', name: 'UnitedHealth',   exchange: 'NYSE',   group: 'US Healthcare' },
+  { id: 'NYSE:LLY', symbol: 'LLY', name: 'Eli Lilly',      exchange: 'NYSE',   group: 'US Healthcare' },
+  { id: 'NYSE:MRK', symbol: 'MRK', name: 'Merck',          exchange: 'NYSE',   group: 'US Healthcare' },
+  { id: 'NYSE:ABBV',symbol: 'ABBV',name: 'AbbVie',         exchange: 'NYSE',   group: 'US Healthcare' },
+  { id: 'NYSE:TMO', symbol: 'TMO', name: 'Thermo Fisher',  exchange: 'NYSE',   group: 'US Healthcare' },
+  { id: 'NASDAQ:AMGN',symbol:'AMGN',name: 'Amgen',         exchange: 'NASDAQ', group: 'US Healthcare' },
+
+  // ── US consumer ──
+  { id: 'NYSE:NKE',  symbol: 'NKE',  name: 'Nike',           exchange: 'NYSE',   group: 'US Consumer' },
+  { id: 'NASDAQ:SBUX',symbol:'SBUX', name: 'Starbucks',      exchange: 'NASDAQ', group: 'US Consumer' },
+  { id: 'NYSE:MCD',  symbol: 'MCD',  name: "McDonald's",     exchange: 'NYSE',   group: 'US Consumer' },
+  { id: 'NASDAQ:COST',symbol:'COST', name: 'Costco',         exchange: 'NASDAQ', group: 'US Consumer' },
+  { id: 'NYSE:HD',   symbol: 'HD',   name: 'Home Depot',     exchange: 'NYSE',   group: 'US Consumer' },
+  { id: 'NYSE:PEP',  symbol: 'PEP',  name: 'PepsiCo',        exchange: 'NASDAQ', group: 'US Consumer' },
+  { id: 'NASDAQ:MDLZ',symbol:'MDLZ', name: 'Mondelez',       exchange: 'NASDAQ', group: 'US Consumer' },
+
+  // ── US finance & industrial ──
+  { id: 'NYSE:GS',   symbol: 'GS',   name: 'Goldman Sachs',    exchange: 'NYSE', group: 'US Finance & Industrial' },
+  { id: 'NYSE:MS',   symbol: 'MS',   name: 'Morgan Stanley',   exchange: 'NYSE', group: 'US Finance & Industrial' },
+  { id: 'NYSE:WFC',  symbol: 'WFC',  name: 'Wells Fargo',      exchange: 'NYSE', group: 'US Finance & Industrial' },
+  { id: 'NYSE:C',    symbol: 'C',    name: 'Citigroup',        exchange: 'NYSE', group: 'US Finance & Industrial' },
+  { id: 'NYSE:BLK',  symbol: 'BLK',  name: 'BlackRock',        exchange: 'NYSE', group: 'US Finance & Industrial' },
+  { id: 'NYSE:BA',   symbol: 'BA',   name: 'Boeing',           exchange: 'NYSE', group: 'US Finance & Industrial' },
+  { id: 'NYSE:CAT',  symbol: 'CAT',  name: 'Caterpillar',      exchange: 'NYSE', group: 'US Finance & Industrial' },
+  { id: 'NYSE:GE',   symbol: 'GE',   name: 'GE Aerospace',     exchange: 'NYSE', group: 'US Finance & Industrial' },
+  { id: 'NYSE:CVX',  symbol: 'CVX',  name: 'Chevron',          exchange: 'NYSE', group: 'US Finance & Industrial' },
+  { id: 'NYSE:F',    symbol: 'F',    name: 'Ford',             exchange: 'NYSE', group: 'US Finance & Industrial' },
+
+  // ── Non-US mega caps people search ──
+  { id: 'NASDAQ:TSM', symbol: 'TSM', name: 'TSMC',              exchange: 'NASDAQ', group: 'Global Mega Caps' },
+  { id: 'NASDAQ:ASML',symbol:'ASML', name: 'ASML',              exchange: 'NASDAQ', group: 'Global Mega Caps' },
+  { id: 'NYSE:NVO',   symbol: 'NVO', name: 'Novo Nordisk',      exchange: 'NYSE',   group: 'Global Mega Caps' },
+  { id: 'NYSE:TM',    symbol: 'TM',  name: 'Toyota',            exchange: 'NYSE',   group: 'Global Mega Caps' },
+  { id: 'NASDAQ:PDD', symbol: 'PDD', name: 'PDD (Temu)',        exchange: 'NASDAQ', group: 'Global Mega Caps' },
+  { id: 'NYSE:NIO',   symbol: 'NIO', name: 'NIO',               exchange: 'NYSE',   group: 'Global Mega Caps' },
 ];
 
 /** Case-insensitive lookup by exchange + symbol (for page params). */

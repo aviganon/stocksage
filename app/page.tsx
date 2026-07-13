@@ -132,6 +132,67 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Visual report preview — show, don't tell */}
+      <section className="max-w-4xl mx-auto px-6 py-14">
+        <h2 className="text-3xl font-bold text-white text-center mb-3">{t('landing.previewTitle')}</h2>
+        <p className="text-gray-400 text-center mb-8">{t('landing.previewSub')}</p>
+
+        <div className="glass-card rounded-3xl p-6 sm:p-8" dir="ltr">
+          {/* Report header */}
+          <div className="flex items-start justify-between pb-4 border-b border-white/8">
+            <div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-bold text-white">AAPL</span>
+                <span className="text-gray-400">Apple Inc.</span>
+              </div>
+              <div className="text-sm text-gray-500 mt-0.5">NASDAQ · <span className="text-white font-mono">$195.20</span> <span className="text-green-400">+1.2%</span></div>
+            </div>
+            <span className="text-xs px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/20">AI analysis</span>
+          </div>
+
+          {/* Verdict badges */}
+          <div className="flex flex-wrap gap-2 mt-4">
+            <span className="text-xs px-2.5 py-1 rounded-full bg-yellow-500/12 text-yellow-300 border border-yellow-500/20">Valuation: Fair</span>
+            <span className="text-xs px-2.5 py-1 rounded-full bg-orange-500/12 text-orange-300 border border-orange-500/20">Risk: Moderate</span>
+            <span className="text-xs px-2.5 py-1 rounded-full bg-green-500/12 text-green-300 border border-green-500/20">Sentiment: Positive</span>
+          </div>
+
+          {/* Executive summary */}
+          <div className="mt-5">
+            <p className="text-xs text-indigo-300 font-medium mb-1.5">{t('rv.execSummary')}</p>
+            <p className="text-gray-300 text-sm leading-relaxed">
+              Apple generates durable cash flow from a premium hardware ecosystem, with Services now roughly a quarter of revenue at high margins. The core tension: slowing iPhone unit growth versus an expanding, sticky Services base.
+            </p>
+          </div>
+
+          {/* Bull / Bear */}
+          <div className="grid sm:grid-cols-2 gap-4 mt-5">
+            <div className="bg-green-500/5 border border-green-500/15 rounded-xl p-4">
+              <p className="text-xs text-green-400 font-semibold mb-2">{t('rv.bullScenario')}</p>
+              <ul className="space-y-1.5 text-xs text-gray-300">
+                <li className="flex gap-2"><span className="text-green-400">✓</span> Services compounding ~15% at 70%+ margins</li>
+                <li className="flex gap-2"><span className="text-green-400">✓</span> 2.2B active devices create a durable moat</li>
+                <li className="flex gap-2"><span className="text-green-400">✓</span> Large buybacks steadily shrink the share count</li>
+              </ul>
+            </div>
+            <div className="bg-red-500/5 border border-red-500/15 rounded-xl p-4">
+              <p className="text-xs text-red-400 font-semibold mb-2">{t('rv.bearScenario')}</p>
+              <ul className="space-y-1.5 text-xs text-gray-300">
+                <li className="flex gap-2"><span className="text-red-400">✗</span> iPhone growth has stalled in key markets</li>
+                <li className="flex gap-2"><span className="text-red-400">✗</span> Regulatory pressure on App Store fees</li>
+                <li className="flex gap-2"><span className="text-red-400">✗</span> Premium valuation leaves little room for error</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div className="text-center mt-8">
+          <Link href="/try" className="inline-flex items-center justify-center gap-2 btn-glow text-white font-semibold px-8 py-4 rounded-xl text-lg">
+            {t('landing.ctaTry')}
+          </Link>
+        </div>
+      </section>
+
       {/* Features */}
       <section className="max-w-6xl mx-auto px-6 py-20">
         <h2 className="text-3xl font-bold text-white text-center mb-4">{t('landing.featuresTitle')}</h2>
