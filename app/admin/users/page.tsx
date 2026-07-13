@@ -7,6 +7,7 @@ import { useAuth } from '@/components/auth/auth-provider';
 interface AdminUser {
   uid: string;
   email: string | null;
+  isGuest: boolean;
   plan: 'free' | 'pro';
   createdAt: string | null;
   reportsThisMonth: number;
@@ -21,6 +22,7 @@ export default function AdminUsersPage() {
   const [filtered, setFiltered] = useState<AdminUser[]>([]);
   const [search, setSearch] = useState('');
   const [planFilter, setPlanFilter] = useState<'all' | 'free' | 'pro'>('all');
+  const [showGuests, setShowGuests] = useState(false);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
 
@@ -42,10 +44,13 @@ export default function AdminUsersPage() {
 
   useEffect(() => {
     let result = users;
+    // Anonymous "guest" sessions (from /try) are hidden by default — they're
+    // not real accounts, just free-trial visitors with no details.
+    if (!showGuests) result = result.filter((u) => !u.isGuest);
     if (planFilter !== 'all') result = result.filter((u) => u.plan === planFilter);
     if (search) result = result.filter((u) => u.email?.toLowerCase().includes(search.toLowerCase()));
     setFiltered(result);
-  }, [users, search, planFilter]);
+  }, [users, search, planFilter, showGuests]);
 
   async function changePlan(uid: string, newPlan: 'free' | 'pro') {
     setUpdating(uid);
@@ -67,6 +72,8 @@ export default function AdminUsersPage() {
     </div>
   );
 
+  const realUsers = users.filter((u) => !u.isGuest);
+  const guestCount = users.length - realUsers.length;
   const proCount = users.filter((u) => u.plan === 'pro').length;
   const totalCost = users.reduce((s, u) => s + u.costThisMonth, 0);
 
@@ -76,7 +83,7 @@ export default function AdminUsersPage() {
         <div>
           <h1 className="text-2xl font-bold text-white">משתמשים</h1>
           <p className="text-gray-500 text-sm mt-1">
-            {users.length} סה״כ · {proCount} Pro · עלות החודש: ${totalCost.toFixed(2)}
+            <span className="text-gray-300">{realUsers.length} משתמשים אמיתיים</span> · {proCount} Pro · {guestCount} אורחים אנונימיים · עלות החודש: ${totalCost.toFixed(2)}
           </p>
         </div>
       </div>
@@ -101,6 +108,14 @@ export default function AdminUsersPage() {
             {p === 'all' ? 'הכל' : p === 'free' ? 'חינמי' : 'Pro'}
           </button>
         ))}
+        <button
+          onClick={() => setShowGuests((v) => !v)}
+          className={`text-sm px-3 py-1.5 rounded-lg transition-colors ${
+            showGuests ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'text-gray-400 hover:text-white hover:bg-white/5'
+          }`}
+        >
+          {showGuests ? `✓ אורחים (${guestCount})` : `הצג אורחים (${guestCount})`}
+        </button>
       </div>
 
       {/* Table */}
@@ -124,7 +139,9 @@ export default function AdminUsersPage() {
             {filtered.map((u) => (
               <tr key={u.uid} className="border-b border-white/5 last:border-0 hover:bg-white/3 transition-colors">
                 <td className="px-5 py-3.5 text-gray-200 font-mono text-xs">
-                  {u.email ?? <span className="text-gray-600">—</span>}
+                  {u.email ?? (u.isGuest
+                    ? <span className="text-amber-300/80 not-italic">אורח אנונימי</span>
+                    : <span className="text-gray-600">—</span>)}
                 </td>
                 <td className="px-5 py-3.5">
                   <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${

@@ -47,6 +47,9 @@ export async function GET() {
       return {
         uid: doc.id,
         email: d['email'] ?? null,
+        // Real accounts (Google/password) always have an email; anonymous
+        // "guest" sessions from /try never do. Use that to flag guests.
+        isGuest: !d['email'],
         firstName: (d['firstName'] as string) ?? null,
         lastName:  (d['lastName']  as string) ?? null,
         plan: (d['plan'] as string) ?? 'free',

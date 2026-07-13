@@ -5,6 +5,7 @@ import { AuthProvider } from '@/components/auth/auth-provider';
 import { I18nProvider } from '@/lib/i18n/context';
 import { CookieConsent } from '@/components/legal/cookie-consent';
 import { AccessibilityButton } from '@/components/legal/accessibility-button';
+import { GoogleAnalytics } from '@/components/analytics/google-analytics';
 
 const geist = Geist({ variable: '--font-geist-sans', subsets: ['latin', 'latin-ext'] });
 
@@ -40,6 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <CookieConsent />
           <AccessibilityButton />
         </I18nProvider>
+        <GoogleAnalytics />
       </body>
     </html>
   );
