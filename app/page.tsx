@@ -290,6 +290,8 @@ export default function LandingPage() {
             <a href="https://t.me/StockSageAI" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 transition-colors font-medium">📣 Telegram</a>
           </div>
           <div className="flex items-center gap-4 text-xs">
+            <Link href="/blog" className="hover:text-gray-400 transition-colors">Blog</Link>
+            <Link href="/analysis" className="hover:text-gray-400 transition-colors">{locale === 'he' || locale === 'ar' ? 'ניתוחים' : 'Analysis'}</Link>
             <Link href="/about" className="hover:text-gray-400 transition-colors">{locale === 'he' || locale === 'ar' ? 'אודות' : 'About'}</Link>
             <Link href="/help" className="hover:text-gray-400 transition-colors">{locale === 'he' || locale === 'ar' ? 'עזרה' : 'Help'}</Link>
             <Link href="/terms" className="hover:text-gray-400 transition-colors">{locale === 'he' || locale === 'ar' ? 'תנאי שימוש' : 'Terms'}</Link>
