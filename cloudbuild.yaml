@@ -2,7 +2,7 @@ substitutions:
   _REGION: europe-west1
   _SERVICE: stocksage
   _IMAGE: europe-west1-docker.pkg.dev/stocks-age/stocksage/stocksage
-  _GA_ID: ''   # GA4 Measurement ID (G-XXXXXXX) — set once a property exists
+  _GA_ID: 'G-1R57RQ5GC0'   # GA4 Measurement ID (public — inlined at build)
 
 steps:
   - name: gcr.io/cloud-builders/docker
