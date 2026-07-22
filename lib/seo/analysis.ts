@@ -19,7 +19,10 @@ import { parseAssetId } from '@/lib/data/asset-id';
 import type { AssetId } from '@/lib/data/types';
 
 const COLLECTION = 'seo_analyses';
-const STALE_DAYS = 7;
+// 30 days: the written analysis (business summary, bull/bear, FAQ) is evergreen
+// — live price/quote is fetched fresh on every render. A 7-day window made
+// ~42 pages/day go stale against a 30/day warmer, so a backlog accumulated.
+const STALE_DAYS = 30;
 
 const FaqSchema = z.object({
   q: z.string(),
